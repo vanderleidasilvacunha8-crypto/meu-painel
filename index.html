@@ -826,11 +826,7 @@ function renderRelatorios() {
 
 // ===== HELPERS =====
 function popularSelectPlano() {
-  const sel = document.getElementById('cPlano');
-  if (!sel) return;
-  const v = sel.value;
-  sel.innerHTML = '<option value="">Selecione...</option>' + planos.map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
-  sel.value = v;
+  // Plano agora é fixo de 1 a 12 meses, não usa Firebase
 }
 
 function popularSelectRevendedor() {}
