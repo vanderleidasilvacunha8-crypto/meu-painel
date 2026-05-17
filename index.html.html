@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a472a">
+<title>StreamPanel Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#1a472a;--green-mid:#2d6a4f;--green-light:#52b788;
+  --gold:#f4a261;--gold-light:#ffd166;
+  --red:#e63946;--blue:#2196f3;--purple:#9b5de5;
+  --bg:#f0f4f0;--white:#fff;--gray:#e8ede8;
+  --text:#1a2e1a;--text-light:#4a6741;
+  --shadow:0 4px 20px rgba(26,71,42,0.13);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,var(--green),var(--green-mid))}
+.login-box{background:var(--white);border-radius:24px;padding:40px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo h1{font-size:26px;font-weight:900;color:var(--green)}
+.login-logo p{font-size:13px;color:var(--text-light);margin-top:4px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);margin-bottom:6px}
+.form-group input,.form-group select{width:100%;padding:12px 16px;border:2px solid var(--gray);border-radius:12px;font-size:15px;font-family:'Nunito',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--green-light)}
+.btn{width:100%;padding:14px;background:var(--green);color:var(--white);border:none;border-radius:12px;font-size:15px;font-weight:900;font-family:'Nunito',sans-serif;cursor:pointer;transition:opacity .2s}
+.btn:active{opacity:.85}
+.btn.gold{background:var(--gold);color:var(--green)}
+.btn.red{background:var(--red)}
+.btn.sm{padding:8px 16px;font-size:13px;width:auto;border-radius:8px}
+.btn.outline{background:transparent;border:2px solid var(--green);color:var(--green)}
+.err-msg{color:var(--red);font-size:13px;font-weight:700;margin-top:8px;text-align:center}
+
+/* LAYOUT */
+.app{display:none;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:linear-gradient(180deg,var(--green),var(--green-mid));z-index:100;overflow-y:auto;transform:translateX(-100%);transition:transform .3s}
+.sidebar.open{transform:translateX(0)}
+.sidebar-head{padding:24px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-head h2{color:var(--white);font-size:18px;font-weight:900}
+.sidebar-head p{color:rgba(255,255,255,.6);font-size:12px;margin-top:2px}
+.sidebar-badge{display:inline-block;background:var(--gold);color:var(--green);font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-top:4px}
+.nav-section{padding:16px 12px 8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;margin:2px 8px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,.7);font-size:14px;font-weight:700;transition:all .2s}
+.nav-item:hover,.nav-item.active{background:rgba(255,255,255,.15);color:var(--white)}
+.nav-item .icon{font-size:18px;width:24px;text-align:center}
+.nav-item.logout{color:rgba(255,100,100,.8);margin-top:8px}
+.nav-item.logout:hover{background:rgba(255,100,100,.1);color:#ff6b6b}
+
+.main{margin-left:0;padding:0;transition:margin .3s}
+@media(min-width:768px){.sidebar{transform:translateX(0)}.main{margin-left:240px}}
+
+.topbar{background:var(--white);padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);position:sticky;top:0;z-index:50}
+.menu-btn{background:var(--gray);border:none;border-radius:8px;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+@media(min-width:768px){.menu-btn{display:none}}
+.topbar-title{font-size:18px;font-weight:900;color:var(--green);flex:1}
+.topbar-user{font-size:12px;font-weight:700;color:var(--text-light);text-align:right}
+
+.content{padding:16px}
+
+/* CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+@media(min-width:600px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{background:var(--white);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.stat-card .label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);margin-bottom:6px}
+.stat-card .value{font-size:26px;font-weight:900;color:var(--green)}
+.stat-card .sub{font-size:11px;color:var(--text-light);margin-top:2px}
+.stat-card.gold .value{color:var(--gold)}
+.stat-card.red .value{color:var(--red)}
+.stat-card.blue .value{color:var(--blue)}
+
+.section-card{background:var(--white);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-head h3{font-size:16px;font-weight:900;color:var(--green)}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--green);color:var(--white);padding:10px 12px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+th:first-child{border-radius:8px 0 0 0}
+th:last-child{border-radius:0 8px 0 0}
+td{padding:10px 12px;border-bottom:1px solid var(--gray);font-weight:600}
+tr:nth-child(even) td{background:#f5fdf5}
+tr:hover td{background:#edfaea}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800}
+.badge.ativo{background:#d8f3dc;color:#1b4332}
+.badge.vencido{background:#ffe5e5;color:#c62828}
+.badge.pendente{background:#fff3cd;color:#856404}
+.badge.admin{background:#e8d5ff;color:#5a189a}
+.badge.revendedor{background:#dbe9f9;color:#1d3557}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--white);border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:900;color:var(--green);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:var(--gray);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row .form-group{margin-bottom:0}
+.form-group{margin-bottom:14px}
+
+/* SEARCH */
+.search-bar{display:flex;gap:8px;margin-bottom:14px}
+.search-bar input{flex:1;padding:10px 14px;border:2px solid var(--gray);border-radius:10px;font-size:14px;font-family:'Nunito',sans-serif;outline:none}
+.search-bar input:focus{border-color:var(--green-light)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:var(--white);padding:12px 24px;border-radius:30px;font-size:14px;font-weight:700;opacity:0;transition:all .3s;z-index:400;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* VENC ALERT */
+.alert{background:#fff3cd;border-left:4px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;font-weight:700;color:#856404}
+
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90;display:none}
+.overlay.show{display:block}
+@media(min-width:768px){.overlay{display:none!important}}
+
+.empty{text-align:center;padding:40px;color:#aaa;font-weight:700}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>📺 StreamPanel Pro</h1>
+      <p>Painel de Gestão IPTV</p>
+    </div>
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="loginEmail" placeholder="seu@email.com">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <button class="btn" onclick="doLogin()">Entrar</button>
+    <div class="err-msg" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <h2>📺 StreamPanel</h2>
+      <p id="sidebarUser">Carregando...</p>
+      <span class="sidebar-badge" id="sidebarRole">Admin</span>
+    </div>
+    <div class="nav-section">Menu</div>
+    <div class="nav-item active" onclick="navigate('dashboard')"><span class="icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="navigate('clientes')" id="navClientes"><span class="icon">👥</span> Clientes</div>
+    <div class="nav-item" onclick="navigate('revendedores')" id="navRevendedores"><span class="icon">🤝</span> Revendedores</div>
+    <div class="nav-item" onclick="navigate('planos')" id="navPlanos"><span class="icon">📋</span> Planos</div>
+    <div class="nav-item" onclick="navigate('relatorios')" id="navRelatorios"><span class="icon">📈</span> Relatórios</div>
+    <div class="nav-section">Conta</div>
+    <div class="nav-item logout" onclick="doLogout()"><span class="icon">🚪</span> Sair</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-user" id="topbarUser"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeModalOut(event)">
+  <div class="modal" id="modal">
+    <div class="modal-title"><span id="modalTitle">Modal</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,get,remove,push,onValue,off}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,createUserWithEmailAndPassword}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const cfg={
+  apiKey:"AIzaSyAQDKTKhoPHiqPJqqW-To2UNUf-rYWjYfQ",
+  authDomain:"gestor-vinanceiro2020.firebaseapp.com",
+  databaseURL:"https://gestor-vinanceiro2020-default-rtdb.firebaseio.com",
+  projectId:"gestor-vinanceiro2020",
+  storageBucket:"gestor-vinanceiro2020.firebasestorage.app",
+  messagingSenderId:"931469622359",
+  appId:"1:931469622359:web:180a63c847ff2bfa3f3712"
+};
+const app=initializeApp(cfg);
+const db=getDatabase(app);
+const auth=getAuth(app);
+
+let currentUser=null,currentRole="admin",currentPage="dashboard";
+let clientes=[],revendedores=[],planos=[],usuarios=[];
+
+// AUTH
+onAuthStateChanged(auth,async u=>{
+  if(u){
+    currentUser=u;
+    const snap=await get(ref(db,`iptv/usuarios/${u.uid}`));
+    const data=snap.val()||{role:"revendedor",nome:u.email};
+    currentRole=data.role||"revendedor";
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('sidebarUser').textContent=data.nome||u.email;
+    document.getElementById('sidebarRole').textContent=currentRole==="admin"?"Admin":"Revendedor";
+    document.getElementById('topbarUser').textContent=data.nome||u.email;
+    if(currentRole!=="admin"){
+      document.getElementById('navRevendedores').style.display='none';
+      document.getElementById('navPlanos').style.display='none';
+    }
+    loadAll();
+    navigate('dashboard');
+  } else {
+    document.getElementById('loginWrap').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }
+});
+
+window.doLogin=async()=>{
+  const e=document.getElementById('loginEmail').value;
+  const p=document.getElementById('loginPass').value;
+  document.getElementById('loginErr').textContent='';
+  try{await signInWithEmailAndPassword(auth,e,p);}
+  catch(err){document.getElementById('loginErr').textContent='E-mail ou senha inválidos.';}
+};
+
+window.doLogout=async()=>{
+  await signOut(auth);
+};
+
+// LOAD
+async function loadAll(){
+  const snap=await get(ref(db,'iptv'));
+  const d=snap.val()||{};
+  clientes=Object.entries(d.clientes||{}).map(([id,v])=>({id,...v}));
+  revendedores=Object.entries(d.revendedores||{}).map(([id,v])=>({id,...v}));
+  planos=Object.entries(d.planos||{}).map(([id,v])=>({id,...v}));
+  usuarios=Object.entries(d.usuarios||{}).map(([id,v])=>({id,...v}));
+  if(currentPage)navigate(currentPage);
+}
+
+// NAV
+window.navigate=function(page){
+  currentPage=page;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const map={dashboard:'',clientes:'navClientes',revendedores:'navRevendedores',planos:'navPlanos',relatorios:'navRelatorios'};
+  if(map[page])document.getElementById(map[page])?.classList.add('active');
+  document.getElementById('topbarTitle').textContent={dashboard:'Dashboard',clientes:'Clientes',revendedores:'Revendedores',planos:'Planos',relatorios:'Relatórios'}[page]||page;
+  closeSidebar();
+  const c=document.getElementById('content');
+  if(page==='dashboard')c.innerHTML=renderDashboard();
+  else if(page==='clientes')c.innerHTML=renderClientes();
+  else if(page==='revendedores')c.innerHTML=renderRevendedores();
+  else if(page==='planos')c.innerHTML=renderPlanos();
+  else if(page==='relatorios')c.innerHTML=renderRelatorios();
+};
+
+window.toggleSidebar=()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+};
+window.closeSidebar=()=>{
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+};
+
+// HELPERS
+function hoje(){return new Date().toISOString().split('T')[0];}
+function diasRestantes(venc){if(!venc)return null;const d=new Date(venc)-new Date();return Math.ceil(d/(1000*60*60*24));}
+function fmtData(d){if(!d)return'—';const[a,m,dia]=d.split('-');return`${dia}/${m}/${a}`;}
+function fmtMoeda(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});}
+function statusBadge(venc){
+  if(!venc)return'<span class="badge pendente">Sem data</span>';
+  const d=diasRestantes(venc);
+  if(d<0)return'<span class="badge vencido">Vencido</span>';
+  if(d<=7)return`<span class="badge pendente">Vence em ${d}d</span>`;
+  return'<span class="badge ativo">Ativo</span>';
+}
+
+// DASHBOARD
+function renderDashboard(){
+  const total=clientes.length;
+  const ativos=clientes.filter(c=>diasRestantes(c.vencimento)>=0).length;
+  const vencidos=clientes.filter(c=>c.vencimento&&diasRestantes(c.vencimento)<0).length;
+  const vencendoHoje=clientes.filter(c=>{const d=diasRestantes(c.vencimento);return d>=0&&d<=7;});
+  const receita=clientes.reduce((s,c)=>s+Number(c.valor||0),0);
+  const alertas=vencendoHoje.map(c=>`<div class="alert">⚠️ <b>${c.nome}</b> vence em ${diasRestantes(c.vencimento)} dia(s) — ${fmtData(c.vencimento)}</div>`).join('');
+  const recentes=clientes.slice(-5).reverse().map(c=>`
+    <tr><td>${c.nome}</td><td>${c.plano||'—'}</td><td>${fmtData(c.vencimento)}</td><td>${statusBadge(c.vencimento)}</td></tr>
+  `).join('');
+  return`
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">👥 Total Clientes</div><div class="value">${total}</div><div class="sub">Cadastrados</div></div>
+      <div class="stat-card"><div class="label">✅ Ativos</div><div class="value">${ativos}</div><div class="sub">Com acesso</div></div>
+      <div class="stat-card red"><div class="label">❌ Vencidos</div><div class="value">${vencidos}</div><div class="sub">Sem acesso</div></div>
+      <div class="stat-card gold"><div class="label">💰 Receita</div><div class="value">${fmtMoeda(receita)}</div><div class="sub">Total mensal</div></div>
+    </div>
+    ${alertas?`<div class="section-card"><div class="section-head"><h3>⚠️ Vencimentos Próximos</h3></div>${alertas}</div>`:''}
+    <div class="section-card">
+      <div class="section-head"><h3>📋 Clientes Recentes</h3><button class="btn sm" onclick="navigate('clientes')">Ver todos</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Plano</th><th>Vencimento</th><th>Status</th></tr></thead><tbody>${recentes||'<tr><td colspan="4" class="empty">Nenhum cliente</td></tr>'}</tbody></table></div>
+    </div>
+  `;
+}
+
+// CLIENTES
+function renderClientes(){
+  const rows=clientes.map(c=>`
+    <tr>
+      <td><b>${c.nome}</b></td>
+      <td>${c.usuario||'—'}</td>
+      <td>${c.senha||'—'}</td>
+      <td>${c.plano||'—'}</td>
+      <td>${fmtData(c.vencimento)}</td>
+      <td>${fmtMoeda(c.valor)}</td>
+      <td>${c.revendedor||'—'}</td>
+      <td>${statusBadge(c.vencimento)}</td>
+      <td><div class="actions">
+        <button class="btn sm" onclick="editCliente('${c.id}')">✏️</button>
+        <button class="btn sm red" onclick="delCliente('${c.id}')">🗑️</button>
+      </div></td>
+    </tr>
+  `).join('');
+  return`
+    <div class="section-card">
+      <div class="section-head"><h3>👥 Clientes (${clientes.length})</h3><button class="btn sm gold" onclick="novoCliente()">+ Novo</button></div>
+      <div class="search-bar"><input placeholder="🔍 Buscar cliente..." oninput="filtrarClientes(this.value)" id="searchCliente"></div>
+      <div class="table-wrap"><table id="tblClientes"><thead><tr><th>Nome</th><th>Usuário</th><th>Senha</th><th>Plano</th><th>Vencimento</th><th>Valor</th><th>Revendedor</th><th>Status</th><th>Ações</th></tr></thead><tbody id="tbodyClientes">${rows||'<tr><td colspan="9" class="empty">Nenhum cliente cadastrado</td></tr>'}</tbody></table></div>
+    </div>
+  `;
+}
+
+window.filtrarClientes=function(q){
+  q=q.toLowerCase();
+  const rows=clientes.filter(c=>c.nome?.toLowerCase().includes(q)||c.usuario?.toLowerCase().includes(q)||c.plano?.toLowerCase().includes(q)).map(c=>`
+    <tr>
+      <td><b>${c.nome}</b></td><td>${c.usuario||'—'}</td><td>${c.senha||'—'}</td><td>${c.plano||'—'}</td>
+      <td>${fmtData(c.vencimento)}</td><td>${fmtMoeda(c.valor)}</td><td>${c.revendedor||'—'}</td>
+      <td>${statusBadge(c.vencimento)}</td>
+      <td><div class="actions"><button class="btn sm" onclick="editCliente('${c.id}')">✏️</button><button class="btn sm red" onclick="delCliente('${c.id}')">🗑️</button></div></td>
+    </tr>
+  `).join('');
+  document.getElementById('tbodyClientes').innerHTML=rows||'<tr><td colspan="9" class="empty">Nenhum resultado</td></tr>';
+};
+
+window.novoCliente=function(){
+  const opts=planos.map(p=>`<option>${p.nome}</option>`).join('');
+  const revs=revendedores.map(r=>`<option>${r.nome}</option>`).join('');
+  showModal('Novo Cliente',`
+    <div class="form-row"><div class="form-group"><label>Nome completo</label><input id="cNome" placeholder="Nome"></div><div class="form-group"><label>WhatsApp</label><input id="cWa" placeholder="(00) 00000-0000"></div></div>
+    <div class="form-row"><div class="form-group"><label>Usuário IPTV</label><input id="cUser" placeholder="usuario"></div><div class="form-group"><label>Senha IPTV</label><input id="cSenha" placeholder="senha123"></div></div>
+    <div class="form-row"><div class="form-group"><label>Plano</label><select id="cPlano"><option value="">Selecione</option>${opts}</select></div><div class="form-group"><label>Valor (R$)</label><input id="cValor" type="number" placeholder="0.00"></div></div>
+    <div class="form-row"><div class="form-group"><label>Vencimento</label><input id="cVenc" type="date"></div><div class="form-group"><label>Revendedor</label><select id="cRev"><option value="">Nenhum</option>${revs}</select></div></div>
+    <div class="form-group"><label>Observações</label><input id="cObs" placeholder="Opcional"></div>
+    <button class="btn gold" onclick="salvarCliente(null)">💾 Salvar Cliente</button>
+  `);
+};
+
+window.editCliente=function(id){
+  const c=clientes.find(x=>x.id===id);
+  if(!c)return;
+  const opts=planos.map(p=>`<option${c.plano===p.nome?' selected':''}>${p.nome}</option>`).join('');
+  const revs=revendedores.map(r=>`<option${c.revendedor===r.nome?' selected':''}>${r.nome}</option>`).join('');
+  showModal('Editar Cliente',`
+    <div class="form-row"><div class="form-group"><label>Nome completo</label><input id="cNome" value="${c.nome||''}" placeholder="Nome"></div><div class="form-group"><label>WhatsApp</label><input id="cWa" value="${c.whatsapp||''}" placeholder="(00) 00000-0000"></div></div>
+    <div class="form-row"><div class="form-group"><label>Usuário IPTV</label><input id="cUser" value="${c.usuario||''}" placeholder="usuario"></div><div class="form-group"><label>Senha IPTV</label><input id="cSenha" value="${c.senha||''}" placeholder="senha123"></div></div>
+    <div class="form-row"><div class="form-group"><label>Plano</label><select id="cPlano"><option value="">Selecione</option>${opts}</select></div><div class="form-group"><label>Valor (R$)</label><input id="cValor" type="number" value="${c.valor||''}" placeholder="0.00"></div></div>
+    <div class="form-row"><div class="form-group"><label>Vencimento</label><input id="cVenc" type="date" value="${c.vencimento||''}"></div><div class="form-group"><label>Revendedor</label><select id="cRev"><option value="">Nenhum</option>${revs}</select></div></div>
+    <div class="form-group"><label>Observações</label><input id="cObs" value="${c.obs||''}" placeholder="Opcional"></div>
+    <button class="btn gold" onclick="salvarCliente('${id}')">💾 Atualizar</button>
+  `);
+};
+
+window.salvarCliente=async function(id){
+  const data={
+    nome:document.getElementById('cNome').value,
+    whatsapp:document.getElementById('cWa').value,
+    usuario:document.getElementById('cUser').value,
+    senha:document.getElementById('cSenha').value,
+    plano:document.getElementById('cPlano').value,
+    valor:document.getElementById('cValor').value,
+    vencimento:document.getElementById('cVenc').value,
+    revendedor:document.getElementById('cRev').value,
+    obs:document.getElementById('cObs').value,
+    criadoEm:id?undefined:hoje()
+  };
+  if(!data.nome){showToast('❌ Nome obrigatório');return;}
+  if(id)await set(ref(db,`iptv/clientes/${id}`),data);
+  else await push(ref(db,'iptv/clientes'),data);
+  closeModal();showToast('✅ Cliente salvo!');await loadAll();
+};
+
+window.delCliente=async function(id){
+  if(!confirm('Excluir este cliente?'))return;
+  await remove(ref(db,`iptv/clientes/${id}`));
+  showToast('🗑️ Removido!');await loadAll();
+};
+
+// REVENDEDORES
+function renderRevendedores(){
+  const rows=revendedores.map(r=>`
+    <tr>
+      <td><b>${r.nome}</b></td>
+      <td>${r.email||'—'}</td>
+      <td>${r.whatsapp||'—'}</td>
+      <td>${r.creditos||0} créditos</td>
+      <td>${clientes.filter(c=>c.revendedor===r.nome).length}</td>
+      <td><span class="badge revendedor">Revendedor</span></td>
+      <td><div class="actions">
+        <button class="btn sm" onclick="editRevendedor('${r.id}')">✏️</button>
+        <button class="btn sm" onclick="addCreditos('${r.id}','${r.nome}')">💳</button>
+        <button class="btn sm red" onclick="delRevendedor('${r.id}')">🗑️</button>
+      </div></td>
+    </tr>
+  `).join('');
+  return`
+    <div class="section-card">
+      <div class="section-head"><h3>🤝 Revendedores (${revendedores.length})</h3><button class="btn sm gold" onclick="novoRevendedor()">+ Novo</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>WhatsApp</th><th>Créditos</th><th>Clientes</th><th>Status</th><th>Ações</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty">Nenhum revendedor</td></tr>'}</tbody></table></div>
+    </div>
+  `;
+}
+
+window.novoRevendedor=function(){
+  showModal('Novo Revendedor',`
+    <div class="form-row"><div class="form-group"><label>Nome</label><input id="rNome" placeholder="Nome"></div><div class="form-group"><label>WhatsApp</label><input id="rWa" placeholder="(00) 00000-0000"></div></div>
+    <div class="form-row"><div class="form-group"><label>E-mail (login)</label><input id="rEmail" type="email" placeholder="email@exemplo.com"></div><div class="form-group"><label>Senha inicial</label><input id="rPass" type="password" placeholder="••••••••"></div></div>
+    <div class="form-group"><label>Créditos iniciais</label><input id="rCred" type="number" placeholder="0" value="0"></div>
+    <button class="btn gold" onclick="salvarRevendedor(null)">💾 Criar Revendedor</button>
+  `);
+};
+
+window.editRevendedor=function(id){
+  const r=revendedores.find(x=>x.id===id);
+  if(!r)return;
+  showModal('Editar Revendedor',`
+    <div class="form-row"><div class="form-group"><label>Nome</label><input id="rNome" value="${r.nome||''}"></div><div class="form-group"><label>WhatsApp</label><input id="rWa" value="${r.whatsapp||''}"></div></div>
+    <div class="form-group"><label>E-mail</label><input id="rEmail" value="${r.email||''}"></div>
+    <div class="form-group"><label>Créditos</label><input id="rCred" type="number" value="${r.creditos||0}"></div>
+    <button class="btn gold" onclick="salvarRevendedor('${id}')">💾 Atualizar</button>
+  `);
+};
+
+window.salvarRevendedor=async function(id){
+  const nome=document.getElementById('rNome').value;
+  const wa=document.getElementById('rWa').value;
+  const email=id?document.getElementById('rEmail').value:(document.getElementById('rEmail')?.value||'');
+  const cred=document.getElementById('rCred').value;
+  if(!nome){showToast('❌ Nome obrigatório');return;}
+  if(!id){
+    const pass=document.getElementById('rPass').value;
+    if(!email||!pass){showToast('❌ E-mail e senha obrigatórios');return;}
+    try{
+      const uc=await createUserWithEmailAndPassword(auth,email,pass);
+      await set(ref(db,`iptv/usuarios/${uc.user.uid}`),{nome,email,role:'revendedor'});
+      await push(ref(db,'iptv/revendedores'),{nome,email,whatsapp:wa,creditos:Number(cred),criadoEm:hoje()});
+      closeModal();showToast('✅ Revendedor criado!');await loadAll();
+    }catch(e){showToast('❌ '+e.message);}
+  } else {
+    await set(ref(db,`iptv/revendedores/${id}`),{nome,email,whatsapp:wa,creditos:Number(cred)});
+    closeModal();showToast('✅ Atualizado!');await loadAll();
+  }
+};
+
+window.addCreditos=function(id,nome){
+  showModal(`Créditos — ${nome}`,`
+    <div class="form-group"><label>Adicionar créditos</label><input id="addCred" type="number" placeholder="Ex: 10" min="1"></div>
+    <button class="btn gold" onclick="confirmarCreditos('${id}')">💳 Adicionar</button>
+  `);
+};
+
+window.confirmarCreditos=async function(id){
+  const add=Number(document.getElementById('addCred').value);
+  if(!add||add<1){showToast('❌ Valor inválido');return;}
+  const r=revendedores.find(x=>x.id===id);
+  const atual=Number(r?.creditos||0);
+  await set(ref(db,`iptv/revendedores/${id}/creditos`),atual+add);
+  closeModal();showToast(`✅ +${add} créditos adicionados!`);await loadAll();
+};
+
+window.delRevendedor=async function(id){
+  if(!confirm('Excluir revendedor?'))return;
+  await remove(ref(db,`iptv/revendedores/${id}`));
+  showToast('🗑️ Removido!');await loadAll();
+};
+
+// PLANOS
+function renderPlanos(){
+  const rows=planos.map(p=>`
+    <tr>
+      <td><b>${p.nome}</b></td>
+      <td>${p.descricao||'—'}</td>
+      <td>${p.telas||1} tela(s)</td>
+      <td>${fmtMoeda(p.valor)}</td>
+      <td>${clientes.filter(c=>c.plano===p.nome).length} clientes</td>
+      <td><div class="actions">
+        <button class="btn sm" onclick="editPlano('${p.id}')">✏️</button>
+        <button class="btn sm red" onclick="delPlano('${p.id}')">🗑️</button>
+      </div></td>
+    </tr>
+  `).join('');
+  return`
+    <div class="section-card">
+      <div class="section-head"><h3>📋 Planos (${planos.length})</h3><button class="btn sm gold" onclick="novoPlano()">+ Novo Plano</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Descrição</th><th>Telas</th><th>Valor</th><th>Clientes</th><th>Ações</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Nenhum plano cadastrado</td></tr>'}</tbody></table></div>
+    </div>
+  `;
+}
+
+window.novoPlano=function(){
+  showModal('Novo Plano',`
+    <div class="form-row"><div class="form-group"><label>Nome do Plano</label><input id="pNome" placeholder="Ex: Básico"></div><div class="form-group"><label>Nº de Telas</label><input id="pTelas" type="number" placeholder="1" value="1" min="1"></div></div>
+    <div class="form-row"><div class="form-group"><label>Valor (R$)</label><input id="pValor" type="number" placeholder="0.00"></div><div class="form-group"><label>Validade (dias)</label><input id="pValidade" type="number" placeholder="30" value="30"></div></div>
+    <div class="form-group"><label>Descrição</label><input id="pDesc" placeholder="Detalhes do plano"></div>
+    <button class="btn gold" onclick="salvarPlano(null)">💾 Salvar Plano</button>
+  `);
+};
+
+window.editPlano=function(id){
+  const p=planos.find(x=>x.id===id);
+  if(!p)return;
+  showModal('Editar Plano',`
+    <div class="form-row"><div class="form-group"><label>Nome</label><input id="pNome" value="${p.nome||''}"></div><div class="form-group"><label>Telas</label><input id="pTelas" type="number" value="${p.telas||1}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Valor</label><input id="pValor" type="number" value="${p.valor||''}"></div><div class="form-group"><label>Validade (dias)</label><input id="pValidade" type="number" value="${p.validade||30}"></div></div>
+    <div class="form-group"><label>Descrição</label><input id="pDesc" value="${p.descricao||''}"></div>
+    <button class="btn gold" onclick="salvarPlano('${id}')">💾 Atualizar</button>
+  `);
+};
+
+window.salvarPlano=async function(id){
+  const data={nome:document.getElementById('pNome').value,telas:document.getElementById('pTelas').value,valor:document.getElementById('pValor').value,validade:document.getElementById('pValidade').value,descricao:document.getElementById('pDesc').value};
+  if(!data.nome){showToast('❌ Nome obrigatório');return;}
+  if(id)await set(ref(db,`iptv/planos/${id}`),data);
+  else await push(ref(db,'iptv/planos'),data);
+  closeModal();showToast('✅ Plano salvo!');await loadAll();
+};
+
+window.delPlano=async function(id){
+  if(!confirm('Excluir plano?'))return;
+  await remove(ref(db,`iptv/planos/${id}`));
+  showToast('🗑️ Removido!');await loadAll();
+};
+
+// RELATÓRIOS
+function renderRelatorios(){
+  const venc7=clientes.filter(c=>{const d=diasRestantes(c.vencimento);return d>=0&&d<=7;});
+  const vencidos=clientes.filter(c=>c.vencimento&&diasRestantes(c.vencimento)<0);
+  const ativos=clientes.filter(c=>diasRestantes(c.vencimento)>=0);
+  const receitaTotal=clientes.reduce((s,c)=>s+Number(c.valor||0),0);
+  const porPlano=planos.map(p=>{const qtd=clientes.filter(c=>c.plano===p.nome).length;return`<tr><td>${p.nome}</td><td>${qtd}</td><td>${fmtMoeda(qtd*Number(p.valor||0))}</td></tr>`;}).join('');
+  const rowsVenc=venc7.map(c=>`<tr><td>${c.nome}</td><td>${c.whatsapp||'—'}</td><td>${fmtData(c.vencimento)}</td><td>${diasRestantes(c.vencimento)} dia(s)</td></tr>`).join('');
+  const rowsVencidos=vencidos.map(c=>`<tr><td>${c.nome}</td><td>${c.whatsapp||'—'}</td><td>${fmtData(c.vencimento)}</td><td>${Math.abs(diasRestantes(c.vencimento))} dias</td></tr>`).join('');
+  return`
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">✅ Ativos</div><div class="value">${ativos.length}</div></div>
+      <div class="stat-card red"><div class="label">❌ Vencidos</div><div class="value">${vencidos.length}</div></div>
+      <div class="stat-card gold"><div class="label">⚠️ Vence em 7d</div><div class="value">${venc7.length}</div></div>
+      <div class="stat-card blue"><div class="label">💰 Receita Total</div><div class="value">${fmtMoeda(receitaTotal)}</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-head"><h3>📊 Clientes por Plano</h3></div>
+      <div class="table-wrap"><table><thead><tr><th>Plano</th><th>Clientes</th><th>Receita</th></tr></thead><tbody>${porPlano||'<tr><td colspan="3" class="empty">Sem dados</td></tr>'}</tbody></table></div>
+    </div>
+    <div class="section-card">
+      <div class="section-head"><h3>⚠️ Vencendo em 7 dias</h3></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Vencimento</th><th>Faltam</th></tr></thead><tbody>${rowsVenc||'<tr><td colspan="4" class="empty">Nenhum</td></tr>'}</tbody></table></div>
+    </div>
+    <div class="section-card">
+      <div class="section-head"><h3>❌ Clientes Vencidos</h3></div>
+      <div class="table-wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Venceu em</th><th>Há quanto tempo</th></tr></thead><tbody>${rowsVencidos||'<tr><td colspan="4" class="empty">Nenhum</td></tr>'}</tbody></table></div>
+    </div>
+  `;
+}
+
+// MODAL / TOAST
+window.showModal=function(title,body){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalBg').classList.add('show');
+};
+window.closeModal=function(){document.getElementById('modalBg').classList.remove('show');};
+window.closeModalOut=function(e){if(e.target===document.getElementById('modalBg'))closeModal();};
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+window.showToast=showToast;
+</script>
+</body>
+</html>
