@@ -310,7 +310,10 @@ tr:last-child td{border-bottom:none}
         <option value="12 meses">12 meses</option>
       </select></div>
     <div class="form-group"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01"></div>
-    <div class="form-group"><label>Vencimento</label><input type="date" id="cVenc"></div>
+    <div class="form-group">
+      <label>Vencimento <span style="font-size:.75rem;color:#888;font-weight:400">(calculado automaticamente pelo plano)</span></label>
+      <input type="date" id="cVenc" readonly style="background:#f9f9f9;color:#555;cursor:not-allowed">
+    </div>
     <div class="form-group"><label>Observações</label><input type="text" id="cObs"></div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="fecharModal('modalCliente')">Cancelar</button>
@@ -832,6 +835,20 @@ function popularSelectPlano() {
 function popularSelectRevendedor() {}
 
 window.fecharModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+// Calcula vencimento automaticamente ao escolher plano
+document.getElementById('cPlano').addEventListener('change', function() {
+  const val = this.value;
+  if (!val) { document.getElementById('cVenc').value = ''; return; }
+  const meses = parseInt(val.split(' ')[0]);
+  if (isNaN(meses)) return;
+  const base = new Date();
+  base.setMonth(base.getMonth() + meses);
+  const yyyy = base.getFullYear();
+  const mm = String(base.getMonth() + 1).padStart(2, '0');
+  const dd = String(base.getDate()).padStart(2, '0');
+  document.getElementById('cVenc').value = `${yyyy}-${mm}-${dd}`;
+});
 
 window.showToast = function(msg) {
   const t = document.getElementById('toast');
