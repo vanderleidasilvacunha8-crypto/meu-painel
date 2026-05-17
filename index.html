@@ -218,8 +218,16 @@ tr:last-child td{border-bottom:none}
           <h3>👥 Lista de Clientes</h3>
           <button class="btn-add" onclick="abrirModalCliente()">+ Novo Cliente</button>
         </div>
-        <div style="margin-bottom:1rem"><input type="text" id="buscaCliente" placeholder="🔍 Buscar cliente..." style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;width:100%;font-size:.9rem" oninput="renderClientes()"></div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Plano</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem">
+          <input type="text" id="buscaCliente" placeholder="🔍 Buscar por nome..." style="flex:1;min-width:160px;padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem" oninput="renderClientes()">
+          <select id="filtroStatus" style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer" onchange="renderClientes()">
+            <option value="">Todos</option>
+            <option value="ativo">✅ Ativo</option>
+            <option value="vencido">❌ Vencido</option>
+            <option value="vence7">⚠️ Vence em 7 dias</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody id="tblClientes"></tbody></table></div>
       </div>
     </div>
@@ -525,16 +533,30 @@ function renderDashboard() {
 // ===== CLIENTES =====
 window.renderClientes = function() {
   const busca = (document.getElementById('buscaCliente')?.value || '').toLowerCase();
+  const filtro = document.getElementById('filtroStatus')?.value || '';
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
+  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
+  let lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
+  if (filtro === 'ativo') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_; });
+  else if (filtro === 'vencido') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v < hoje_; });
+  else if (filtro === 'vence7') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_ && v <= em7; });
   document.getElementById('tblClientes').innerHTML = lista.length ? lista.map(c => {
     const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
     const ativo = v && v >= hoje_;
+    const diasRestantes = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
+    let diasBadge = '—';
+    if (diasRestantes !== null) {
+      if (diasRestantes < 0) diasBadge = `<span style="color:#dc2626;font-weight:700">${Math.abs(diasRestantes)}d vencido</span>`;
+      else if (diasRestantes === 0) diasBadge = `<span style="color:#d97706;font-weight:700">Vence hoje</span>`;
+      else if (diasRestantes <= 7) diasBadge = `<span style="color:#d97706;font-weight:700">${diasRestantes}d</span>`;
+      else diasBadge = `<span style="color:#16a34a;font-weight:600">${diasRestantes}d</span>`;
+    }
     return `<tr>
       <td>${c.nome}</td>
       <td>${c.usuario || '—'}</td>
       <td>${c.plano || '—'}</td>
       <td>${formatDate(c.vencimento)}</td>
+      <td>${diasBadge}</td>
       <td>R$ ${parseFloat(c.valor || 0).toFixed(2).replace('.', ',')}</td>
       <td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td>
       <td><div class="actions-cell">
