@@ -172,6 +172,7 @@ tr:last-child td{border-bottom:none}
     <div class="sidebar-user">
       <strong id="sidebarEmail"></strong>
       <span id="sidebarBadge" class="badge-role"></span>
+      <span id="sidebarCreditos" style="display:none;font-size:.75rem;color:#4ade80;margin-top:.3rem;display:block"></span>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section">Menu</div>
@@ -187,7 +188,7 @@ tr:last-child td{border-bottom:none}
       <div class="nav-item admin-only hidden" onclick="showPage('planos')">
         <span class="nav-icon">📋</span> Planos
       </div>
-      <div class="nav-item" onclick="showPage('servidores')">
+      <div class="nav-item" id="menuServidores" onclick="showPage('servidores')">
         <span class="nav-icon">🖥️</span> Servidores
       </div>
       <div class="nav-section">Conta</div>
@@ -459,8 +460,8 @@ document.getElementById('btnSair').addEventListener('click', async function() {
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
-    await carregarPerfil(user);
-    mostrarApp();
+    const podeEntrar = await carregarPerfil(user);
+    if (podeEntrar) mostrarApp();
   } else {
     currentUser = null;
     isAdmin = false;
@@ -487,7 +488,6 @@ async function carregarPerfil(user) {
       isAdmin = true;
       await set(ref(db, 'iptv/admins/' + user.uid), { email: user.email, criadoEm: hoje() });
     } else {
-      // Verifica bloqueio do revendedor
       if (snapRevAll.exists()) {
         const revs = snapRevAll.val();
         const entry = Object.entries(revs).find(([k,r]) => r.email === user.email);
@@ -495,11 +495,14 @@ async function carregarPerfil(user) {
           const [revId, rev] = entry;
           currentRevendedorId = revId;
           if (rev.bloqueado) {
+            // FORÇA logout e mostra mensagem - não deixa entrar
             await signOut(auth);
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appLayout').classList.add('hidden');
             const errEl = document.getElementById('loginError');
-            errEl.textContent = '🚫 Sua conta está bloqueada. Contate o administrador.';
+            errEl.textContent = '🚫 Conta bloqueada. Contate o administrador.';
             errEl.style.display = 'block';
-            return;
+            return false; // BLOQUEIA entrada no app
           }
         }
       }
@@ -511,6 +514,7 @@ async function carregarPerfil(user) {
   badge.textContent = isAdmin ? 'Admin' : 'Revendedor';
   badge.className = 'badge-role ' + (isAdmin ? 'badge-admin' : 'badge-rev');
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
+  return true; // Pode entrar
 }
 
 function mostrarLogin() {
@@ -545,6 +549,15 @@ function iniciarListeners() {
   unsubRevs = onValue(ref(db, 'iptv/revendedores'), snap => {
     revendedores = [];
     if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => revendedores.push({ id: k, ...d[k] })); }
+    // Verificar bloqueio e atualizar créditos em tempo real
+    if (!isAdmin && currentRevendedorId) {
+      const meuDado = revendedores.find(r => r.id === currentRevendedorId);
+      if (meuDado) {
+        if (meuDado.bloqueado) { signOut(auth); return; }
+        const credEl = document.getElementById('sidebarCreditos');
+        if (credEl) { credEl.textContent = '💳 Créditos: ' + (meuDado.creditos || 0); credEl.style.display = 'block'; }
+      }
+    }
     renderRevendedores();
     popularSelectRevendedor();
   });
