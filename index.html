@@ -144,7 +144,14 @@ tr:hover td{background:#edfaea}
       <input type="password" id="loginPass" placeholder="••••••••">
     </div>
     <button class="btn" onclick="doLogin()">Entrar</button>
+    <button class="btn outline" style="margin-top:8px" onclick="recuperarSenha()">Esqueci minha senha</button>
     <div class="err-msg" id="loginErr"></div>
+    <div style="margin-top:20px;text-align:center;padding-top:16px;border-top:1px solid #eee">
+      <p style="font-size:12px;color:#666;margin-bottom:8px">Quer ser revendedor?</p>
+      <a href="https://wa.me/5531989892315?text=Olá! Quero ser revendedor do StreamPanel Pro." target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:white;padding:10px 16px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px">
+        📱 Falar no WhatsApp
+      </a>
+    </div>
   </div>
 </div>
 
@@ -240,8 +247,14 @@ window.doLogin=async()=>{
   catch(err){document.getElementById('loginErr').textContent='E-mail ou senha inválidos.';}
 };
 
-window.doLogout=async()=>{
-  await signOut(auth);
+window.recuperarSenha=async()=>{
+  const e=document.getElementById('loginEmail').value;
+  if(!e){showToast('❌ Digite seu e-mail primeiro');return;}
+  try{
+    const{sendPasswordResetEmail}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    await sendPasswordResetEmail(auth,e);
+    showToast('✅ E-mail de recuperação enviado!');
+  }catch(err){showToast('❌ E-mail não encontrado');}
 };
 
 // LOAD
@@ -421,10 +434,11 @@ function renderRevendedores(){
       <td>${r.whatsapp||'—'}</td>
       <td>${r.creditos||0} créditos</td>
       <td>${clientes.filter(c=>c.revendedor===r.nome).length}</td>
-      <td><span class="badge revendedor">Revendedor</span></td>
+      <td><span class="badge ${r.bloqueado?'vencido':'revendedor'}">${r.bloqueado?'Bloqueado':'Ativo'}</span></td>
       <td><div class="actions">
         <button class="btn sm" onclick="editRevendedor('${r.id}')">✏️</button>
         <button class="btn sm" onclick="addCreditos('${r.id}','${r.nome}')">💳</button>
+        <button class="btn sm ${r.bloqueado?'':'red'}" onclick="toggleBloquear('${r.id}','${r.bloqueado}')">${r.bloqueado?'✅ Liberar':'🚫 Bloquear'}</button>
         <button class="btn sm red" onclick="delRevendedor('${r.id}')">🗑️</button>
       </div></td>
     </tr>
@@ -492,6 +506,15 @@ window.confirmarCreditos=async function(id){
   const atual=Number(r?.creditos||0);
   await set(ref(db,`iptv/revendedores/${id}/creditos`),atual+add);
   closeModal();showToast(`✅ +${add} créditos adicionados!`);await loadAll();
+};
+
+window.toggleBloquear=async function(id,bloqueado){
+  const msg=bloqueado==='true'||bloqueado===true?'Liberar este revendedor?':'Bloquear este revendedor?';
+  if(!confirm(msg))return;
+  const novo=!(bloqueado==='true'||bloqueado===true);
+  await set(ref(db,`iptv/revendedores/${id}/bloqueado`),novo);
+  showToast(novo?'🚫 Revendedor bloqueado!':'✅ Revendedor liberado!');
+  await loadAll();
 };
 
 window.delRevendedor=async function(id){
