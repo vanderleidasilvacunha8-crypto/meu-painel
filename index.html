@@ -110,10 +110,20 @@ tr:last-child td{border-bottom:none}
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%);transition:transform .3s}
   .sidebar.open{transform:translateX(0)}
-  .main-content{margin-left:0;padding:1rem;padding-top:4rem}
+  .main-content{margin-left:0;padding:.75rem;padding-top:4rem}
   .hamburger{display:flex}
   .sidebar-overlay.show{display:block}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .modal{padding:1rem;margin:.5rem}
+  .modal-overlay{padding:.5rem;align-items:flex-end}
+  .modal{border-radius:16px 16px 0 0;max-height:95vh}
+  table{font-size:.78rem}
+  th,td{padding:.5rem .4rem}
+  .actions-cell{flex-direction:column;gap:.3rem}
+  .btn-sm{width:100%;text-align:center}
+  .card{padding:1rem}
+  .card-header{flex-wrap:wrap;gap:.5rem}
+  .page-header h2{font-size:1.2rem}
 }
 
 /* ALERTAS DASHBOARD */
@@ -227,7 +237,7 @@ tr:last-child td{border-bottom:none}
             <option value="vence7">⚠️ Vence em 7 dias</option>
           </select>
         </div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Servidor</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody id="tblClientes"></tbody></table></div>
       </div>
     </div>
@@ -282,8 +292,23 @@ tr:last-child td{border-bottom:none}
     <div class="form-group"><label>Nome *</label><input type="text" id="cNome"></div>
     <div class="form-group"><label>Usuário IPTV</label><input type="text" id="cUser"></div>
     <div class="form-group"><label>Senha IPTV</label><input type="text" id="cPass"></div>
-    <div class="form-group"><label>Plano</label>
-      <select id="cPlano"><option value="">Selecione...</option></select></div>
+    <div class="form-group"><label>Nome do Servidor</label><input type="text" id="cServidor" placeholder="Ex: Servidor Alpha"></div>
+    <div class="form-group"><label>Plano (meses)</label>
+      <select id="cPlano" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem">
+        <option value="">Selecione...</option>
+        <option value="1 mês">1 mês</option>
+        <option value="2 meses">2 meses</option>
+        <option value="3 meses">3 meses</option>
+        <option value="4 meses">4 meses</option>
+        <option value="5 meses">5 meses</option>
+        <option value="6 meses">6 meses</option>
+        <option value="7 meses">7 meses</option>
+        <option value="8 meses">8 meses</option>
+        <option value="9 meses">9 meses</option>
+        <option value="10 meses">10 meses</option>
+        <option value="11 meses">11 meses</option>
+        <option value="12 meses">12 meses</option>
+      </select></div>
     <div class="form-group"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01"></div>
     <div class="form-group"><label>Vencimento</label><input type="date" id="cVenc"></div>
     <div class="form-group"><label>Observações</label><input type="text" id="cObs"></div>
@@ -554,6 +579,7 @@ window.renderClientes = function() {
     return `<tr>
       <td>${c.nome}</td>
       <td>${c.usuario || '—'}</td>
+      <td>${c.servidor || '—'}</td>
       <td>${c.plano || '—'}</td>
       <td>${formatDate(c.vencimento)}</td>
       <td>${diasBadge}</td>
@@ -572,6 +598,7 @@ window.abrirModalCliente = function() {
   document.getElementById('cNome').value = '';
   document.getElementById('cUser').value = '';
   document.getElementById('cPass').value = '';
+  document.getElementById('cServidor').value = '';
   document.getElementById('cPlano').value = '';
   document.getElementById('cValor').value = '';
   document.getElementById('cVenc').value = '';
@@ -587,6 +614,7 @@ window.editarCliente = function(id) {
   document.getElementById('cNome').value = c.nome || '';
   document.getElementById('cUser').value = c.usuario || '';
   document.getElementById('cPass').value = c.senha || '';
+  document.getElementById('cServidor').value = c.servidor || '';
   document.getElementById('cPlano').value = c.plano || '';
   document.getElementById('cValor').value = c.valor || '';
   document.getElementById('cVenc').value = c.vencimento || '';
@@ -604,6 +632,7 @@ window.salvarCliente = async function() {
     nome,
     usuario: document.getElementById('cUser').value.trim(),
     senha: document.getElementById('cPass').value.trim(),
+    servidor: document.getElementById('cServidor').value.trim(),
     plano: document.getElementById('cPlano').value,
     valor: parseFloat(document.getElementById('cValor').value) || 0,
     vencimento: document.getElementById('cVenc').value || '',
