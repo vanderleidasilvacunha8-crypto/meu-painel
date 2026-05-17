@@ -571,6 +571,7 @@ function iniciarListeners() {
     renderClientes();
     renderDashboard();
     renderRelatorios();
+    renderServidores();
   });
   unsubRevs = onValue(ref(db, 'iptv/revendedores'), snap => {
     revendedores = [];
@@ -981,20 +982,54 @@ function iniciarListenerServidores() {
 function renderServidores() {
   const tbody = document.getElementById('tblServidores');
   if (!tbody) return;
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  tbody.innerHTML = servidores.length ? servidores.map(s => {
-    const n = clientes.filter(c => (c.servidor || '').toLowerCase() === s.nome.toLowerCase()).length;
-    return `<tr>
-      <td><strong>${s.nome}</strong>${s.url ? '<br><span style="font-size:.75rem;color:#888">' + s.url + '</span>' : ''}</td>
-      <td><span style="font-size:1.1rem;font-weight:700;color:#1a3a2a">${n}</span> cliente(s)</td>
-      <td><div class="actions-cell">
-        <button class="btn-sm btn-edit" onclick="verClientesServidor('${s.id}','${s.nome}')">Ver Clientes</button>
-        <button class="btn-sm btn-edit" onclick="editarServidor('${s.id}')">Editar</button>
-        <button class="btn-sm btn-del" onclick="deletarServidor('${s.id}')">Excluir</button>
-      </div></td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="3" class="empty-state">Nenhum servidor cadastrado</td></tr>';
+  let rows = '';
+  if (servidores.length) {
+    rows = servidores.map(s => {
+      // Conta clientes que têm exatamente esse servidor OU cujo campo servidor bate
+      const n = clientes.filter(c => {
+        const srv = (c.servidor || '').trim().toLowerCase();
+        return srv === s.nome.trim().toLowerCase();
+      }).length;
+      return `<tr>
+        <td><strong>${s.nome}</strong>${s.url ? '<br><span style="font-size:.75rem;color:#888">' + s.url + '</span>' : ''}</td>
+        <td><span style="font-size:1.1rem;font-weight:700;color:#1a3a2a">${n}</span> cliente(s)</td>
+        <td><div class="actions-cell">
+          <button class="btn-sm btn-edit" onclick="verClientesServidor('${s.id}','${s.nome}')">Ver Clientes</button>
+          <button class="btn-sm btn-edit" onclick="editarServidor('${s.id}')">Editar</button>
+          <button class="btn-sm btn-del" onclick="deletarServidor('${s.id}')">Excluir</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+    // Clientes sem servidor cadastrado
+    const semSrv = clientes.filter(c => !c.servidor || c.servidor.trim() === '').length;
+    if (semSrv > 0) {
+      rows += `<tr style="background:#fef9ec">
+        <td><strong style="color:#d97706">⚠️ Sem servidor</strong></td>
+        <td><span style="font-size:1.1rem;font-weight:700;color:#d97706">${semSrv}</span> cliente(s)</td>
+        <td><button class="btn-sm btn-block" onclick="verClientesSemServidor()">Ver Clientes</button></td>
+      </tr>`;
+    }
+  } else {
+    rows = '<tr><td colspan="3" class="empty-state">Nenhum servidor cadastrado. Clique em "+ Novo Servidor" para adicionar.</td></tr>';
+  }
+  tbody.innerHTML = rows;
 }
+
+window.verClientesSemServidor = function() {
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const lista = clientes.filter(c => !c.servidor || c.servidor.trim() === '');
+  document.getElementById('tituloClientesServidor').textContent = '⚠️ Clientes sem servidor definido';
+  document.getElementById('cardClientesServidor').style.display = 'block';
+  document.getElementById('tblClientesServidor').innerHTML = lista.length ? lista.map(c => {
+    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
+    const ativo = v && v >= hoje_;
+    const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
+    let diasTxt = 'Sem data';
+    if (dias !== null) { if (dias < 0) diasTxt = Math.abs(dias) + 'd vencido'; else if (dias === 0) diasTxt = 'Hoje'; else diasTxt = dias + 'd'; }
+    return `<tr><td>${c.nome}</td><td>${c.usuario||'—'}</td><td>${c.plano||'—'}</td><td>${formatDate(c.vencimento)}</td><td>${diasTxt}</td><td><span class="badge ${ativo?'badge-green':'badge-red'}">${ativo?'Ativo':'Vencido'}</span></td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty-state">Nenhum</td></tr>';
+  document.getElementById('cardClientesServidor').scrollIntoView({behavior:'smooth'});
+};
 
 window.verClientesServidor = function(id, nome) {
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
