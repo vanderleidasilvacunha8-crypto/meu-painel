@@ -552,7 +552,7 @@ function renderDashboard() {
   const recentes = [...clientes].sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')).slice(0, 5);
   document.getElementById('tblDashClientes').innerHTML = recentes.length ? recentes.map(c => {
     const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    const ativo = v && v >= hoje_;
+    const ativo = v && v >= hoje_; // sem data = vencido
     return `<tr><td>${c.nome}</td><td>${c.plano || '—'}</td><td>${formatDate(c.vencimento)}</td><td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td></tr>`;
   }).join('') : '<tr><td colspan="4" class="empty-state">Nenhum cliente ainda</td></tr>';
   document.getElementById('dashGreet').textContent = 'Bem-vindo, ' + (currentUser?.email || '');
@@ -566,13 +566,13 @@ window.renderClientes = function() {
   const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
   let lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
   if (filtro === 'ativo') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_; });
-  else if (filtro === 'vencido') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v < hoje_; });
+  else if (filtro === 'vencido') lista = lista.filter(c => { if (!c.vencimento) return true; const v = new Date(c.vencimento + 'T00:00:00'); return v < hoje_; });
   else if (filtro === 'vence7') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_ && v <= em7; });
   document.getElementById('tblClientes').innerHTML = lista.length ? lista.map(c => {
     const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
     const ativo = v && v >= hoje_;
     const diasRestantes = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-    let diasBadge = '—';
+    let diasBadge = '<span style="color:#dc2626;font-weight:700">Sem data</span>';
     if (diasRestantes !== null) {
       if (diasRestantes < 0) diasBadge = `<span style="color:#dc2626;font-weight:700">${Math.abs(diasRestantes)}d vencido</span>`;
       else if (diasRestantes === 0) diasBadge = `<span style="color:#d97706;font-weight:700">Vence hoje</span>`;
@@ -623,6 +623,18 @@ window.editarCliente = function(id) {
   document.getElementById('cVenc').value = c.vencimento || '';
   document.getElementById('cObs').value = c.obs || '';
   document.getElementById('modalClienteTitulo').textContent = 'Editar Cliente';
+  // Se não tem vencimento mas tem plano, recalcula
+  if (!c.vencimento && c.plano) {
+    const meses = parseInt(c.plano.split(' ')[0]);
+    if (!isNaN(meses)) {
+      const base = new Date();
+      base.setMonth(base.getMonth() + meses);
+      const yyyy = base.getFullYear();
+      const mm = String(base.getMonth() + 1).padStart(2, '0');
+      const dd = String(base.getDate()).padStart(2, '0');
+      document.getElementById('cVenc').value = `${yyyy}-${mm}-${dd}`;
+    }
+  }
   document.getElementById('modalCliente').classList.add('open');
 };
 
