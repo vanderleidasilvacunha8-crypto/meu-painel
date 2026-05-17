@@ -187,6 +187,9 @@ tr:last-child td{border-bottom:none}
       <div class="nav-item admin-only hidden" onclick="showPage('planos')">
         <span class="nav-icon">📋</span> Planos
       </div>
+      <div class="nav-item" onclick="showPage('servidores')">
+        <span class="nav-icon">🖥️</span> Servidores
+      </div>
       <div class="nav-section">Conta</div>
       <div class="nav-item" onclick="showPage('relatorios')">
         <span class="nav-icon">📈</span> Relatórios
@@ -265,6 +268,24 @@ tr:last-child td{border-bottom:none}
         </div>
         <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Telas</th><th>Valor (R$)</th><th>Validade (dias)</th><th>Ações</th></tr></thead>
         <tbody id="tblPlanos"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- SERVIDORES -->
+    <div id="pageServidores" class="page hidden">
+      <div class="page-header"><h2>Servidores</h2><p>Gerencie seus servidores e veja clientes por servidor</p></div>
+      <div class="card">
+        <div class="card-header">
+          <h3>🖥️ Meus Servidores</h3>
+          <button class="btn-add" onclick="abrirModalServidor()">+ Novo Servidor</button>
+        </div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Nome do Servidor</th><th>Clientes</th><th>Ações</th></tr></thead>
+        <tbody id="tblServidores"></tbody></table></div>
+      </div>
+      <div class="card" id="cardClientesServidor" style="display:none">
+        <div class="card-header"><h3 id="tituloClientesServidor">Clientes do Servidor</h3></div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Status</th></tr></thead>
+        <tbody id="tblClientesServidor"></tbody></table></div>
       </div>
     </div>
 
@@ -349,6 +370,20 @@ tr:last-child td{border-bottom:none}
     <div class="modal-footer">
       <button class="btn-cancel" onclick="fecharModal('modalPlano')">Cancelar</button>
       <button class="btn-save" onclick="salvarPlano()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalServidor">
+  <div class="modal">
+    <h3 id="modalServidorTitulo">Novo Servidor</h3>
+    <input type="hidden" id="srvId">
+    <div class="form-group"><label>Nome do Servidor *</label><input type="text" id="srvNome" placeholder="Ex: Servidor Alpha"></div>
+    <div class="form-group"><label>URL / Host (opcional)</label><input type="text" id="srvUrl" placeholder="Ex: http://servidor.com:8080"></div>
+    <div class="form-group"><label>Observações</label><input type="text" id="srvObs"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal('modalServidor')">Cancelar</button>
+      <button class="btn-save" onclick="salvarServidor()">Salvar</button>
     </div>
   </div>
 </div>
@@ -439,25 +474,36 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+let currentRevendedorId = null;
+
 async function carregarPerfil(user) {
-  // Verifica se é admin
   const snapAdmin = await get(ref(db, 'iptv/admins/' + user.uid));
   if (snapAdmin.exists()) {
     isAdmin = true;
   } else {
-    // Verifica se é revendedor
-    const snapRevs = await get(ref(db, 'iptv/revendedores'));
-    if (snapRevs.exists()) {
-      const revs = snapRevs.val();
-      const rev = Object.values(revs).find(r => r.email === user.email);
-      if (rev) isAdmin = false;
-    }
-    // Primeiro usuário vira admin automaticamente
     const snapRevAll = await get(ref(db, 'iptv/revendedores'));
     const snapAdmAll = await get(ref(db, 'iptv/admins'));
     if (!snapRevAll.exists() && !snapAdmAll.exists()) {
       isAdmin = true;
       await set(ref(db, 'iptv/admins/' + user.uid), { email: user.email, criadoEm: hoje() });
+    } else {
+      // Verifica bloqueio do revendedor
+      if (snapRevAll.exists()) {
+        const revs = snapRevAll.val();
+        const entry = Object.entries(revs).find(([k,r]) => r.email === user.email);
+        if (entry) {
+          const [revId, rev] = entry;
+          currentRevendedorId = revId;
+          if (rev.bloqueado) {
+            await signOut(auth);
+            const errEl = document.getElementById('loginError');
+            errEl.textContent = '🚫 Sua conta está bloqueada. Contate o administrador.';
+            errEl.style.display = 'block';
+            return;
+          }
+        }
+      }
+      isAdmin = false;
     }
   }
   document.getElementById('sidebarEmail').textContent = user.email;
@@ -484,7 +530,7 @@ function mostrarApp() {
 
 // ===== LISTENERS TEMPO REAL =====
 function iniciarListeners() {
-  const path = isAdmin ? 'iptv/clientes' : 'iptv/clientes';
+  iniciarListenerServidores();
   unsubClientes = onValue(ref(db, 'iptv/clientes'), snap => {
     clientes = [];
     if (snap.exists()) {
@@ -659,6 +705,15 @@ window.salvarCliente = async function() {
     if (id) {
       await set(ref(db, 'iptv/clientes/' + id), data);
     } else {
+      // Novo cliente: verificar e descontar crédito do revendedor
+      if (!isAdmin && currentRevendedorId) {
+        const snapRev = await get(ref(db, 'iptv/revendedores/' + currentRevendedorId));
+        if (snapRev.exists()) {
+          const creditos = snapRev.val().creditos || 0;
+          if (creditos <= 0) { showToast('❌ Sem créditos! Solicite mais créditos ao administrador.'); return; }
+          await set(ref(db, 'iptv/revendedores/' + currentRevendedorId + '/creditos'), creditos - 1);
+        }
+      }
       const newRef = push(ref(db, 'iptv/clientes'));
       await set(newRef, data);
     }
@@ -847,6 +902,94 @@ function popularSelectPlano() {
 function popularSelectRevendedor() {}
 
 window.fecharModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+// ===== SERVIDORES =====
+let servidores = [];
+let unsubServ = null;
+
+function iniciarListenerServidores() {
+  const path = 'iptv/servidores/' + (isAdmin ? 'admin' : currentRevendedorId || currentUser.uid);
+  unsubServ = onValue(ref(db, path), snap => {
+    servidores = [];
+    if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] })); }
+    renderServidores();
+  });
+}
+
+function renderServidores() {
+  const tbody = document.getElementById('tblServidores');
+  if (!tbody) return;
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  tbody.innerHTML = servidores.length ? servidores.map(s => {
+    const n = clientes.filter(c => (c.servidor || '').toLowerCase() === s.nome.toLowerCase()).length;
+    return `<tr>
+      <td><strong>${s.nome}</strong>${s.url ? '<br><span style="font-size:.75rem;color:#888">' + s.url + '</span>' : ''}</td>
+      <td><span style="font-size:1.1rem;font-weight:700;color:#1a3a2a">${n}</span> cliente(s)</td>
+      <td><div class="actions-cell">
+        <button class="btn-sm btn-edit" onclick="verClientesServidor('${s.id}','${s.nome}')">Ver Clientes</button>
+        <button class="btn-sm btn-edit" onclick="editarServidor('${s.id}')">Editar</button>
+        <button class="btn-sm btn-del" onclick="deletarServidor('${s.id}')">Excluir</button>
+      </div></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="3" class="empty-state">Nenhum servidor cadastrado</td></tr>';
+}
+
+window.verClientesServidor = function(id, nome) {
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const lista = clientes.filter(c => (c.servidor || '').toLowerCase() === nome.toLowerCase());
+  document.getElementById('tituloClientesServidor').textContent = '👥 Clientes — ' + nome;
+  document.getElementById('cardClientesServidor').style.display = 'block';
+  document.getElementById('tblClientesServidor').innerHTML = lista.length ? lista.map(c => {
+    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
+    const ativo = v && v >= hoje_;
+    const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
+    let diasTxt = 'Sem data';
+    if (dias !== null) { if (dias < 0) diasTxt = Math.abs(dias) + 'd vencido'; else if (dias === 0) diasTxt = 'Hoje'; else diasTxt = dias + 'd'; }
+    return `<tr><td>${c.nome}</td><td>${c.usuario||'—'}</td><td>${c.plano||'—'}</td><td>${formatDate(c.vencimento)}</td><td>${diasTxt}</td><td><span class="badge ${ativo?'badge-green':'badge-red'}">${ativo?'Ativo':'Vencido'}</span></td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="empty-state">Nenhum cliente neste servidor</td></tr>';
+  document.getElementById('cardClientesServidor').scrollIntoView({behavior:'smooth'});
+};
+
+window.abrirModalServidor = function() {
+  document.getElementById('srvId').value = '';
+  document.getElementById('srvNome').value = '';
+  document.getElementById('srvUrl').value = '';
+  document.getElementById('srvObs').value = '';
+  document.getElementById('modalServidorTitulo').textContent = 'Novo Servidor';
+  document.getElementById('modalServidor').classList.add('open');
+};
+
+window.editarServidor = function(id) {
+  const s = servidores.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('srvId').value = id;
+  document.getElementById('srvNome').value = s.nome || '';
+  document.getElementById('srvUrl').value = s.url || '';
+  document.getElementById('srvObs').value = s.obs || '';
+  document.getElementById('modalServidorTitulo').textContent = 'Editar Servidor';
+  document.getElementById('modalServidor').classList.add('open');
+};
+
+window.salvarServidor = async function() {
+  const id = document.getElementById('srvId').value;
+  const nome = document.getElementById('srvNome').value.trim();
+  if (!nome) { showToast('❌ Nome obrigatório'); return; }
+  const path = 'iptv/servidores/' + (isAdmin ? 'admin' : currentRevendedorId || currentUser.uid);
+  const data = { nome, url: document.getElementById('srvUrl').value.trim(), obs: document.getElementById('srvObs').value.trim() };
+  try {
+    if (id) await set(ref(db, path + '/' + id), data);
+    else { const nr = push(ref(db, path)); await set(nr, data); }
+    fecharModal('modalServidor');
+    showToast('✅ Servidor salvo!');
+  } catch(e) { showToast('❌ Erro ao salvar.'); }
+};
+
+window.deletarServidor = async function(id) {
+  if (!confirm('Excluir este servidor?')) return;
+  const path = 'iptv/servidores/' + (isAdmin ? 'admin' : currentRevendedorId || currentUser.uid);
+  try { await remove(ref(db, path + '/' + id)); showToast('🗑️ Servidor removido.'); }
+  catch(e) { showToast('❌ Erro.'); }
+};
 
 // Calcula vencimento automaticamente ao escolher plano
 document.getElementById('cPlano').addEventListener('change', function() {
