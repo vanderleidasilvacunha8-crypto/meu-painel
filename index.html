@@ -946,6 +946,9 @@ function popularSelectServidor() {
   const val = sel.value;
   sel.innerHTML = '<option value="">Selecione um servidor...</option>' +
     servidores.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+  if (!servidores.length) {
+    sel.innerHTML += '<option value="" disabled>— Nenhum servidor cadastrado —</option>';
+  }
   if (val) sel.value = val;
 }
 
@@ -957,11 +960,19 @@ window.fecharModal = function(id) { document.getElementById(id).classList.remove
 let servidores = [];
 let unsubServ = null;
 
+function getServidorPath() {
+  return 'iptv/servidores/' + (isAdmin ? 'admin' : currentUser.uid);
+}
+
 function iniciarListenerServidores() {
-  const path = 'iptv/servidores/' + (isAdmin ? 'admin' : currentRevendedorId || currentUser.uid);
+  const path = getServidorPath();
+  if (unsubServ) unsubServ();
   unsubServ = onValue(ref(db, path), snap => {
     servidores = [];
-    if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] })); }
+    if (snap.exists()) {
+      const d = snap.val();
+      Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] }));
+    }
     renderServidores();
     popularSelectServidor();
   });
@@ -1025,19 +1036,19 @@ window.salvarServidor = async function() {
   const id = document.getElementById('srvId').value;
   const nome = document.getElementById('srvNome').value.trim();
   if (!nome) { showToast('❌ Nome obrigatório'); return; }
-  const path = 'iptv/servidores/' + (isAdmin ? 'admin' : currentRevendedorId || currentUser.uid);
+  const path = getServidorPath();
   const data = { nome, url: document.getElementById('srvUrl').value.trim(), obs: document.getElementById('srvObs').value.trim() };
   try {
     if (id) await set(ref(db, path + '/' + id), data);
     else { const nr = push(ref(db, path)); await set(nr, data); }
     fecharModal('modalServidor');
     showToast('✅ Servidor salvo!');
-  } catch(e) { showToast('❌ Erro ao salvar.'); }
+  } catch(e) { showToast('❌ Erro ao salvar: ' + e.message); }
 };
 
 window.deletarServidor = async function(id) {
   if (!confirm('Excluir este servidor?')) return;
-  const path = 'iptv/servidores/' + (isAdmin ? 'admin' : currentRevendedorId || currentUser.uid);
+  const path = getServidorPath();
   try { await remove(ref(db, path + '/' + id)); showToast('🗑️ Servidor removido.'); }
   catch(e) { showToast('❌ Erro.'); }
 };
