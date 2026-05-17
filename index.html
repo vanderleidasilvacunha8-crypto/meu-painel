@@ -314,7 +314,11 @@ tr:last-child td{border-bottom:none}
     <div class="form-group"><label>Nome *</label><input type="text" id="cNome"></div>
     <div class="form-group"><label>Usuário IPTV</label><input type="text" id="cUser"></div>
     <div class="form-group"><label>Senha IPTV</label><input type="text" id="cPass"></div>
-    <div class="form-group"><label>Nome do Servidor</label><input type="text" id="cServidor" placeholder="Ex: Servidor Alpha"></div>
+    <div class="form-group"><label>Nome do Servidor</label>
+      <select id="cServidor" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff">
+        <option value="">Selecione um servidor...</option>
+      </select>
+    </div>
     <div class="form-group"><label>Plano (meses)</label>
       <select id="cPlano" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem">
         <option value="">Selecione...</option>
@@ -429,7 +433,29 @@ window.fazerLogin = async function() {
   errEl.style.display = 'none';
   if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; errEl.style.display = 'block'; return; }
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    // 1. Faz login no Firebase Auth
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+
+    // 2. Verifica IMEDIATAMENTE se é revendedor bloqueado
+    const snapAdmin = await get(ref(db, 'iptv/admins/' + cred.user.uid));
+    if (!snapAdmin.exists()) {
+      // Não é admin — verifica bloqueio
+      const snapRevs = await get(ref(db, 'iptv/revendedores'));
+      if (snapRevs.exists()) {
+        const revs = snapRevs.val();
+        const entry = Object.entries(revs).find(([k,r]) => r.email === email);
+        if (entry) {
+          const [revId, rev] = entry;
+          if (rev.bloqueado) {
+            // Bloqueia: faz logout imediatamente e mostra erro
+            await signOut(auth);
+            errEl.textContent = '🚫 Conta bloqueada. Contate o administrador.';
+            errEl.style.display = 'block';
+            return;
+          }
+        }
+      }
+    }
   } catch(e) {
     errEl.textContent = 'E-mail ou senha incorretos.';
     errEl.style.display = 'block';
@@ -660,6 +686,7 @@ window.abrirModalCliente = function() {
   document.getElementById('cNome').value = '';
   document.getElementById('cUser').value = '';
   document.getElementById('cPass').value = '';
+  popularSelectServidor();
   document.getElementById('cServidor').value = '';
   document.getElementById('cPlano').value = '';
   document.getElementById('cValor').value = '';
@@ -676,6 +703,7 @@ window.editarCliente = function(id) {
   document.getElementById('cNome').value = c.nome || '';
   document.getElementById('cUser').value = c.usuario || '';
   document.getElementById('cPass').value = c.senha || '';
+  popularSelectServidor();
   document.getElementById('cServidor').value = c.servidor || '';
   document.getElementById('cPlano').value = c.plano || '';
   document.getElementById('cValor').value = c.valor || '';
@@ -912,6 +940,15 @@ function popularSelectPlano() {
   // Plano agora é fixo de 1 a 12 meses, não usa Firebase
 }
 
+function popularSelectServidor() {
+  const sel = document.getElementById('cServidor');
+  if (!sel) return;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">Selecione um servidor...</option>' +
+    servidores.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+  if (val) sel.value = val;
+}
+
 function popularSelectRevendedor() {}
 
 window.fecharModal = function(id) { document.getElementById(id).classList.remove('open'); };
@@ -926,6 +963,7 @@ function iniciarListenerServidores() {
     servidores = [];
     if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] })); }
     renderServidores();
+    popularSelectServidor();
   });
 }
 
