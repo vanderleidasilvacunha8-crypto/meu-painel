@@ -132,13 +132,33 @@ tr:last-child td{border-bottom:none}
   background:#4ade80;border:none;color:#1a3a2a;
   border-radius:8px;padding:.4rem .85rem;font-size:.85rem;font-weight:700;cursor:pointer;
 }
-.modal-body{padding:1rem 1.25rem;flex:1}
-.modal h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:#1a3a2a}
+.modal-body{padding:1rem 1.25rem;flex:1;background:#161b27}
+.modal h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:#f1f5f9}
 .modal-body .form-group{margin-bottom:.9rem}
 .modal .form-group input,.modal .form-group select,.modal .form-group textarea{
-  width:100%;padding:.7rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;
+  width:100%;padding:.7rem .9rem;
+  border:1.5px solid rgba(255,255,255,.15);
+  border-radius:10px;font-size:.95rem;
+  background:rgba(255,255,255,.07);
+  color:#f1f5f9;
+  transition:border .2s, box-shadow .2s, background .2s;
 }
-.modal .form-group input:focus,.modal .form-group select:focus{outline:none;border-color:#2d7a4f}
+.modal .form-group input::placeholder{color:#475569}
+.modal .form-group select option{background:#1e2433;color:#f1f5f9}
+.modal .form-group input:focus,.modal .form-group select:focus{
+  outline:none;
+  border-color:#f59e0b;
+  box-shadow:0 0 0 3px rgba(245,158,11,.2);
+  background:#fff;
+}
+.modal .form-group label{
+  color:#94a3b8;font-size:.82rem;font-weight:600;
+  display:block;margin-bottom:.35rem;letter-spacing:.3px;
+}
+.modal .form-group input:focus + label,
+.modal .form-group input:not(:placeholder-shown){
+  color:#f59e0b;
+}
 .modal-footer{display:none}
 .btn-cancel{flex:1;padding:.7rem;background:#f3f4f6;border:none;border-radius:8px;font-weight:600;cursor:pointer}
 .btn-save{flex:2;padding:.7rem;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}
@@ -432,6 +452,7 @@ tr:last-child td{border-bottom:none}
         </div>
       </div>
       <div class="form-group"><label>Vencimento</label><input type="date" id="cVenc"></div>
+      <div class="form-group"><label>📱 WhatsApp do cliente</label><input type="tel" id="cWhats" placeholder="Ex: 31999998888 (só números)"></div>
       <div class="form-group"><label>Observações / Informações</label><input type="text" id="cObs" placeholder="Anotações sobre o cliente"></div>
     </div>
   </div>
@@ -807,6 +828,7 @@ window.abrirModalCliente = function() {
   document.getElementById('cPlano').value = '';
   document.getElementById('cValor').value = '';
   document.getElementById('cVenc').value = '';
+  document.getElementById('cWhats').value = '';
   document.getElementById('cObs').value = '';
   document.getElementById('modalClienteTitulo').textContent = 'Novo Cliente';
   document.getElementById('modalCliente').classList.add('open');
@@ -824,6 +846,7 @@ window.editarCliente = function(id) {
   document.getElementById('cPlano').value = c.plano || '';
   document.getElementById('cValor').value = c.valor || '';
   document.getElementById('cVenc').value = c.vencimento || '';
+  document.getElementById('cWhats').value = c.whatsapp || '';
   document.getElementById('cObs').value = c.obs || '';
   document.getElementById('modalClienteTitulo').textContent = '✏️ Editar: ' + c.nome;
   document.getElementById('modalCliente').classList.add('open');
@@ -857,6 +880,7 @@ window.salvarCliente = async function() {
     plano: document.getElementById('cPlano').value,
     valor: parseFloat(document.getElementById('cValor').value) || 0,
     vencimento: document.getElementById('cVenc').value || '',
+    whatsapp: document.getElementById('cWhats').value.replace(/\D/g,''),
     obs: document.getElementById('cObs').value.trim(),
     revendedor: currentUser.email,
     criadoEm: (clienteExistente && clienteExistente.criadoEm) ? clienteExistente.criadoEm : hoje()
@@ -1312,10 +1336,12 @@ window.whatsCliente = function(id) {
   } else {
     msg = `Olá ${c.nome}! Tudo bem? Passando para falar sobre seu plano IPTV que vence em ${formatDate(c.vencimento)}. Qualquer dúvida é só chamar! 😊`;
   }
-  const whats = c.obs?.match(/\d{10,11}/) ? c.obs.match(/\d{10,11}/)[0] : '';
-  const url = whats
-    ? `https://wa.me/55${whats}?text=${encodeURIComponent(msg)}`
-    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  const whats = (c.whatsapp || '').replace(/\D/g,'');
+  if (!whats) {
+    showToast('❌ ' + c.nome + ' não tem WhatsApp cadastrado');
+    return;
+  }
+  const url = `https://wa.me/55${whats}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 };
 
@@ -1373,6 +1399,7 @@ function renderCardsMobile() {
       </div>
       <div class="client-card-row">
         <div class="client-chip">👤 <strong>${c.usuario || '—'}</strong></div>
+        ${c.whatsapp ? `<div class="client-chip">📱 <strong>${c.whatsapp}</strong></div>` : ''}
         <div class="client-chip">🔑 <strong>${c.senha || '—'}</strong></div>
         <div class="client-chip">🖥️ <strong>${c.servidor || '—'}</strong></div>
         <div class="client-chip">📋 <strong>${c.plano || '—'}</strong></div>
