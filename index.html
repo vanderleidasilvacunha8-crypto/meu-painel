@@ -90,18 +90,20 @@ tr:last-child td{border-bottom:none}
 
 /* BOTÕES ÍCONE NA LINHA */
 .btn-icon{
-  width:30px;height:30px;border-radius:7px;border:none;cursor:pointer;
+  width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;
-  font-size:.85rem;transition:all .2s;flex-shrink:0;
+  font-size:.9rem;transition:all .2s;flex-shrink:0;
 }
-.btn-icon:hover{transform:scale(1.12);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.btn-icon:hover{opacity:.85;transform:scale(1.08)}
 .bi-edit{background:#2563eb;color:#fff}
 .bi-venc{background:#8b5cf6;color:#fff}
-.bi-ren1{background:#16a34a;color:#fff}
+.bi-ren1{background:#16a34a;color:#fff;font-size:.75rem;font-weight:700}
 .bi-renN{background:#0891b2;color:#fff}
 .bi-block{background:#d97706;color:#fff}
 .bi-unblock{background:#16a34a;color:#fff}
 .bi-del{background:#dc2626;color:#fff}
+/* Grade 3x2 no mobile */
+.actions-grid{display:grid;grid-template-columns:repeat(3,32px);gap:3px}
 
 /* ===================== MODAL CORRIGIDO ===================== */
 .modal-overlay{
@@ -185,8 +187,8 @@ tr:last-child td{border-bottom:none}
 
   table{font-size:.78rem}
   th,td{padding:.5rem .4rem}
-  .actions-cell{flex-wrap:wrap;gap:.2rem}
-  .btn-icon{width:26px;height:26px;font-size:.7rem;border-radius:5px}
+  .actions-grid{grid-template-columns:repeat(3,30px);gap:2px}
+  .btn-icon{width:30px;height:30px;font-size:.82rem}
   .card{padding:1rem}
   .card-header{flex-wrap:wrap;gap:.5rem}
   .page-header h2{font-size:1.2rem}
@@ -761,7 +763,7 @@ window.renderClientes = function() {
       <td>${formatDate(c.vencimento)}<br>${diasBadge}</td>
       <td>R$ ${parseFloat(c.valor || 0).toFixed(2).replace('.', ',')}</td>
       <td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td>
-      <td><div class="actions-cell">
+      <td><div class="actions-grid">
         <button class="btn-icon bi-edit" title="Editar dados" onclick="editarCliente('${c.id}')">✏️</button>
         <button class="btn-icon bi-venc" title="Alterar vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
         <button class="btn-icon bi-ren1" title="Renovar 1 mês" onclick="renovar1Mes('${c.id}')">+1</button>
@@ -785,7 +787,6 @@ window.abrirModalCliente = function() {
   document.getElementById('cVenc').value = '';
   document.getElementById('cObs').value = '';
   document.getElementById('modalClienteTitulo').textContent = 'Novo Cliente';
-  document.getElementById('wrapRenovar').style.display = 'none';
   document.getElementById('modalCliente').classList.add('open');
 };
 
@@ -1253,10 +1254,7 @@ document.getElementById('cPlano').addEventListener('change', function() {
   const base = new Date();
   base.setMonth(base.getMonth() + meses);
   document.getElementById('cVenc').value = base.toISOString().split('T')[0];
-  // Mostra botão renovar quando tem plano
-  if (document.getElementById('cId').value) {
-    document.getElementById('wrapRenovar').style.display = 'block';
-  }
+
 });
 
 window.showToast = function(msg) {
