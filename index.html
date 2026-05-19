@@ -88,16 +88,57 @@ tr:last-child td{border-bottom:none}
 .btn-unblock:hover{background:#bbf7d0}
 .actions-cell{display:flex;gap:.4rem;flex-wrap:wrap}
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+/* ===================== MODAL CORRIGIDO ===================== */
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:1000;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+  overflow-y:auto;
+}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:16px;padding:1.5rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal{
+  background:#fff;
+  border-radius:16px;
+  padding:1.5rem;
+  width:100%;
+  max-width:480px;
+  max-height:88vh;
+  overflow-y:auto;
+  position:relative;
+  margin:auto;
+  box-shadow:0 25px 60px rgba(0,0,0,.25);
+}
 .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;color:#1a3a2a}
 .modal .form-group input,.modal .form-group select,.modal .form-group textarea{width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem}
 .modal .form-group input:focus,.modal .form-group select:focus{outline:none;border-color:#2d7a4f}
 .modal-footer{display:flex;gap:.75rem;margin-top:1.25rem}
 .btn-cancel{flex:1;padding:.7rem;background:#f3f4f6;border:none;border-radius:8px;font-weight:600;cursor:pointer}
 .btn-save{flex:2;padding:.7rem;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+
+/* Botão renovar no modal */
+.btn-renovar{
+  width:100%;
+  padding:.6rem;
+  background:#f0fdf4;
+  border:1.5px dashed #16a34a;
+  border-radius:8px;
+  color:#16a34a;
+  font-size:.85rem;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:.5rem;
+  transition:all .2s;
+}
+.btn-renovar:hover{background:#dcfce7}
+
+/* Separador de seção no modal */
+.modal-section{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#aaa;margin:1rem 0 .5rem;border-top:1px solid #f3f4f6;padding-top:.75rem}
+/* ==========================================================*/
 
 /* TOAST */
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1a3a2a;color:#fff;padding:.75rem 1.25rem;border-radius:10px;font-size:.875rem;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
@@ -114,9 +155,19 @@ tr:last-child td{border-bottom:none}
   .hamburger{display:flex}
   .sidebar-overlay.show{display:block}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .modal{padding:1rem;margin:.5rem}
-  .modal-overlay{padding:.5rem;align-items:flex-end}
-  .modal{border-radius:16px 16px 0 0;max-height:95vh}
+
+  /* MODAL MOBILE — centralizado e compacto */
+  .modal-overlay{
+    padding:.75rem;
+    align-items:center;
+  }
+  .modal{
+    border-radius:14px;
+    max-height:85vh;
+    padding:1.25rem 1rem;
+    margin:auto;
+  }
+
   table{font-size:.78rem}
   th,td{padding:.5rem .4rem}
   .actions-cell{flex-direction:column;gap:.3rem}
@@ -311,14 +362,18 @@ tr:last-child td{border-bottom:none}
   <div class="modal">
     <h3 id="modalClienteTitulo">Novo Cliente</h3>
     <input type="hidden" id="cId">
-    <div class="form-group"><label>Nome *</label><input type="text" id="cNome"></div>
-    <div class="form-group"><label>Usuário IPTV</label><input type="text" id="cUser"></div>
-    <div class="form-group"><label>Senha IPTV</label><input type="text" id="cPass"></div>
-    <div class="form-group"><label>Nome do Servidor</label>
+
+    <div class="form-group"><label>Nome *</label><input type="text" id="cNome" placeholder="Nome completo do cliente"></div>
+    <div class="form-group"><label>Usuário IPTV</label><input type="text" id="cUser" placeholder="login do app IPTV"></div>
+    <div class="form-group"><label>Senha IPTV</label><input type="text" id="cPass" placeholder="senha do app IPTV"></div>
+    <div class="form-group"><label>Servidor</label>
       <select id="cServidor" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff">
         <option value="">Selecione um servidor...</option>
       </select>
     </div>
+
+    <div class="modal-section">📅 Plano e Vencimento</div>
+
     <div class="form-group"><label>Plano (meses)</label>
       <select id="cPlano" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem">
         <option value="">Selecione...</option>
@@ -334,13 +389,21 @@ tr:last-child td{border-bottom:none}
         <option value="10 meses">10 meses</option>
         <option value="11 meses">11 meses</option>
         <option value="12 meses">12 meses</option>
-      </select></div>
-    <div class="form-group"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01"></div>
-    <div class="form-group">
-      <label>Vencimento <span style="font-size:.75rem;color:#888;font-weight:400">(calculado automaticamente pelo plano)</span></label>
-      <input type="date" id="cVenc" readonly style="background:#f9f9f9;color:#555;cursor:not-allowed">
+      </select>
     </div>
-    <div class="form-group"><label>Observações</label><input type="text" id="cObs"></div>
+
+    <div class="form-group">
+      <label>Vencimento <span style="font-size:.75rem;color:#888;font-weight:400">(calculado pelo plano ou edite manualmente)</span></label>
+      <input type="date" id="cVenc">
+    </div>
+
+    <!-- Botão renovar — só aparece ao editar -->
+    <div id="wrapRenovar" style="display:none">
+      <button class="btn-renovar" onclick="renovarCliente()">🔄 Renovar a partir de hoje (mesmo plano)</button>
+    </div>
+
+    <div class="form-group"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01" placeholder="0,00"></div>
+    <div class="form-group"><label>Observações</label><input type="text" id="cObs" placeholder="Opcional"></div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="fecharModal('modalCliente')">Cancelar</button>
       <button class="btn-save" onclick="salvarCliente()">Salvar</button>
@@ -433,13 +496,9 @@ window.fazerLogin = async function() {
   errEl.style.display = 'none';
   if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; errEl.style.display = 'block'; return; }
   try {
-    // 1. Faz login no Firebase Auth
     const cred = await signInWithEmailAndPassword(auth, email, pass);
-
-    // 2. Verifica IMEDIATAMENTE se é revendedor bloqueado
     const snapAdmin = await get(ref(db, 'iptv/admins/' + cred.user.uid));
     if (!snapAdmin.exists()) {
-      // Não é admin — verifica bloqueio
       const snapRevs = await get(ref(db, 'iptv/revendedores'));
       if (snapRevs.exists()) {
         const revs = snapRevs.val();
@@ -447,7 +506,6 @@ window.fazerLogin = async function() {
         if (entry) {
           const [revId, rev] = entry;
           if (rev.bloqueado) {
-            // Bloqueia: faz logout imediatamente e mostra erro
             await signOut(auth);
             errEl.textContent = '🚫 Conta bloqueada. Contate o administrador.';
             errEl.style.display = 'block';
@@ -471,16 +529,8 @@ window.recuperarSenha = async function() {
   } catch(e) { showToast('❌ Erro ao enviar e-mail.'); }
 };
 
-// BOTÃO SAIR — configurado corretamente
 document.getElementById('btnSair').addEventListener('click', async function() {
-  try {
-    await signOut(auth);
-  } catch(e) {
-    console.error('Erro ao sair:', e);
-    // Força logout mesmo com erro
-    currentUser = null;
-    mostrarLogin();
-  }
+  try { await signOut(auth); } catch(e) { currentUser = null; mostrarLogin(); }
 });
 
 onAuthStateChanged(auth, async (user) => {
@@ -489,11 +539,7 @@ onAuthStateChanged(auth, async (user) => {
     const podeEntrar = await carregarPerfil(user);
     if (podeEntrar) mostrarApp();
   } else {
-    currentUser = null;
-    isAdmin = false;
-    clientes = [];
-    revendedores = [];
-    planos = [];
+    currentUser = null; isAdmin = false; clientes = []; revendedores = []; planos = [];
     if (unsubClientes) unsubClientes();
     if (unsubRevs) unsubRevs();
     if (unsubPlanos) unsubPlanos();
@@ -521,14 +567,13 @@ async function carregarPerfil(user) {
           const [revId, rev] = entry;
           currentRevendedorId = revId;
           if (rev.bloqueado) {
-            // FORÇA logout e mostra mensagem - não deixa entrar
             await signOut(auth);
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('appLayout').classList.add('hidden');
             const errEl = document.getElementById('loginError');
             errEl.textContent = '🚫 Conta bloqueada. Contate o administrador.';
             errEl.style.display = 'block';
-            return false; // BLOQUEIA entrada no app
+            return false;
           }
         }
       }
@@ -540,7 +585,7 @@ async function carregarPerfil(user) {
   badge.textContent = isAdmin ? 'Admin' : 'Revendedor';
   badge.className = 'badge-role ' + (isAdmin ? 'badge-admin' : 'badge-rev');
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
-  return true; // Pode entrar
+  return true;
 }
 
 function mostrarLogin() {
@@ -558,7 +603,7 @@ function mostrarApp() {
   showPage('dashboard');
 }
 
-// ===== LISTENERS TEMPO REAL =====
+// ===== LISTENERS =====
 function iniciarListeners() {
   iniciarListenerServidores();
   unsubClientes = onValue(ref(db, 'iptv/clientes'), snap => {
@@ -568,15 +613,11 @@ function iniciarListeners() {
       Object.keys(data).forEach(k => clientes.push({ id: k, ...data[k] }));
       if (!isAdmin) clientes = clientes.filter(c => c.revendedor === currentUser.email);
     }
-    renderClientes();
-    renderDashboard();
-    renderRelatorios();
-    renderServidores();
+    renderClientes(); renderDashboard(); renderRelatorios(); renderServidores();
   });
   unsubRevs = onValue(ref(db, 'iptv/revendedores'), snap => {
     revendedores = [];
     if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => revendedores.push({ id: k, ...d[k] })); }
-    // Verificar bloqueio e atualizar créditos em tempo real
     if (!isAdmin && currentRevendedorId) {
       const meuDado = revendedores.find(r => r.id === currentRevendedorId);
       if (meuDado) {
@@ -585,14 +626,12 @@ function iniciarListeners() {
         if (credEl) { credEl.textContent = '💳 Créditos: ' + (meuDado.creditos || 0); credEl.style.display = 'block'; }
       }
     }
-    renderRevendedores();
-    popularSelectRevendedor();
+    renderRevendedores(); popularSelectRevendedor();
   });
   unsubPlanos = onValue(ref(db, 'iptv/planos'), snap => {
     planos = [];
     if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => planos.push({ id: k, ...d[k] })); }
-    renderPlanos();
-    popularSelectPlano();
+    renderPlanos(); popularSelectPlano();
   });
 }
 
@@ -638,7 +677,7 @@ function renderDashboard() {
   const recentes = [...clientes].sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')).slice(0, 5);
   document.getElementById('tblDashClientes').innerHTML = recentes.length ? recentes.map(c => {
     const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    const ativo = v && v >= hoje_; // sem data = vencido
+    const ativo = v && v >= hoje_;
     return `<tr><td>${c.nome}</td><td>${c.plano || '—'}</td><td>${formatDate(c.vencimento)}</td><td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td></tr>`;
   }).join('') : '<tr><td colspan="4" class="empty-state">Nenhum cliente ainda</td></tr>';
   document.getElementById('dashGreet').textContent = 'Bem-vindo, ' + (currentUser?.email || '');
@@ -679,7 +718,7 @@ window.renderClientes = function() {
         <button class="btn-sm btn-del" onclick="deletarCliente('${c.id}')">Excluir</button>
       </div></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="7" class="empty-state">Nenhum cliente encontrado</td></tr>';
+  }).join('') : '<tr><td colspan="9" class="empty-state">Nenhum cliente encontrado</td></tr>';
 };
 
 window.abrirModalCliente = function() {
@@ -694,6 +733,7 @@ window.abrirModalCliente = function() {
   document.getElementById('cVenc').value = '';
   document.getElementById('cObs').value = '';
   document.getElementById('modalClienteTitulo').textContent = 'Novo Cliente';
+  document.getElementById('wrapRenovar').style.display = 'none';
   document.getElementById('modalCliente').classList.add('open');
 };
 
@@ -710,20 +750,25 @@ window.editarCliente = function(id) {
   document.getElementById('cValor').value = c.valor || '';
   document.getElementById('cVenc').value = c.vencimento || '';
   document.getElementById('cObs').value = c.obs || '';
-  document.getElementById('modalClienteTitulo').textContent = 'Editar Cliente';
-  // Se não tem vencimento mas tem plano, recalcula
-  if (!c.vencimento && c.plano) {
-    const meses = parseInt(c.plano.split(' ')[0]);
-    if (!isNaN(meses)) {
-      const base = new Date();
-      base.setMonth(base.getMonth() + meses);
-      const yyyy = base.getFullYear();
-      const mm = String(base.getMonth() + 1).padStart(2, '0');
-      const dd = String(base.getDate()).padStart(2, '0');
-      document.getElementById('cVenc').value = `${yyyy}-${mm}-${dd}`;
-    }
-  }
+  document.getElementById('modalClienteTitulo').textContent = '✏️ Editar Cliente — ' + c.nome;
+  // Mostra botão renovar só quando editando
+  document.getElementById('wrapRenovar').style.display = c.plano ? 'block' : 'none';
   document.getElementById('modalCliente').classList.add('open');
+};
+
+// ===== RENOVAR CLIENTE COM 1 CLIQUE =====
+window.renovarCliente = function() {
+  const plano = document.getElementById('cPlano').value;
+  if (!plano) { showToast('❌ Selecione um plano primeiro'); return; }
+  const meses = parseInt(plano.split(' ')[0]);
+  if (isNaN(meses)) return;
+  const base = new Date();
+  base.setMonth(base.getMonth() + meses);
+  const yyyy = base.getFullYear();
+  const mm = String(base.getMonth() + 1).padStart(2, '0');
+  const dd = String(base.getDate()).padStart(2, '0');
+  document.getElementById('cVenc').value = `${yyyy}-${mm}-${dd}`;
+  showToast('📅 Vencimento renovado para ' + dd + '/' + mm + '/' + yyyy);
 };
 
 window.salvarCliente = async function() {
@@ -747,7 +792,6 @@ window.salvarCliente = async function() {
     if (id) {
       await set(ref(db, 'iptv/clientes/' + id), data);
     } else {
-      // Novo cliente: verificar e descontar crédito do revendedor
       if (!isAdmin && currentRevendedorId) {
         const snapRev = await get(ref(db, 'iptv/revendedores/' + currentRevendedorId));
         if (snapRev.exists()) {
@@ -778,10 +822,7 @@ function renderRevendedores() {
     const nClientes = clientes.filter(c => c.revendedor === r.email).length;
     const bloqueado = r.bloqueado;
     return `<tr>
-      <td>${r.nome}</td>
-      <td>${r.email}</td>
-      <td>${r.creditos || 0}</td>
-      <td>${nClientes}</td>
+      <td>${r.nome}</td><td>${r.email}</td><td>${r.creditos || 0}</td><td>${nClientes}</td>
       <td><span class="badge ${bloqueado ? 'badge-red' : 'badge-green'}">${bloqueado ? 'Bloqueado' : 'Ativo'}</span></td>
       <td><div class="actions-cell">
         <button class="btn-sm btn-edit" onclick="editarRevendedor('${r.id}')">Editar</button>
@@ -832,8 +873,7 @@ window.salvarRevendedor = async function() {
     }
     const rev = revendedores.find(x => x.id === id);
     const data = {
-      nome,
-      email,
+      nome, email,
       creditos: parseInt(document.getElementById('rCreditos').value) || 0,
       whatsapp: document.getElementById('rWhats').value.trim(),
       bloqueado: rev ? (rev.bloqueado || false) : false,
@@ -937,9 +977,7 @@ function renderRelatorios() {
 }
 
 // ===== HELPERS =====
-function popularSelectPlano() {
-  // Plano agora é fixo de 1 a 12 meses, não usa Firebase
-}
+function popularSelectPlano() {}
 
 function popularSelectServidor() {
   const sel = document.getElementById('cServidor');
@@ -947,15 +985,20 @@ function popularSelectServidor() {
   const val = sel.value;
   sel.innerHTML = '<option value="">Selecione um servidor...</option>' +
     servidores.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
-  if (!servidores.length) {
-    sel.innerHTML += '<option value="" disabled>— Nenhum servidor cadastrado —</option>';
-  }
+  if (!servidores.length) sel.innerHTML += '<option value="" disabled>— Nenhum servidor cadastrado —</option>';
   if (val) sel.value = val;
 }
 
 function popularSelectRevendedor() {}
 
 window.fecharModal = function(id) { document.getElementById(id).classList.remove('open'); };
+
+// Fecha modal clicando fora
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) fecharModal(this.id);
+  });
+});
 
 // ===== SERVIDORES =====
 let servidores = [];
@@ -970,12 +1013,8 @@ function iniciarListenerServidores() {
   if (unsubServ) unsubServ();
   unsubServ = onValue(ref(db, path), snap => {
     servidores = [];
-    if (snap.exists()) {
-      const d = snap.val();
-      Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] }));
-    }
-    renderServidores();
-    popularSelectServidor();
+    if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] })); }
+    renderServidores(); popularSelectServidor();
   });
 }
 
@@ -985,11 +1024,7 @@ function renderServidores() {
   let rows = '';
   if (servidores.length) {
     rows = servidores.map(s => {
-      // Conta clientes que têm exatamente esse servidor OU cujo campo servidor bate
-      const n = clientes.filter(c => {
-        const srv = (c.servidor || '').trim().toLowerCase();
-        return srv === s.nome.trim().toLowerCase();
-      }).length;
+      const n = clientes.filter(c => (c.servidor || '').trim().toLowerCase() === s.nome.trim().toLowerCase()).length;
       return `<tr>
         <td><strong>${s.nome}</strong>${s.url ? '<br><span style="font-size:.75rem;color:#888">' + s.url + '</span>' : ''}</td>
         <td><span style="font-size:1.1rem;font-weight:700;color:#1a3a2a">${n}</span> cliente(s)</td>
@@ -1000,7 +1035,6 @@ function renderServidores() {
         </div></td>
       </tr>`;
     }).join('');
-    // Clientes sem servidor cadastrado
     const semSrv = clientes.filter(c => !c.servidor || c.servidor.trim() === '').length;
     if (semSrv > 0) {
       rows += `<tr style="background:#fef9ec">
@@ -1010,7 +1044,7 @@ function renderServidores() {
       </tr>`;
     }
   } else {
-    rows = '<tr><td colspan="3" class="empty-state">Nenhum servidor cadastrado. Clique em "+ Novo Servidor" para adicionar.</td></tr>';
+    rows = '<tr><td colspan="3" class="empty-state">Nenhum servidor cadastrado.</td></tr>';
   }
   tbody.innerHTML = rows;
 }
@@ -1088,18 +1122,19 @@ window.deletarServidor = async function(id) {
   catch(e) { showToast('❌ Erro.'); }
 };
 
-// Calcula vencimento automaticamente ao escolher plano
+// Calcula vencimento ao selecionar plano
 document.getElementById('cPlano').addEventListener('change', function() {
   const val = this.value;
-  if (!val) { document.getElementById('cVenc').value = ''; return; }
+  if (!val) return;
   const meses = parseInt(val.split(' ')[0]);
   if (isNaN(meses)) return;
   const base = new Date();
   base.setMonth(base.getMonth() + meses);
-  const yyyy = base.getFullYear();
-  const mm = String(base.getMonth() + 1).padStart(2, '0');
-  const dd = String(base.getDate()).padStart(2, '0');
-  document.getElementById('cVenc').value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('cVenc').value = base.toISOString().split('T')[0];
+  // Mostra botão renovar quando tem plano
+  if (document.getElementById('cId').value) {
+    document.getElementById('wrapRenovar').style.display = 'block';
+  }
 });
 
 window.showToast = function(msg) {
