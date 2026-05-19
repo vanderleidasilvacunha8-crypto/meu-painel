@@ -86,7 +86,22 @@ tr:last-child td{border-bottom:none}
 .btn-block:hover{background:#fde68a}
 .btn-unblock{background:#dcfce7;color:#16a34a}
 .btn-unblock:hover{background:#bbf7d0}
-.actions-cell{display:flex;gap:.4rem;flex-wrap:wrap}
+.actions-cell{display:flex;gap:.3rem;flex-wrap:nowrap;align-items:center}
+
+/* BOTÕES ÍCONE NA LINHA */
+.btn-icon{
+  width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:1rem;transition:all .2s;flex-shrink:0;
+}
+.btn-icon:hover{transform:scale(1.12);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.bi-edit{background:#2563eb;color:#fff}
+.bi-venc{background:#8b5cf6;color:#fff}
+.bi-ren1{background:#16a34a;color:#fff}
+.bi-renN{background:#0891b2;color:#fff}
+.bi-block{background:#d97706;color:#fff}
+.bi-unblock{background:#16a34a;color:#fff}
+.bi-del{background:#dc2626;color:#fff}
 
 /* ===================== MODAL CORRIGIDO ===================== */
 .modal-overlay{
@@ -170,8 +185,8 @@ tr:last-child td{border-bottom:none}
 
   table{font-size:.78rem}
   th,td{padding:.5rem .4rem}
-  .actions-cell{flex-direction:column;gap:.3rem}
-  .btn-sm{width:100%;text-align:center}
+  .actions-cell{flex-wrap:wrap;gap:.25rem}
+  .btn-icon{width:30px;height:30px;font-size:.85rem}
   .card{padding:1rem}
   .card-header{flex-wrap:wrap;gap:.5rem}
   .page-header h2{font-size:1.2rem}
@@ -358,55 +373,83 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <!-- MODAIS -->
+
+<!-- Modal: Novo/Editar Cliente -->
 <div class="modal-overlay" id="modalCliente">
   <div class="modal">
     <h3 id="modalClienteTitulo">Novo Cliente</h3>
     <input type="hidden" id="cId">
-
-    <div class="form-group"><label>Nome *</label><input type="text" id="cNome" placeholder="Nome completo do cliente"></div>
-    <div class="form-group"><label>Usuário IPTV</label><input type="text" id="cUser" placeholder="login do app IPTV"></div>
-    <div class="form-group"><label>Senha IPTV</label><input type="text" id="cPass" placeholder="senha do app IPTV"></div>
-    <div class="form-group"><label>Servidor</label>
-      <select id="cServidor" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff">
-        <option value="">Selecione um servidor...</option>
-      </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+      <div class="form-group" style="margin:0"><label>Nome *</label><input type="text" id="cNome" placeholder="Nome do cliente"></div>
+      <div class="form-group" style="margin:0"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01" placeholder="0,00"></div>
     </div>
-
-    <div class="modal-section">📅 Plano e Vencimento</div>
-
-    <div class="form-group"><label>Plano (meses)</label>
-      <select id="cPlano" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem">
-        <option value="">Selecione...</option>
-        <option value="1 mês">1 mês</option>
-        <option value="2 meses">2 meses</option>
-        <option value="3 meses">3 meses</option>
-        <option value="4 meses">4 meses</option>
-        <option value="5 meses">5 meses</option>
-        <option value="6 meses">6 meses</option>
-        <option value="7 meses">7 meses</option>
-        <option value="8 meses">8 meses</option>
-        <option value="9 meses">9 meses</option>
-        <option value="10 meses">10 meses</option>
-        <option value="11 meses">11 meses</option>
-        <option value="12 meses">12 meses</option>
-      </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.65rem">
+      <div class="form-group" style="margin:0"><label>Usuário IPTV</label><input type="text" id="cUser" placeholder="login"></div>
+      <div class="form-group" style="margin:0"><label>Senha IPTV</label><input type="text" id="cPass" placeholder="senha"></div>
     </div>
-
-    <div class="form-group">
-      <label>Vencimento <span style="font-size:.75rem;color:#888;font-weight:400">(calculado pelo plano ou edite manualmente)</span></label>
-      <input type="date" id="cVenc">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.65rem">
+      <div class="form-group" style="margin:0"><label>Servidor</label>
+        <select id="cServidor" style="width:100%;padding:.6rem .8rem;border:1.5px solid #ddd;border-radius:8px;font-size:.88rem;background:#fff">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0"><label>Plano</label>
+        <select id="cPlano" style="width:100%;padding:.6rem .8rem;border:1.5px solid #ddd;border-radius:8px;font-size:.88rem">
+          <option value="">Selecione...</option>
+          <option value="1 mês">1 mês</option><option value="2 meses">2 meses</option>
+          <option value="3 meses">3 meses</option><option value="4 meses">4 meses</option>
+          <option value="5 meses">5 meses</option><option value="6 meses">6 meses</option>
+          <option value="7 meses">7 meses</option><option value="8 meses">8 meses</option>
+          <option value="9 meses">9 meses</option><option value="10 meses">10 meses</option>
+          <option value="11 meses">11 meses</option><option value="12 meses">12 meses</option>
+        </select>
+      </div>
     </div>
-
-    <!-- Botão renovar — só aparece ao editar -->
-    <div id="wrapRenovar" style="display:none">
-      <button class="btn-renovar" onclick="renovarCliente()">🔄 Renovar a partir de hoje (mesmo plano)</button>
-    </div>
-
-    <div class="form-group"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01" placeholder="0,00"></div>
-    <div class="form-group"><label>Observações</label><input type="text" id="cObs" placeholder="Opcional"></div>
+    <div class="form-group" style="margin-top:.65rem"><label>Vencimento</label><input type="date" id="cVenc"></div>
+    <div class="form-group"><label>Observações / Informações</label><input type="text" id="cObs" placeholder="Informações adicionais do cliente"></div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="fecharModal('modalCliente')">Cancelar</button>
       <button class="btn-save" onclick="salvarCliente()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Alterar Vencimento -->
+<div class="modal-overlay" id="modalVencimento">
+  <div class="modal" style="max-width:320px">
+    <h3>📅 Alterar Vencimento</h3>
+    <input type="hidden" id="vencId">
+    <p id="vencNomeCliente" style="font-size:.85rem;color:#555;font-weight:600;margin-bottom:.25rem"></p>
+    <p id="vencAtual" style="font-size:.8rem;color:#888;margin-bottom:1rem"></p>
+    <div class="form-group"><label>Nova data de vencimento</label><input type="date" id="vencNovaData"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal('modalVencimento')">Cancelar</button>
+      <button class="btn-save" onclick="salvarVencimento()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Renovar vários meses -->
+<div class="modal-overlay" id="modalRenovar">
+  <div class="modal" style="max-width:320px">
+    <h3>🔄 Renovar Plano</h3>
+    <input type="hidden" id="renId">
+    <p id="renNomeCliente" style="font-size:.85rem;color:#555;font-weight:600;margin-bottom:.25rem"></p>
+    <p id="renVencAtual" style="font-size:.8rem;color:#888;margin-bottom:1rem"></p>
+    <div class="form-group"><label>Quantos meses renovar?</label>
+      <select id="renMeses" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem">
+        <option value="1">1 mês</option><option value="2">2 meses</option>
+        <option value="3">3 meses</option><option value="4">4 meses</option>
+        <option value="5">5 meses</option><option value="6">6 meses</option>
+        <option value="7">7 meses</option><option value="8">8 meses</option>
+        <option value="9">9 meses</option><option value="10">10 meses</option>
+        <option value="11">11 meses</option><option value="12">12 meses</option>
+      </select>
+    </div>
+    <p style="font-size:.78rem;color:#2d7a4f;margin-bottom:.5rem">⚡ Soma ao vencimento atual (ou usa hoje se vencido)</p>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal('modalRenovar')">Cancelar</button>
+      <button class="btn-save" onclick="confirmarRenovar()">Renovar</button>
     </div>
   </div>
 </div>
@@ -704,18 +747,24 @@ window.renderClientes = function() {
       else if (diasRestantes <= 7) diasBadge = `<span style="color:#d97706;font-weight:700">${diasRestantes}d</span>`;
       else diasBadge = `<span style="color:#16a34a;font-weight:600">${diasRestantes}d</span>`;
     }
-    return `<tr>
-      <td>${c.nome}</td>
-      <td>${c.usuario || '—'}</td>
+    const bloqIcon = c.bloqueado
+      ? `<button class="btn-icon bi-unblock" title="Desbloquear" onclick="toggleBloqueioCliente('${c.id}',true)">✅</button>`
+      : `<button class="btn-icon bi-block" title="Bloquear" onclick="toggleBloqueioCliente('${c.id}',false)">🚫</button>`;
+    return `<tr style="${c.bloqueado ? 'opacity:.6;background:#fff5f5' : ''}">
+      <td><strong>${c.nome}</strong>${c.obs ? '<br><span style="font-size:.72rem;color:#888">' + c.obs + '</span>' : ''}</td>
+      <td><span style="font-family:monospace;font-size:.82rem">${c.usuario || '—'}</span><br><span style="font-size:.72rem;color:#aaa">${c.senha || ''}</span></td>
       <td>${c.servidor || '—'}</td>
       <td>${c.plano || '—'}</td>
-      <td>${formatDate(c.vencimento)}</td>
-      <td>${diasBadge}</td>
+      <td>${formatDate(c.vencimento)}<br>${diasBadge}</td>
       <td>R$ ${parseFloat(c.valor || 0).toFixed(2).replace('.', ',')}</td>
       <td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td>
       <td><div class="actions-cell">
-        <button class="btn-sm btn-edit" onclick="editarCliente('${c.id}')">Editar</button>
-        <button class="btn-sm btn-del" onclick="deletarCliente('${c.id}')">Excluir</button>
+        <button class="btn-icon bi-edit" title="Editar dados" onclick="editarCliente('${c.id}')">✏️</button>
+        <button class="btn-icon bi-venc" title="Alterar vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
+        <button class="btn-icon bi-ren1" title="Renovar 1 mês" onclick="renovar1Mes('${c.id}')">+1</button>
+        <button class="btn-icon bi-renN" title="Renovar vários meses" onclick="abrirModalRenovar('${c.id}')">🔄</button>
+        ${bloqIcon}
+        <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
       </div></td>
     </tr>`;
   }).join('') : '<tr><td colspan="9" class="empty-state">Nenhum cliente encontrado</td></tr>';
@@ -812,6 +861,78 @@ window.deletarCliente = async function(id) {
   if (!confirm('Excluir este cliente?')) return;
   try { await remove(ref(db, 'iptv/clientes/' + id)); showToast('🗑️ Cliente removido.'); }
   catch(e) { showToast('❌ Erro ao excluir.'); }
+};
+
+// ===== AÇÕES RÁPIDAS CLIENTES =====
+window.toggleBloqueioCliente = async function(id, estaBloqueado) {
+  const acao = estaBloqueado ? 'desbloquear' : 'bloquear';
+  if (!confirm('Deseja ' + acao + ' este cliente?')) return;
+  try {
+    await set(ref(db, 'iptv/clientes/' + id + '/bloqueado'), !estaBloqueado);
+    showToast(estaBloqueado ? '✅ Cliente desbloqueado.' : '🚫 Cliente bloqueado.');
+  } catch(e) { showToast('❌ Erro.'); }
+};
+
+window.abrirModalVencimento = function(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('vencId').value = id;
+  document.getElementById('vencNomeCliente').textContent = '👤 ' + c.nome;
+  document.getElementById('vencAtual').textContent = 'Vencimento atual: ' + formatDate(c.vencimento);
+  document.getElementById('vencNovaData').value = c.vencimento || '';
+  document.getElementById('modalVencimento').classList.add('open');
+};
+
+window.salvarVencimento = async function() {
+  const id = document.getElementById('vencId').value;
+  const novaData = document.getElementById('vencNovaData').value;
+  if (!novaData) { showToast('❌ Selecione uma data'); return; }
+  try {
+    await set(ref(db, 'iptv/clientes/' + id + '/vencimento'), novaData);
+    fecharModal('modalVencimento');
+    showToast('✅ Vencimento atualizado para ' + formatDate(novaData));
+  } catch(e) { showToast('❌ Erro ao salvar.'); }
+};
+
+window.renovar1Mes = async function(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  const base = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : new Date();
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  if (base < hoje_) base.setTime(hoje_.getTime());
+  base.setMonth(base.getMonth() + 1);
+  const novaData = base.toISOString().split('T')[0];
+  try {
+    await set(ref(db, 'iptv/clientes/' + id + '/vencimento'), novaData);
+    showToast('✅ ' + c.nome + ' renovado até ' + formatDate(novaData));
+  } catch(e) { showToast('❌ Erro ao renovar.'); }
+};
+
+window.abrirModalRenovar = function(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('renId').value = id;
+  document.getElementById('renNomeCliente').textContent = '👤 ' + c.nome;
+  document.getElementById('renVencAtual').textContent = 'Vencimento atual: ' + formatDate(c.vencimento);
+  document.getElementById('renMeses').value = '1';
+  document.getElementById('modalRenovar').classList.add('open');
+};
+
+window.confirmarRenovar = async function() {
+  const id = document.getElementById('renId').value;
+  const meses = parseInt(document.getElementById('renMeses').value);
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  const base = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : new Date();
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  if (base < hoje_) base.setTime(hoje_.getTime());
+  base.setMonth(base.getMonth() + meses);
+  const novaData = base.toISOString().split('T')[0];
+  try {
+    await set(ref(db, 'iptv/clientes/' + id + '/vencimento'), novaData);
+    fecharModal('modalRenovar');
+    showToast('✅ ' + c.nome + ' renovado por ' + meses + ' mes(es) ate ' + formatDate(novaData));
+  } catch(e) { showToast('❌ Erro ao renovar.'); }
 };
 
 // ===== REVENDEDORES =====
