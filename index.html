@@ -90,9 +90,9 @@ tr:last-child td{border-bottom:none}
 
 /* BOTÕES ÍCONE NA LINHA */
 .btn-icon{
-  width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;
+  width:30px;height:30px;border-radius:7px;border:none;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;
-  font-size:1rem;transition:all .2s;flex-shrink:0;
+  font-size:.85rem;transition:all .2s;flex-shrink:0;
 }
 .btn-icon:hover{transform:scale(1.12);box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .bi-edit{background:#2563eb;color:#fff}
@@ -185,8 +185,8 @@ tr:last-child td{border-bottom:none}
 
   table{font-size:.78rem}
   th,td{padding:.5rem .4rem}
-  .actions-cell{flex-wrap:wrap;gap:.25rem}
-  .btn-icon{width:30px;height:30px;font-size:.85rem}
+  .actions-cell{flex-wrap:wrap;gap:.2rem}
+  .btn-icon{width:26px;height:26px;font-size:.7rem;border-radius:5px}
   .card{padding:1rem}
   .card-header{flex-wrap:wrap;gap:.5rem}
   .page-header h2{font-size:1.2rem}
@@ -299,7 +299,10 @@ tr:last-child td{border-bottom:none}
           <button class="btn-add" onclick="abrirModalCliente()">+ Novo Cliente</button>
         </div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem">
-          <input type="text" id="buscaCliente" placeholder="🔍 Buscar por nome..." style="flex:1;min-width:160px;padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem" oninput="renderClientes()">
+          <div style="display:flex;flex:1;min-width:160px;border:1.5px solid #ddd;border-radius:8px;overflow:hidden;background:#fff">
+            <input type="text" id="buscaCliente" placeholder="Buscar por nome..." style="flex:1;padding:.6rem 1rem;border:none;font-size:.9rem;outline:none" oninput="renderClientes()">
+            <button onclick="renderClientes()" style="padding:.6rem .9rem;background:#2d7a4f;border:none;cursor:pointer;color:#fff;font-size:1rem">🔍</button>
+          </div>
           <select id="filtroStatus" style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer" onchange="renderClientes()">
             <option value="">Todos</option>
             <option value="ativo">✅ Ativo</option>
@@ -799,9 +802,7 @@ window.editarCliente = function(id) {
   document.getElementById('cValor').value = c.valor || '';
   document.getElementById('cVenc').value = c.vencimento || '';
   document.getElementById('cObs').value = c.obs || '';
-  document.getElementById('modalClienteTitulo').textContent = '✏️ Editar Cliente — ' + c.nome;
-  // Mostra botão renovar só quando editando
-  document.getElementById('wrapRenovar').style.display = c.plano ? 'block' : 'none';
+  document.getElementById('modalClienteTitulo').textContent = '✏️ Editar: ' + c.nome;
   document.getElementById('modalCliente').classList.add('open');
 };
 
