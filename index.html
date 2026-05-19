@@ -7,9 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>StreamPanel Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:100vh}
+body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
 .hidden{display:none!important}
 
 /* LOGIN */
@@ -31,7 +32,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:
 
 /* LAYOUT PRINCIPAL */
 #appLayout{display:flex;min-height:100vh}
-.sidebar{width:240px;background:#1a3a2a;color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;left:0;top:0;z-index:100;overflow-y:auto}
+.sidebar{width:240px;background:#111827;color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;left:0;top:0;z-index:100;overflow-y:auto;border-right:1px solid rgba(255,255,255,.06)}
 .sidebar-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,.1)}
 .sidebar-logo h2{font-size:1.1rem;font-weight:700;letter-spacing:.5px}
 .sidebar-user{padding:.75rem 1.25rem;font-size:.78rem;color:rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.1)}
@@ -43,35 +44,35 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;min-height:
 .nav-section{padding:.5rem 1.25rem .25rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4)}
 .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1.25rem;cursor:pointer;color:rgba(255,255,255,.75);font-size:.9rem;transition:all .2s;border-left:3px solid transparent}
 .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#4ade80}
+.nav-item.active{background:linear-gradient(90deg,rgba(74,222,128,.15),transparent);color:#fff;border-left-color:#4ade80}
 .nav-icon{font-size:1.1rem;width:20px;text-align:center}
 .sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.1)}
 .btn-sair{width:100%;display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:#f87171;cursor:pointer;font-size:.9rem;font-weight:600;transition:all .2s}
 .btn-sair:hover{background:rgba(239,68,68,.25);color:#fca5a5}
 
-.main-content{margin-left:240px;flex:1;padding:1.5rem;min-height:100vh}
+.main-content{margin-left:240px;flex:1;padding:1.5rem;min-height:100vh;background:#0f1117}
 .page-header{margin-bottom:1.5rem}
-.page-header h2{font-size:1.4rem;font-weight:700;color:#1a3a2a}
-.page-header p{color:#666;font-size:.875rem;margin-top:.25rem}
+.page-header h2{font-size:1.4rem;font-weight:700;color:#f1f5f9}
+.page-header p{color:#64748b;font-size:.875rem;margin-top:.25rem}
 
 /* CARDS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
-.stat-card{background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e7eb}
-.stat-label{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:.5rem}
-.stat-value{font-size:1.8rem;font-weight:700;color:#1a3a2a}
+.stat-card{background:#1e2433;border-radius:14px;padding:1.25rem;border:1px solid rgba(255,255,255,.07);box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.stat-label{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:.5rem}
+.stat-value{font-size:1.8rem;font-weight:700;color:#f1f5f9}
 .stat-value.green{color:#16a34a}
 .stat-value.red{color:#dc2626}
 .stat-value.amber{color:#d97706}
 
 /* TABELAS */
-.card{background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e7eb;margin-bottom:1.25rem}
+.card{background:#1e2433;border-radius:14px;padding:1.25rem;border:1px solid rgba(255,255,255,.07);margin-bottom:1.25rem;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-.card-header h3{font-size:1rem;font-weight:700;color:#1a3a2a}
+.card-header h3{font-size:1rem;font-weight:700;color:#f1f5f9}
 .btn-add{background:#2d7a4f;color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-size:.875rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:background .2s}
 .btn-add:hover{background:#1a5c38}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:.6rem .75rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #f3f4f6}
-td{padding:.75rem;font-size:.875rem;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+th{text-align:left;padding:.6rem .75rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;border-bottom:1px solid rgba(255,255,255,.07)}
+td{padding:.75rem;font-size:.875rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;color:#cbd5e1}
 tr:last-child td{border-bottom:none}
 .badge{display:inline-block;padding:.2rem .6rem;border-radius:50px;font-size:.72rem;font-weight:700}
 .badge-green{background:#dcfce7;color:#16a34a}
@@ -102,58 +103,45 @@ tr:last-child td{border-bottom:none}
 .bi-block{background:#d97706;color:#fff}
 .bi-unblock{background:#16a34a;color:#fff}
 .bi-del{background:#dc2626;color:#fff}
+.bi-whats{background:#25D366;color:#fff}
 /* Grade 3x2 no mobile */
 .actions-grid{display:grid;grid-template-columns:repeat(3,32px);gap:3px}
 
-/* ===================== MODAL CORRIGIDO ===================== */
+/* ===================== MODAL TELA CHEIA ===================== */
 .modal-overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  z-index:1000;
-  align-items:center;
-  justify-content:center;
-  padding:1rem;
-  overflow-y:auto;
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:#f0f2f5;overflow-y:auto;
+  flex-direction:column;
 }
 .modal-overlay.open{display:flex}
 .modal{
-  background:#fff;
-  border-radius:16px;
-  padding:1.5rem;
-  width:100%;
-  max-width:480px;
-  max-height:88vh;
-  overflow-y:auto;
-  position:relative;
-  margin:auto;
-  box-shadow:0 25px 60px rgba(0,0,0,.25);
+  background:#fff;width:100%;min-height:100vh;
+  padding:0;display:flex;flex-direction:column;
 }
-.modal h3{font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;color:#1a3a2a}
-.modal .form-group input,.modal .form-group select,.modal .form-group textarea{width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem}
+.modal-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.25rem;background:#1a3a2a;color:#fff;
+  position:sticky;top:0;z-index:10;
+}
+.modal-topbar h3{font-size:1rem;font-weight:700;color:#fff;margin:0}
+.modal-topbar .btn-topbar-cancel{
+  background:rgba(255,255,255,.15);border:none;color:#fff;
+  border-radius:8px;padding:.4rem .85rem;font-size:.85rem;font-weight:600;cursor:pointer;
+}
+.modal-topbar .btn-topbar-save{
+  background:#4ade80;border:none;color:#1a3a2a;
+  border-radius:8px;padding:.4rem .85rem;font-size:.85rem;font-weight:700;cursor:pointer;
+}
+.modal-body{padding:1rem 1.25rem;flex:1}
+.modal h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:#1a3a2a}
+.modal-body .form-group{margin-bottom:.9rem}
+.modal .form-group input,.modal .form-group select,.modal .form-group textarea{
+  width:100%;padding:.7rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;
+}
 .modal .form-group input:focus,.modal .form-group select:focus{outline:none;border-color:#2d7a4f}
-.modal-footer{display:flex;gap:.75rem;margin-top:1.25rem}
+.modal-footer{display:none}
 .btn-cancel{flex:1;padding:.7rem;background:#f3f4f6;border:none;border-radius:8px;font-weight:600;cursor:pointer}
 .btn-save{flex:2;padding:.7rem;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}
-
-/* Botão renovar no modal */
-.btn-renovar{
-  width:100%;
-  padding:.6rem;
-  background:#f0fdf4;
-  border:1.5px dashed #16a34a;
-  border-radius:8px;
-  color:#16a34a;
-  font-size:.85rem;
-  font-weight:600;
-  cursor:pointer;
-  margin-bottom:.5rem;
-  transition:all .2s;
-}
-.btn-renovar:hover{background:#dcfce7}
-
-/* Separador de seção no modal */
 .modal-section{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#aaa;margin:1rem 0 .5rem;border-top:1px solid #f3f4f6;padding-top:.75rem}
 /* ==========================================================*/
 
@@ -183,6 +171,7 @@ tr:last-child td{border-bottom:none}
     max-height:85vh;
     padding:1.25rem 1rem;
     margin:auto;
+    background:#1e2433;
   }
 
   table{font-size:.78rem}
@@ -192,10 +181,25 @@ tr:last-child td{border-bottom:none}
   .card{padding:1rem}
   .card-header{flex-wrap:wrap;gap:.5rem}
   .page-header h2{font-size:1.2rem}
+  /* CARDS MOBILE em vez de tabela */
+  .table-wrapper{display:none}
+  .cards-mobile{display:flex;flex-direction:column;gap:.65rem}
+  .client-card{background:#1e2433;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+  .client-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem}
+  .client-card-name{font-weight:700;font-size:.95rem;color:#f1f5f9}
+  .client-card-obs{font-size:.72rem;color:#64748b;margin-top:.1rem}
+  .client-card-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+  .client-chip{background:rgba(255,255,255,.06);border-radius:6px;padding:.2rem .5rem;font-size:.72rem;color:#94a3b8}
+  .client-chip strong{color:#e2e8f0}
+  .client-card-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem;margin-top:.6rem;border-top:1px solid rgba(255,255,255,.06);padding-top:.6rem}
+  .client-card-actions .btn-icon{width:100%;border-radius:8px}
 }
+@media(min-width:769px){
+  .cards-mobile{display:none}
+  .table-wrapper{display:block}
 
 /* ALERTAS DASHBOARD */
-.alert-box{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:1rem;margin-bottom:1rem}
+.alert-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:1rem;margin-bottom:1rem}
 .alert-box h4{color:#92400e;font-size:.85rem;font-weight:700;margin-bottom:.5rem}
 .alert-box ul{list-style:none;font-size:.82rem;color:#78350f}
 .alert-box ul li{padding:.2rem 0}
@@ -285,6 +289,17 @@ tr:last-child td{border-bottom:none}
         <div class="stat-card"><div class="stat-label">Receita</div><div class="stat-value amber" id="stReceita">R$ 0</div></div>
       </div>
       <div id="alertVenc"></div>
+      <div id="btnAvisarWrap" style="display:none;margin-bottom:1rem">
+        <button onclick="avisarTodosVencendo()" style="width:100%;padding:.75rem;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">
+          📱 Avisar todos que vencem em 7 dias via WhatsApp
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>📊 Receita dos Últimos 6 Meses</h3>
+        </div>
+        <canvas id="chartReceita" height="120"></canvas>
+      </div>
       <div class="card">
         <div class="card-header"><h3>📋 Clientes Recentes</h3></div>
         <table><thead><tr><th>Nome</th><th>Plano</th><th>Vencimento</th><th>Status</th></tr></thead>
@@ -312,8 +327,9 @@ tr:last-child td{border-bottom:none}
             <option value="vence7">⚠️ Vence em 7 dias</option>
           </select>
         </div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Servidor</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+        <div class="table-wrapper" style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Servidor</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody id="tblClientes"></tbody></table></div>
+        <div class="cards-mobile" id="cardsMobileClientes"></div>
       </div>
     </div>
 
@@ -379,49 +395,51 @@ tr:last-child td{border-bottom:none}
 
 <!-- MODAIS -->
 
-<!-- Modal: Novo/Editar Cliente -->
+<!-- Modal: Novo/Editar Cliente (TELA CHEIA) -->
 <div class="modal-overlay" id="modalCliente">
   <div class="modal">
-    <h3 id="modalClienteTitulo">Novo Cliente</h3>
-    <input type="hidden" id="cId">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
-      <div class="form-group" style="margin:0"><label>Nome *</label><input type="text" id="cNome" placeholder="Nome do cliente"></div>
-      <div class="form-group" style="margin:0"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01" placeholder="0,00"></div>
+    <div class="modal-topbar">
+      <button class="btn-topbar-cancel" onclick="fecharModal('modalCliente')">✕ Cancelar</button>
+      <h3 id="modalClienteTitulo">Novo Cliente</h3>
+      <button class="btn-topbar-save" onclick="salvarCliente()">✓ Salvar</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.65rem">
-      <div class="form-group" style="margin:0"><label>Usuário IPTV</label><input type="text" id="cUser" placeholder="login"></div>
-      <div class="form-group" style="margin:0"><label>Senha IPTV</label><input type="text" id="cPass" placeholder="senha"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-top:.65rem">
-      <div class="form-group" style="margin:0"><label>Servidor</label>
-        <select id="cServidor" style="width:100%;padding:.6rem .8rem;border:1.5px solid #ddd;border-radius:8px;font-size:.88rem;background:#fff">
-          <option value="">Selecione...</option>
-        </select>
+    <div class="modal-body">
+      <input type="hidden" id="cId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group"><label>Nome *</label><input type="text" id="cNome" placeholder="Nome do cliente"></div>
+        <div class="form-group"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01" placeholder="0,00"></div>
       </div>
-      <div class="form-group" style="margin:0"><label>Plano</label>
-        <select id="cPlano" style="width:100%;padding:.6rem .8rem;border:1.5px solid #ddd;border-radius:8px;font-size:.88rem">
-          <option value="">Selecione...</option>
-          <option value="1 mês">1 mês</option><option value="2 meses">2 meses</option>
-          <option value="3 meses">3 meses</option><option value="4 meses">4 meses</option>
-          <option value="5 meses">5 meses</option><option value="6 meses">6 meses</option>
-          <option value="7 meses">7 meses</option><option value="8 meses">8 meses</option>
-          <option value="9 meses">9 meses</option><option value="10 meses">10 meses</option>
-          <option value="11 meses">11 meses</option><option value="12 meses">12 meses</option>
-        </select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group"><label>Usuário IPTV</label><input type="text" id="cUser" placeholder="login"></div>
+        <div class="form-group"><label>Senha IPTV</label><input type="text" id="cPass" placeholder="senha"></div>
       </div>
-    </div>
-    <div class="form-group" style="margin-top:.65rem"><label>Vencimento</label><input type="date" id="cVenc"></div>
-    <div class="form-group"><label>Observações / Informações</label><input type="text" id="cObs" placeholder="Informações adicionais do cliente"></div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal('modalCliente')">Cancelar</button>
-      <button class="btn-save" onclick="salvarCliente()">Salvar</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group"><label>Servidor</label>
+          <select id="cServidor" style="width:100%;padding:.7rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;background:#fff">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Plano</label>
+          <select id="cPlano" style="width:100%;padding:.7rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem">
+            <option value="">Selecione...</option>
+            <option value="1 mês">1 mês</option><option value="2 meses">2 meses</option>
+            <option value="3 meses">3 meses</option><option value="4 meses">4 meses</option>
+            <option value="5 meses">5 meses</option><option value="6 meses">6 meses</option>
+            <option value="7 meses">7 meses</option><option value="8 meses">8 meses</option>
+            <option value="9 meses">9 meses</option><option value="10 meses">10 meses</option>
+            <option value="11 meses">11 meses</option><option value="12 meses">12 meses</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Vencimento</label><input type="date" id="cVenc"></div>
+      <div class="form-group"><label>Observações / Informações</label><input type="text" id="cObs" placeholder="Anotações sobre o cliente"></div>
     </div>
   </div>
 </div>
 
 <!-- Modal: Alterar Vencimento -->
-<div class="modal-overlay" id="modalVencimento">
-  <div class="modal" style="max-width:320px">
+<div class="modal-overlay" id="modalVencimento" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
+  <div class="modal" style="max-width:340px;min-height:unset;border-radius:16px;padding:1.5rem">
     <h3>📅 Alterar Vencimento</h3>
     <input type="hidden" id="vencId">
     <p id="vencNomeCliente" style="font-size:.85rem;color:#555;font-weight:600;margin-bottom:.25rem"></p>
@@ -435,8 +453,8 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <!-- Modal: Renovar vários meses -->
-<div class="modal-overlay" id="modalRenovar">
-  <div class="modal" style="max-width:320px">
+<div class="modal-overlay" id="modalRenovar" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
+  <div class="modal" style="max-width:340px;min-height:unset;border-radius:16px;padding:1.5rem">
     <h3>🔄 Renovar Plano</h3>
     <input type="hidden" id="renId">
     <p id="renNomeCliente" style="font-size:.85rem;color:#555;font-weight:600;margin-bottom:.25rem"></p>
@@ -459,8 +477,8 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="modal-overlay" id="modalRevendedor">
-  <div class="modal">
+<div class="modal-overlay" id="modalRevendedor" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
+  <div class="modal" style="max-width:460px;min-height:unset;border-radius:16px;padding:1.5rem">
     <h3 id="modalRevTitulo">Novo Revendedor</h3>
     <input type="hidden" id="rId">
     <div class="form-group"><label>Nome *</label><input type="text" id="rNome"></div>
@@ -475,8 +493,8 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="modal-overlay" id="modalPlano">
-  <div class="modal">
+<div class="modal-overlay" id="modalPlano" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
+  <div class="modal" style="max-width:460px;min-height:unset;border-radius:16px;padding:1.5rem">
     <h3 id="modalPlanoTitulo">Novo Plano</h3>
     <input type="hidden" id="pId">
     <div class="form-group"><label>Nome *</label><input type="text" id="pNome"></div>
@@ -490,8 +508,8 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="modal-overlay" id="modalServidor">
-  <div class="modal">
+<div class="modal-overlay" id="modalServidor" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
+  <div class="modal" style="max-width:460px;min-height:unset;border-radius:16px;padding:1.5rem">
     <h3 id="modalServidorTitulo">Novo Servidor</h3>
     <input type="hidden" id="srvId">
     <div class="form-group"><label>Nome do Servidor *</label><input type="text" id="srvNome" placeholder="Ex: Servidor Alpha"></div>
@@ -729,6 +747,13 @@ function renderDashboard() {
     return `<tr><td>${c.nome}</td><td>${c.plano || '—'}</td><td>${formatDate(c.vencimento)}</td><td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td></tr>`;
   }).join('') : '<tr><td colspan="4" class="empty-state">Nenhum cliente ainda</td></tr>';
   document.getElementById('dashGreet').textContent = 'Bem-vindo, ' + (currentUser?.email || '');
+  renderGraficoReceita();
+  // Mostrar botão avisar se tem vencendo
+  const hoje__ = new Date(); hoje__.setHours(0,0,0,0);
+  const em7_ = new Date(hoje__); em7_.setDate(em7_.getDate()+7);
+  const temVenc = clientes.some(cl => { if(!cl.vencimento) return false; const v=new Date(cl.vencimento+'T00:00:00'); return v>=hoje__ && v<=em7_; });
+  const btnWrap = document.getElementById('btnAvisarWrap');
+  if(btnWrap) btnWrap.style.display = temVenc ? 'block' : 'none';
 }
 
 // ===== CLIENTES =====
@@ -752,10 +777,7 @@ window.renderClientes = function() {
       else if (diasRestantes <= 7) diasBadge = `<span style="color:#d97706;font-weight:700">${diasRestantes}d</span>`;
       else diasBadge = `<span style="color:#16a34a;font-weight:600">${diasRestantes}d</span>`;
     }
-    const bloqIcon = c.bloqueado
-      ? `<button class="btn-icon bi-unblock" title="Desbloquear" onclick="toggleBloqueioCliente('${c.id}',true)">✅</button>`
-      : `<button class="btn-icon bi-block" title="Bloquear" onclick="toggleBloqueioCliente('${c.id}',false)">🚫</button>`;
-    return `<tr style="${c.bloqueado ? 'opacity:.6;background:#fff5f5' : ''}">
+    return `<tr>
       <td><strong>${c.nome}</strong>${c.obs ? '<br><span style="font-size:.72rem;color:#888">' + c.obs + '</span>' : ''}</td>
       <td><span style="font-family:monospace;font-size:.82rem">${c.usuario || '—'}</span><br><span style="font-size:.72rem;color:#aaa">${c.senha || ''}</span></td>
       <td>${c.servidor || '—'}</td>
@@ -768,11 +790,11 @@ window.renderClientes = function() {
         <button class="btn-icon bi-venc" title="Alterar vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
         <button class="btn-icon bi-ren1" title="Renovar 1 mês" onclick="renovar1Mes('${c.id}')">+1</button>
         <button class="btn-icon bi-renN" title="Renovar vários meses" onclick="abrirModalRenovar('${c.id}')">🔄</button>
-        ${bloqIcon}
         <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
       </div></td>
     </tr>`;
   }).join('') : '<tr><td colspan="9" class="empty-state">Nenhum cliente encontrado</td></tr>';
+  renderCardsMobile();
 };
 
 window.abrirModalCliente = function() {
@@ -1269,6 +1291,162 @@ function formatDate(d) {
   if (!d) return '—';
   const [y,m,day] = d.split('-');
   return `${day}/${m}/${y}`;
+}
+
+// ===== WHATSAPP INDIVIDUAL =====
+window.whatsCliente = function(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
+  const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
+  let msg = '';
+  if (dias === null) {
+    msg = `Olá ${c.nome}! Tudo bem? Passando para falar sobre seu plano IPTV. Qualquer dúvida estou à disposição! 😊`;
+  } else if (dias < 0) {
+    msg = `Olá ${c.nome}! Seu plano IPTV venceu há ${Math.abs(dias)} dia(s). Renove agora para continuar assistindo! Entre em contato comigo. 📺`;
+  } else if (dias === 0) {
+    msg = `Olá ${c.nome}! Seu plano IPTV vence HOJE! Renove agora para não perder o acesso. 📺`;
+  } else if (dias <= 7) {
+    msg = `Olá ${c.nome}! Seu plano IPTV vence em ${dias} dia(s) (${formatDate(c.vencimento)}). Renove com antecedência para não perder o acesso! 😊📺`;
+  } else {
+    msg = `Olá ${c.nome}! Tudo bem? Passando para falar sobre seu plano IPTV que vence em ${formatDate(c.vencimento)}. Qualquer dúvida é só chamar! 😊`;
+  }
+  const whats = c.obs?.match(/\d{10,11}/) ? c.obs.match(/\d{10,11}/)[0] : '';
+  const url = whats
+    ? `https://wa.me/55${whats}?text=${encodeURIComponent(msg)}`
+    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+};
+
+// ===== WHATSAPP EM MASSA =====
+window.avisarTodosVencendo = function() {
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
+  const vencendo = clientes.filter(c => {
+    if (!c.vencimento) return false;
+    const v = new Date(c.vencimento + 'T00:00:00');
+    return v >= hoje_ && v <= em7;
+  });
+  if (!vencendo.length) { showToast('Nenhum cliente vencendo nos próximos 7 dias'); return; }
+  let delay = 0;
+  vencendo.forEach((c, i) => {
+    setTimeout(() => {
+      whatsCliente(c.id);
+    }, delay);
+    delay += 1500;
+  });
+  showToast(`📱 Abrindo WhatsApp para ${vencendo.length} cliente(s)...`);
+};
+
+// ===== CARDS MOBILE =====
+function renderCardsMobile() {
+  const busca = (document.getElementById('buscaCliente')?.value || '').toLowerCase();
+  const filtro = document.getElementById('filtroStatus')?.value || '';
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
+  let lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
+  if (filtro === 'ativo') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_; });
+  else if (filtro === 'vencido') lista = lista.filter(c => { if (!c.vencimento) return true; const v = new Date(c.vencimento + 'T00:00:00'); return v < hoje_; });
+  else if (filtro === 'vence7') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_ && v <= em7; });
+  const container = document.getElementById('cardsMobileClientes');
+  if (!container) return;
+  if (!lista.length) { container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b">Nenhum cliente encontrado</div>'; return; }
+  container.innerHTML = lista.map(c => {
+    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
+    const ativo = v && v >= hoje_;
+    const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
+    let diasTxt = '<span style="color:#64748b">Sem data</span>';
+    if (dias !== null) {
+      if (dias < 0) diasTxt = `<span style="color:#ef4444;font-weight:700">${Math.abs(dias)}d vencido</span>`;
+      else if (dias === 0) diasTxt = `<span style="color:#f59e0b;font-weight:700">Vence hoje!</span>`;
+      else if (dias <= 7) diasTxt = `<span style="color:#f59e0b;font-weight:700">${dias}d</span>`;
+      else diasTxt = `<span style="color:#4ade80;font-weight:600">${dias}d</span>`;
+    }
+    return `<div class="client-card">
+      <div class="client-card-top">
+        <div>
+          <div class="client-card-name">${c.nome}</div>
+          ${c.obs ? `<div class="client-card-obs">${c.obs}</div>` : ''}
+        </div>
+        <span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span>
+      </div>
+      <div class="client-card-row">
+        <div class="client-chip">👤 <strong>${c.usuario || '—'}</strong></div>
+        <div class="client-chip">🔑 <strong>${c.senha || '—'}</strong></div>
+        <div class="client-chip">🖥️ <strong>${c.servidor || '—'}</strong></div>
+        <div class="client-chip">📋 <strong>${c.plano || '—'}</strong></div>
+        <div class="client-chip">💰 <strong>R$ ${parseFloat(c.valor||0).toFixed(2).replace('.',',')}</strong></div>
+        <div class="client-chip">📅 <strong>${formatDate(c.vencimento)}</strong> ${diasTxt}</div>
+      </div>
+      <div class="client-card-actions">
+        <button class="btn-icon bi-edit" title="Editar" onclick="editarCliente('${c.id}')">✏️</button>
+        <button class="btn-icon bi-venc" title="Vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
+        <button class="btn-icon bi-ren1" title="+1 mês" onclick="renovar1Mes('${c.id}')">+1</button>
+        <button class="btn-icon bi-renN" title="Renovar" onclick="abrirModalRenovar('${c.id}')">🔄</button>
+        <button class="btn-icon bi-whats" title="WhatsApp" onclick="whatsCliente('${c.id}')">📱</button>
+        <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== GRÁFICO DE RECEITA =====
+let chartInstance = null;
+function renderGraficoReceita() {
+  const canvas = document.getElementById('chartReceita');
+  if (!canvas) return;
+  const meses = [];
+  const receitas = [];
+  const hoje_ = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(hoje_.getFullYear(), hoje_.getMonth() - i, 1);
+    const ano = d.getFullYear();
+    const mes = d.getMonth();
+    const nomeMes = d.toLocaleDateString('pt-BR', {month:'short'}).replace('.','');
+    meses.push(nomeMes + '/' + String(ano).slice(2));
+    // Soma clientes com vencimento nesse mês
+    const receita = clientes
+      .filter(c => {
+        if (!c.vencimento) return false;
+        const [y,m] = c.vencimento.split('-').map(Number);
+        return y === ano && (m-1) === mes;
+      })
+      .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+    receitas.push(receita);
+  }
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: meses,
+      datasets: [{
+        label: 'Receita (R$)',
+        data: receitas,
+        backgroundColor: 'rgba(74,222,128,.25)',
+        borderColor: '#4ade80',
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => 'R$ ' + ctx.parsed.y.toFixed(2).replace('.',',')
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#64748b', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#64748b', font: { size: 11 },
+          callback: v => 'R$ ' + v.toFixed(0) } }
+      }
+    }
+  });
 }
 </script>
 </body>
