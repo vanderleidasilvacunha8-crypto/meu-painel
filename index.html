@@ -236,17 +236,17 @@ tr:last-child td{border-bottom:none}
       <p>Painel de Gestão IPTV</p>
     </div>
     <div class="form-group">
-      <label>E-mail</label>
-      <input type="email" id="loginEmail" placeholder="seu@email.com">
+      <label>Usuário</label>
+      <input type="text" id="loginEmail" placeholder="Digite seu usuário">
     </div>
     <div class="form-group">
       <label>Senha</label>
       <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
     </div>
     <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
-    <div id="loginError" class="error-msg">E-mail ou senha incorretos.</div>
+    <div id="loginError" class="error-msg">Usuário ou senha incorretos.</div>
     <div class="login-footer">
-      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha</button><br>
+      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha (suporte)</button><br>
       <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro." target="_blank">📱 Falar no WhatsApp</a>
     </div>
   </div>
@@ -506,7 +506,7 @@ tr:last-child td{border-bottom:none}
     <h3 id="modalRevTitulo">Novo Revendedor</h3>
     <input type="hidden" id="rId">
     <div class="form-group"><label>Nome *</label><input type="text" id="rNome"></div>
-    <div class="form-group"><label>E-mail *</label><input type="email" id="rEmail"></div>
+    <div class="form-group"><label>Usuário *</label><input type="text" id="rEmail" placeholder="Ex: joao (sem @)"></div>
     <div class="form-group"><label>Senha (para login) *</label><input type="password" id="rSenha" placeholder="Mínimo 6 caracteres"></div>
     <div class="form-group"><label>Créditos</label><input type="number" id="rCreditos" value="0"></div>
     <div class="form-group"><label>WhatsApp</label><input type="text" id="rWhats" placeholder="(31) 99999-9999"></div>
@@ -605,14 +605,15 @@ window.fazerLogin = async function() {
       }
     }
   } catch(e) {
-    errEl.textContent = 'E-mail ou senha incorretos.';
+    errEl.textContent = 'Usuário ou senha incorretos.';
     errEl.style.display = 'block';
   }
 };
 
 window.recuperarSenha = async function() {
-  const email = document.getElementById('loginEmail').value.trim();
-  if (!email) { showToast('Digite seu e-mail primeiro.'); return; }
+  const inputUsuario = document.getElementById('loginEmail').value.trim();
+  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
+  if (!inputUsuario) { showToast('Digite seu usuário primeiro.'); return; }
   try {
     await sendPasswordResetEmail(auth, email);
     showToast('✅ E-mail de recuperação enviado!');
