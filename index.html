@@ -346,6 +346,9 @@ tr:last-child td{border-bottom:none}
             <option value="vencido">❌ Vencido</option>
             <option value="vence7">⚠️ Vence em 7 dias</option>
           </select>
+          <select id="filtroServidor" style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer" onchange="renderClientes()">
+            <option value="">🖥️ Todos servidores</option>
+          </select>
         </div>
         <div class="table-wrapper" style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Servidor</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody id="tblClientes"></tbody></table></div>
@@ -435,7 +438,7 @@ tr:last-child td{border-bottom:none}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
         <div class="form-group"><label>Servidor</label>
-          <select id="cServidor" style="width:100%;padding:.7rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;background:#fff">
+          <select id="cServidor">
             <option value="">Selecione...</option>
           </select>
         </div>
@@ -781,12 +784,14 @@ function renderDashboard() {
 window.renderClientes = function() {
   const busca = (document.getElementById('buscaCliente')?.value || '').toLowerCase();
   const filtro = document.getElementById('filtroStatus')?.value || '';
+  const filtroSrv = document.getElementById('filtroServidor')?.value || '';
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
   const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
   let lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
   if (filtro === 'ativo') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_; });
   else if (filtro === 'vencido') lista = lista.filter(c => { if (!c.vencimento) return true; const v = new Date(c.vencimento + 'T00:00:00'); return v < hoje_; });
   else if (filtro === 'vence7') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_ && v <= em7; });
+  if (filtroSrv) lista = lista.filter(c => (c.servidor || '').toLowerCase() === filtroSrv.toLowerCase());
   document.getElementById('tblClientes').innerHTML = lista.length ? lista.map(c => {
     const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
     const ativo = v && v >= hoje_;
@@ -1158,6 +1163,16 @@ function popularSelectServidor() {
   if (val) sel.value = val;
 }
 
+function popularFiltroServidor() {
+  const sel = document.getElementById('filtroServidor');
+  if (!sel) return;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">🖥️ Todos servidores</option>' +
+    servidores.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+  if (val) sel.value = val;
+  renderClientes();
+}
+
 function popularSelectRevendedor() {}
 
 window.fecharModal = function(id) { document.getElementById(id).classList.remove('open'); };
@@ -1183,7 +1198,7 @@ function iniciarListenerServidores() {
   unsubServ = onValue(ref(db, path), snap => {
     servidores = [];
     if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] })); }
-    renderServidores(); popularSelectServidor();
+    renderServidores(); popularSelectServidor(); popularFiltroServidor();
   });
 }
 
@@ -1369,12 +1384,14 @@ window.avisarTodosVencendo = function() {
 function renderCardsMobile() {
   const busca = (document.getElementById('buscaCliente')?.value || '').toLowerCase();
   const filtro = document.getElementById('filtroStatus')?.value || '';
+  const filtroSrv = document.getElementById('filtroServidor')?.value || '';
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
   const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
   let lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
   if (filtro === 'ativo') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_; });
   else if (filtro === 'vencido') lista = lista.filter(c => { if (!c.vencimento) return true; const v = new Date(c.vencimento + 'T00:00:00'); return v < hoje_; });
   else if (filtro === 'vence7') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_ && v <= em7; });
+  if (filtroSrv) lista = lista.filter(c => (c.servidor || '').toLowerCase() === filtroSrv.toLowerCase());
   const container = document.getElementById('cardsMobileClientes');
   if (!container) return;
   if (!lista.length) { container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b">Nenhum cliente encontrado</div>'; return; }
@@ -1478,3 +1495,4 @@ function renderGraficoReceita() {
 </script>
 </body>
 </html>
+
