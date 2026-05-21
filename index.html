@@ -236,8 +236,8 @@ tr:last-child td{border-bottom:none}
       <p>Painel de Gestão IPTV</p>
     </div>
     <div class="form-group">
-      <label>Usuário</label>
-      <input type="text" id="loginEmail" placeholder="Digite seu usuário">
+      <label>E-mail</label>
+      <input type="email" id="loginEmail" placeholder="seu@email.com">
     </div>
     <div class="form-group">
       <label>Senha</label>
@@ -245,14 +245,9 @@ tr:last-child td{border-bottom:none}
     </div>
     <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
     <div id="loginError" class="error-msg">E-mail ou senha incorretos.</div>
-    <div style="background:#f0fdf4;border-radius:10px;padding:1rem;margin:1rem 0;text-align:center;border:1px solid #bbf7d0">
-      <div style="font-size:1rem;font-weight:700;color:#1a3a2a;margin-bottom:.35rem">🚀 Bem-vindo à nova tecnologia de gestão IPTV!</div>
-      <div style="font-size:.82rem;color:#15803d;line-height:1.5">Gerencie seus clientes de forma simples, rápida e profissional. Faça um teste grátis agora mesmo!</div>
-      <div style="font-size:.78rem;color:#166534;margin-top:.5rem;font-weight:600">👇 Clique abaixo e solicite seu usuário e senha</div>
-    </div>
     <div class="login-footer">
-      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha (suporte)</button><br>
-      <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro.%20Pode%20me%20enviar%20meu%20usu%C3%A1rio%20e%20senha%3F" target="_blank">📱 Solicitar usuário e senha</a>
+      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha</button><br>
+      <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro." target="_blank">📱 Falar no WhatsApp</a>
     </div>
   </div>
 </div>
@@ -292,6 +287,9 @@ tr:last-child td{border-bottom:none}
       <div class="nav-item" onclick="showPage('relatorios')">
         <span class="nav-icon">📈</span> Relatórios
       </div>
+      <div class="nav-item admin-only hidden" onclick="fazerBackup()">
+        <span class="nav-icon">💾</span> Backup
+      </div>
     </nav>
     <div class="sidebar-footer">
       <button class="btn-sair" id="btnSair">
@@ -303,9 +301,14 @@ tr:last-child td{border-bottom:none}
   <main class="main-content">
     <!-- DASHBOARD -->
     <div id="pageDashboard" class="page">
-      <div class="page-header">
-        <h2>Dashboard</h2>
-        <p id="dashGreet"></p>
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.75rem">
+        <div>
+          <h2>Dashboard</h2>
+          <p id="dashGreet"></p>
+        </div>
+        <button id="btnBackup" onclick="fazerBackup()" class="admin-only hidden" style="display:none;align-items:center;gap:.5rem;padding:.6rem 1.1rem;background:#1e2433;border:1px solid rgba(74,222,128,.3);border-radius:10px;color:#4ade80;font-size:.85rem;font-weight:700;cursor:pointer">
+          💾 Fazer Backup
+        </button>
       </div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Total Clientes</div><div class="stat-value" id="stTotal">0</div></div>
@@ -369,7 +372,7 @@ tr:last-child td{border-bottom:none}
           <h3>🤝 Lista de Revendedores</h3>
           <button class="btn-add" onclick="abrirModalRevendedor()">+ Novo Revendedor</button>
         </div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário</th><th>Senha</th><th>Créditos</th><th>Clientes</th><th>Status</th><th>Ações</th></tr></thead>
+        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Créditos</th><th>Clientes</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody id="tblRevendedores"></tbody></table></div>
       </div>
     </div>
@@ -511,13 +514,8 @@ tr:last-child td{border-bottom:none}
     <h3 id="modalRevTitulo">Novo Revendedor</h3>
     <input type="hidden" id="rId">
     <div class="form-group"><label>Nome *</label><input type="text" id="rNome"></div>
-    <div class="form-group"><label>Usuário *</label><input type="text" id="rEmail" placeholder="Ex: joao (sem @)"></div>
-    <div class="form-group"><label>Senha (para login) *</label>
-      <div style="position:relative">
-        <input type="text" id="rSenha" placeholder="Mínimo 6 caracteres" style="width:100%;padding:.7rem 2.5rem .7rem .9rem;border:1.5px solid rgba(255,255,255,.15);border-radius:10px;font-size:.95rem;background:rgba(255,255,255,.07);color:#f1f5f9">
-        <span id="rSenhaHint" style="font-size:.72rem;color:#4ade80;margin-top:.25rem;display:block">✅ Senha visível — anote para enviar ao revendedor</span>
-      </div>
-    </div>
+    <div class="form-group"><label>E-mail *</label><input type="email" id="rEmail"></div>
+    <div class="form-group"><label>Senha (para login) *</label><input type="password" id="rSenha" placeholder="Mínimo 6 caracteres"></div>
     <div class="form-group"><label>Créditos</label><input type="number" id="rCreditos" value="0"></div>
     <div class="form-group"><label>WhatsApp</label><input type="text" id="rWhats" placeholder="(31) 99999-9999"></div>
     <div class="modal-footer">
@@ -590,12 +588,11 @@ let unsubPlanos = null;
 
 // ===== AUTH =====
 window.fazerLogin = async function() {
-  const inputUsuario = document.getElementById('loginEmail').value.trim();
-  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
+  const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPass').value;
   const errEl = document.getElementById('loginError');
   errEl.style.display = 'none';
-  if (!inputUsuario || !pass) { errEl.textContent = 'Usuário ou senha incorretos.'; errEl.style.display = 'block'; return; }
+  if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; errEl.style.display = 'block'; return; }
   try {
     const cred = await signInWithEmailAndPassword(auth, email, pass);
     const snapAdmin = await get(ref(db, 'iptv/admins/' + cred.user.uid));
@@ -622,9 +619,8 @@ window.fazerLogin = async function() {
 };
 
 window.recuperarSenha = async function() {
-  const inputUsuario = document.getElementById('loginEmail').value.trim();
-  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
-  if (!inputUsuario) { showToast('Digite seu usuário primeiro.'); return; }
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { showToast('Digite seu e-mail primeiro.'); return; }
   try {
     await sendPasswordResetEmail(auth, email);
     showToast('✅ E-mail de recuperação enviado!');
@@ -682,7 +678,7 @@ async function carregarPerfil(user) {
       isAdmin = false;
     }
   }
-  document.getElementById('sidebarEmail').textContent = user.email.replace('@painelvsc.com.br','');
+  document.getElementById('sidebarEmail').textContent = user.email;
   const badge = document.getElementById('sidebarBadge');
   badge.textContent = isAdmin ? 'Admin' : 'Revendedor';
   badge.className = 'badge-role ' + (isAdmin ? 'badge-admin' : 'badge-rev');
@@ -703,6 +699,10 @@ function mostrarApp() {
   document.getElementById('appLayout').classList.remove('hidden');
   iniciarListeners();
   showPage('dashboard');
+  if (isAdmin) {
+    const btn = document.getElementById('btnBackup');
+    if (btn) btn.style.display = 'flex';
+  }
 }
 
 // ===== LISTENERS =====
@@ -1008,23 +1008,22 @@ function renderRevendedores() {
     const nClientes = clientes.filter(c => c.revendedor === r.email).length;
     const bloqueado = r.bloqueado;
     return `<tr>
-      <td>${r.nome}</td><td>${r.email.replace('@painelvsc.com.br','')}</td><td>${r.senha ? '<span style="font-family:monospace;font-size:.8rem;background:rgba(74,222,128,.1);padding:.1rem .4rem;border-radius:4px;color:#4ade80">'+r.senha+'</span>' : '—'}</td><td>${r.creditos || 0}</td><td>${nClientes}</td>
+      <td>${r.nome}</td><td>${r.email}</td><td>${r.creditos || 0}</td><td>${nClientes}</td>
       <td><span class="badge ${bloqueado ? 'badge-red' : 'badge-green'}">${bloqueado ? 'Bloqueado' : 'Ativo'}</span></td>
       <td><div class="actions-cell">
         <button class="btn-sm btn-edit" onclick="editarRevendedor('${r.id}')">Editar</button>
-        <button class="btn-sm" style="background:#dcfce7;color:#16a34a" onclick="enviarCredenciais('${r.id}')">📱 Enviar</button>
         <button class="btn-sm ${bloqueado ? 'btn-unblock' : 'btn-block'}" onclick="toggleBloquear('${r.id}',${bloqueado})">${bloqueado ? 'Liberar' : 'Bloquear'}</button>
         <button class="btn-sm btn-del" onclick="deletarRevendedor('${r.id}')">Excluir</button>
       </div></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="7" class="empty-state">Nenhum revendedor cadastrado</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="empty-state">Nenhum revendedor cadastrado</td></tr>';
 }
 
 window.abrirModalRevendedor = function() {
   document.getElementById('rId').value = '';
   document.getElementById('rNome').value = '';
   document.getElementById('rEmail').value = '';
-  document.getElementById('rSenha').value = r.senha || '';
+  document.getElementById('rSenha').value = '';
   document.getElementById('rCreditos').value = '0';
   document.getElementById('rWhats').value = '';
   document.getElementById('modalRevTitulo').textContent = 'Novo Revendedor';
@@ -1037,7 +1036,7 @@ window.editarRevendedor = function(id) {
   document.getElementById('rId').value = id;
   document.getElementById('rNome').value = r.nome || '';
   document.getElementById('rEmail').value = r.email || '';
-  document.getElementById('rSenha').value = r.senha || '';
+  document.getElementById('rSenha').value = '';
   document.getElementById('rCreditos').value = r.creditos || 0;
   document.getElementById('rWhats').value = r.whatsapp || '';
   document.getElementById('modalRevTitulo').textContent = 'Editar Revendedor';
@@ -1047,10 +1046,9 @@ window.editarRevendedor = function(id) {
 window.salvarRevendedor = async function() {
   const id = document.getElementById('rId').value;
   const nome = document.getElementById('rNome').value.trim();
-  const emailInput = document.getElementById('rEmail').value.trim();
-  const email = emailInput.includes('@') ? emailInput : emailInput + '@painelvsc.com.br';
+  const email = document.getElementById('rEmail').value.trim();
   const senha = document.getElementById('rSenha').value;
-  if (!nome || !emailInput) { showToast('❌ Nome e usuário obrigatórios'); return; }
+  if (!nome || !email) { showToast('❌ Nome e e-mail obrigatórios'); return; }
   if (!id && !senha) { showToast('❌ Senha obrigatória para novo revendedor'); return; }
   if (!id && senha.length < 6) { showToast('❌ Senha mínima: 6 caracteres'); return; }
   try {
@@ -1060,11 +1058,8 @@ window.salvarRevendedor = async function() {
       uid = cred.user.uid;
     }
     const rev = revendedores.find(x => x.id === id);
-    const senhaDigitada = document.getElementById('rSenha').value;
-    const rev2 = revendedores.find(x => x.id === id);
     const data = {
       nome, email,
-      senha: senhaDigitada || (rev2 ? rev2.senha || '' : ''),
       creditos: parseInt(document.getElementById('rCreditos').value) || 0,
       whatsapp: document.getElementById('rWhats').value.trim(),
       bloqueado: rev ? (rev.bloqueado || false) : false,
@@ -1335,20 +1330,39 @@ document.getElementById('cPlano').addEventListener('change', function() {
 
 });
 
-window.enviarCredenciais = function(id) {
-  const r = revendedores.find(x => x.id === id);
-  if (!r) return;
-  const usuario = r.email.replace('@painelvsc.com.br','');
-  const senha = r.senha || '(senha não salva)';
-  const link = 'https://vanderleidasilvacunha8-crypto.github.io/meu-painel';
-  const msg = 'Olá ' + r.nome + '! Seguem suas credenciais de acesso ao StreamPanel Pro:\n\n' +
-    '🌐 Link: ' + link + '\n' +
-    '👤 Usuário: ' + usuario + '\n' +
-    '🔑 Senha: ' + senha + '\n\n' +
-    'Qualquer dúvida é só chamar! 😊';
-  const whats = (r.whatsapp || '').replace(/\D/g,'');
-  if (!whats) { showToast('❌ Revendedor sem WhatsApp cadastrado'); return; }
-  window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), '_blank');
+window.fazerBackup = async function() {
+  try {
+    showToast('⏳ Gerando backup...');
+    const snapClientes = await get(ref(db, 'iptv/clientes'));
+    const snapRevs = await get(ref(db, 'iptv/revendedores'));
+    const snapServ = await get(ref(db, 'iptv/servidores'));
+    const snapPlanos = await get(ref(db, 'iptv/planos'));
+    const backup = {
+      geradoEm: new Date().toISOString(),
+      geradoPor: currentUser?.email || 'admin',
+      versao: '1.0',
+      dados: {
+        clientes: snapClientes.exists() ? snapClientes.val() : {},
+        revendedores: snapRevs.exists() ? snapRevs.val() : {},
+        servidores: snapServ.exists() ? snapServ.val() : {},
+        planos: snapPlanos.exists() ? snapPlanos.val() : {}
+      }
+    };
+    const totalClientes = Object.keys(backup.dados.clientes).length;
+    const totalRevs = Object.keys(backup.dados.revendedores).length;
+    const json = JSON.stringify(backup, null, 2);
+    const blob = new Blob([json], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const data = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+    a.href = url;
+    a.download = 'backup-streampanel-' + data + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Backup gerado! ' + totalClientes + ' clientes e ' + totalRevs + ' revendedores salvos.');
+  } catch(e) {
+    showToast('❌ Erro ao gerar backup: ' + e.message);
+  }
 };
 
 window.showToast = function(msg) {
