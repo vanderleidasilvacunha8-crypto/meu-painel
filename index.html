@@ -236,18 +236,23 @@ tr:last-child td{border-bottom:none}
       <p>Painel de Gestão IPTV</p>
     </div>
     <div class="form-group">
-      <label>Usuário</label>
-      <input type="text" id="loginEmail" placeholder="Digite seu usuário">
+      <label>E-mail</label>
+      <input type="email" id="loginEmail" placeholder="seu@email.com">
     </div>
     <div class="form-group">
       <label>Senha</label>
       <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
     </div>
     <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
-    <div id="loginError" class="error-msg">Usuário ou senha incorretos.</div>
+    <div id="loginError" class="error-msg">E-mail ou senha incorretos.</div>
+    <div style="background:#f0fdf4;border-radius:10px;padding:1rem;margin:1rem 0;text-align:center;border:1px solid #bbf7d0">
+      <div style="font-size:1rem;font-weight:700;color:#1a3a2a;margin-bottom:.35rem">🚀 Bem-vindo à nova tecnologia de gestão IPTV!</div>
+      <div style="font-size:.82rem;color:#15803d;line-height:1.5">Gerencie seus clientes de forma simples, rápida e profissional. Faça um teste grátis agora mesmo!</div>
+      <div style="font-size:.78rem;color:#166534;margin-top:.5rem;font-weight:600">👇 Clique abaixo e solicite seu usuário e senha</div>
+    </div>
     <div class="login-footer">
-      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha (suporte)</button><br>
-      <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro." target="_blank">📱 Falar no WhatsApp</a>
+      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha</button><br>
+      <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro.%20Pode%20me%20enviar%20meu%20usu%C3%A1rio%20e%20senha%3F" target="_blank">📱 Solicitar usuário e senha</a>
     </div>
   </div>
 </div>
@@ -506,7 +511,7 @@ tr:last-child td{border-bottom:none}
     <h3 id="modalRevTitulo">Novo Revendedor</h3>
     <input type="hidden" id="rId">
     <div class="form-group"><label>Nome *</label><input type="text" id="rNome"></div>
-    <div class="form-group"><label>Usuário *</label><input type="text" id="rEmail" placeholder="Ex: joao (sem @)"></div>
+    <div class="form-group"><label>E-mail *</label><input type="email" id="rEmail"></div>
     <div class="form-group"><label>Senha (para login) *</label><input type="password" id="rSenha" placeholder="Mínimo 6 caracteres"></div>
     <div class="form-group"><label>Créditos</label><input type="number" id="rCreditos" value="0"></div>
     <div class="form-group"><label>WhatsApp</label><input type="text" id="rWhats" placeholder="(31) 99999-9999"></div>
@@ -605,15 +610,14 @@ window.fazerLogin = async function() {
       }
     }
   } catch(e) {
-    errEl.textContent = 'Usuário ou senha incorretos.';
+    errEl.textContent = 'E-mail ou senha incorretos.';
     errEl.style.display = 'block';
   }
 };
 
 window.recuperarSenha = async function() {
-  const inputUsuario = document.getElementById('loginEmail').value.trim();
-  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
-  if (!inputUsuario) { showToast('Digite seu usuário primeiro.'); return; }
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { showToast('Digite seu e-mail primeiro.'); return; }
   try {
     await sendPasswordResetEmail(auth, email);
     showToast('✅ E-mail de recuperação enviado!');
