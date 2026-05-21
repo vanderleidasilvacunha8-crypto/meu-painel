@@ -369,7 +369,7 @@ tr:last-child td{border-bottom:none}
           <h3>🤝 Lista de Revendedores</h3>
           <button class="btn-add" onclick="abrirModalRevendedor()">+ Novo Revendedor</button>
         </div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Créditos</th><th>Clientes</th><th>Status</th><th>Ações</th></tr></thead>
+        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário</th><th>Senha</th><th>Créditos</th><th>Clientes</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody id="tblRevendedores"></tbody></table></div>
       </div>
     </div>
@@ -512,7 +512,12 @@ tr:last-child td{border-bottom:none}
     <input type="hidden" id="rId">
     <div class="form-group"><label>Nome *</label><input type="text" id="rNome"></div>
     <div class="form-group"><label>Usuário *</label><input type="text" id="rEmail" placeholder="Ex: joao (sem @)"></div>
-    <div class="form-group"><label>Senha (para login) *</label><input type="password" id="rSenha" placeholder="Mínimo 6 caracteres"></div>
+    <div class="form-group"><label>Senha (para login) *</label>
+      <div style="position:relative">
+        <input type="text" id="rSenha" placeholder="Mínimo 6 caracteres" style="width:100%;padding:.7rem 2.5rem .7rem .9rem;border:1.5px solid rgba(255,255,255,.15);border-radius:10px;font-size:.95rem;background:rgba(255,255,255,.07);color:#f1f5f9">
+        <span id="rSenhaHint" style="font-size:.72rem;color:#4ade80;margin-top:.25rem;display:block">✅ Senha visível — anote para enviar ao revendedor</span>
+      </div>
+    </div>
     <div class="form-group"><label>Créditos</label><input type="number" id="rCreditos" value="0"></div>
     <div class="form-group"><label>WhatsApp</label><input type="text" id="rWhats" placeholder="(31) 99999-9999"></div>
     <div class="modal-footer">
@@ -1003,22 +1008,23 @@ function renderRevendedores() {
     const nClientes = clientes.filter(c => c.revendedor === r.email).length;
     const bloqueado = r.bloqueado;
     return `<tr>
-      <td>${r.nome}</td><td>${r.email}</td><td>${r.creditos || 0}</td><td>${nClientes}</td>
+      <td>${r.nome}</td><td>${r.email.replace('@painelvsc.com.br','')}</td><td>${r.senha ? '<span style="font-family:monospace;font-size:.8rem;background:rgba(74,222,128,.1);padding:.1rem .4rem;border-radius:4px;color:#4ade80">'+r.senha+'</span>' : '—'}</td><td>${r.creditos || 0}</td><td>${nClientes}</td>
       <td><span class="badge ${bloqueado ? 'badge-red' : 'badge-green'}">${bloqueado ? 'Bloqueado' : 'Ativo'}</span></td>
       <td><div class="actions-cell">
         <button class="btn-sm btn-edit" onclick="editarRevendedor('${r.id}')">Editar</button>
+        <button class="btn-sm" style="background:#dcfce7;color:#16a34a" onclick="enviarCredenciais('${r.id}')">📱 Enviar</button>
         <button class="btn-sm ${bloqueado ? 'btn-unblock' : 'btn-block'}" onclick="toggleBloquear('${r.id}',${bloqueado})">${bloqueado ? 'Liberar' : 'Bloquear'}</button>
         <button class="btn-sm btn-del" onclick="deletarRevendedor('${r.id}')">Excluir</button>
       </div></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="6" class="empty-state">Nenhum revendedor cadastrado</td></tr>';
+  }).join('') : '<tr><td colspan="7" class="empty-state">Nenhum revendedor cadastrado</td></tr>';
 }
 
 window.abrirModalRevendedor = function() {
   document.getElementById('rId').value = '';
   document.getElementById('rNome').value = '';
   document.getElementById('rEmail').value = '';
-  document.getElementById('rSenha').value = '';
+  document.getElementById('rSenha').value = r.senha || '';
   document.getElementById('rCreditos').value = '0';
   document.getElementById('rWhats').value = '';
   document.getElementById('modalRevTitulo').textContent = 'Novo Revendedor';
@@ -1031,7 +1037,7 @@ window.editarRevendedor = function(id) {
   document.getElementById('rId').value = id;
   document.getElementById('rNome').value = r.nome || '';
   document.getElementById('rEmail').value = r.email || '';
-  document.getElementById('rSenha').value = '';
+  document.getElementById('rSenha').value = r.senha || '';
   document.getElementById('rCreditos').value = r.creditos || 0;
   document.getElementById('rWhats').value = r.whatsapp || '';
   document.getElementById('modalRevTitulo').textContent = 'Editar Revendedor';
@@ -1054,8 +1060,11 @@ window.salvarRevendedor = async function() {
       uid = cred.user.uid;
     }
     const rev = revendedores.find(x => x.id === id);
+    const senhaDigitada = document.getElementById('rSenha').value;
+    const rev2 = revendedores.find(x => x.id === id);
     const data = {
       nome, email,
+      senha: senhaDigitada || (rev2 ? rev2.senha || '' : ''),
       creditos: parseInt(document.getElementById('rCreditos').value) || 0,
       whatsapp: document.getElementById('rWhats').value.trim(),
       bloqueado: rev ? (rev.bloqueado || false) : false,
@@ -1325,6 +1334,22 @@ document.getElementById('cPlano').addEventListener('change', function() {
   document.getElementById('cVenc').value = base.toISOString().split('T')[0];
 
 });
+
+window.enviarCredenciais = function(id) {
+  const r = revendedores.find(x => x.id === id);
+  if (!r) return;
+  const usuario = r.email.replace('@painelvsc.com.br','');
+  const senha = r.senha || '(senha não salva)';
+  const link = 'https://vanderleidasilvacunha8-crypto.github.io/meu-painel';
+  const msg = 'Olá ' + r.nome + '! Seguem suas credenciais de acesso ao StreamPanel Pro:\n\n' +
+    '🌐 Link: ' + link + '\n' +
+    '👤 Usuário: ' + usuario + '\n' +
+    '🔑 Senha: ' + senha + '\n\n' +
+    'Qualquer dúvida é só chamar! 😊';
+  const whats = (r.whatsapp || '').replace(/\D/g,'');
+  if (!whats) { showToast('❌ Revendedor sem WhatsApp cadastrado'); return; }
+  window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), '_blank');
+};
 
 window.showToast = function(msg) {
   const t = document.getElementById('toast');
