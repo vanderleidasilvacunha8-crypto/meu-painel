@@ -241,7 +241,10 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="form-group">
       <label>Senha</label>
-      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
+      <div style="position:relative">
+        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()" style="width:100%;padding:.75rem 2.75rem .75rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;transition:border .2s">
+        <button type="button" onclick="toggleSenhaLogin()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:#888;padding:0;line-height:1" id="btnOlhoLogin">👁️</button>
+      </div>
     </div>
     <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
     <div id="loginError" class="error-msg">E-mail ou senha incorretos.</div>
@@ -582,6 +585,13 @@ let unsubRevs = null;
 let unsubPlanos = null;
 
 // ===== AUTH =====
+window.toggleSenhaLogin = function() {
+  const inp = document.getElementById('loginPass');
+  const btn = document.getElementById('btnOlhoLogin');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁️'; }
+};
+
 window.fazerLogin = async function() {
   const inputUsuario = document.getElementById('loginEmail').value.trim();
   const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
@@ -1017,7 +1027,7 @@ window.abrirModalRevendedor = function() {
   document.getElementById('rId').value = '';
   document.getElementById('rNome').value = '';
   document.getElementById('rEmail').value = '';
-  document.getElementById('rSenha').value = r.senha || '';
+  document.getElementById('rSenha').value = '';
   document.getElementById('rCreditos').value = '0';
   document.getElementById('rWhats').value = '';
   document.getElementById('modalRevTitulo').textContent = 'Novo Revendedor';
@@ -1030,7 +1040,7 @@ window.editarRevendedor = function(id) {
   document.getElementById('rId').value = id;
   document.getElementById('rNome').value = r.nome || '';
   document.getElementById('rEmail').value = r.email || '';
-  document.getElementById('rSenha').value = r.senha || '';
+  document.getElementById('rSenha').value = '';
   document.getElementById('rCreditos').value = r.creditos || 0;
   document.getElementById('rWhats').value = r.whatsapp || '';
   document.getElementById('modalRevTitulo').textContent = 'Editar Revendedor';
