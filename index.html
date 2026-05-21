@@ -829,7 +829,7 @@ window.renderClientes = function() {
       <td><div class="actions-grid">
         <button class="btn-icon bi-edit" title="Editar dados" onclick="editarCliente('${c.id}')">✏️</button>
         <button class="btn-icon bi-venc" title="Alterar vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
-        <button class="btn-icon bi-ren1" title="Renovar 1 mês" onclick="renovar1Mes('${c.id}')">+1</button>
+
         <button class="btn-icon bi-renN" title="Renovar vários meses" onclick="abrirModalRenovar('${c.id}')">🔄</button>
         <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
       </div></td>
@@ -1492,7 +1492,7 @@ function renderCardsMobile() {
       <div class="client-card-actions">
         <button class="btn-icon bi-edit" title="Editar" onclick="editarCliente('${c.id}')">✏️</button>
         <button class="btn-icon bi-venc" title="Vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
-        <button class="btn-icon bi-ren1" title="+1 mês" onclick="renovar1Mes('${c.id}')">+1</button>
+
         <button class="btn-icon bi-renN" title="Renovar" onclick="abrirModalRenovar('${c.id}')">🔄</button>
         <button class="btn-icon bi-whats" title="WhatsApp" onclick="whatsCliente('${c.id}')">📱</button>
         <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
