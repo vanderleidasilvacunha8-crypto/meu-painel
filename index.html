@@ -236,8 +236,8 @@ tr:last-child td{border-bottom:none}
       <p>Painel de Gestão IPTV</p>
     </div>
     <div class="form-group">
-      <label>E-mail</label>
-      <input type="email" id="loginEmail" placeholder="seu@email.com">
+      <label>Usuário</label>
+      <input type="text" id="loginEmail" placeholder="Digite seu usuário">
     </div>
     <div class="form-group">
       <label>Senha</label>
@@ -251,7 +251,7 @@ tr:last-child td{border-bottom:none}
       <div style="font-size:.78rem;color:#166534;margin-top:.5rem;font-weight:600">👇 Clique abaixo e solicite seu usuário e senha</div>
     </div>
     <div class="login-footer">
-      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha</button><br>
+      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha (suporte)</button><br>
       <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro.%20Pode%20me%20enviar%20meu%20usu%C3%A1rio%20e%20senha%3F" target="_blank">📱 Solicitar usuário e senha</a>
     </div>
   </div>
@@ -511,7 +511,7 @@ tr:last-child td{border-bottom:none}
     <h3 id="modalRevTitulo">Novo Revendedor</h3>
     <input type="hidden" id="rId">
     <div class="form-group"><label>Nome *</label><input type="text" id="rNome"></div>
-    <div class="form-group"><label>E-mail *</label><input type="email" id="rEmail"></div>
+    <div class="form-group"><label>Usuário *</label><input type="text" id="rEmail" placeholder="Ex: joao (sem @)"></div>
     <div class="form-group"><label>Senha (para login) *</label><input type="password" id="rSenha" placeholder="Mínimo 6 caracteres"></div>
     <div class="form-group"><label>Créditos</label><input type="number" id="rCreditos" value="0"></div>
     <div class="form-group"><label>WhatsApp</label><input type="text" id="rWhats" placeholder="(31) 99999-9999"></div>
@@ -585,11 +585,12 @@ let unsubPlanos = null;
 
 // ===== AUTH =====
 window.fazerLogin = async function() {
-  const email = document.getElementById('loginEmail').value.trim();
+  const inputUsuario = document.getElementById('loginEmail').value.trim();
+  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
   const pass = document.getElementById('loginPass').value;
   const errEl = document.getElementById('loginError');
   errEl.style.display = 'none';
-  if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; errEl.style.display = 'block'; return; }
+  if (!inputUsuario || !pass) { errEl.textContent = 'Usuário ou senha incorretos.'; errEl.style.display = 'block'; return; }
   try {
     const cred = await signInWithEmailAndPassword(auth, email, pass);
     const snapAdmin = await get(ref(db, 'iptv/admins/' + cred.user.uid));
@@ -616,8 +617,9 @@ window.fazerLogin = async function() {
 };
 
 window.recuperarSenha = async function() {
-  const email = document.getElementById('loginEmail').value.trim();
-  if (!email) { showToast('Digite seu e-mail primeiro.'); return; }
+  const inputUsuario = document.getElementById('loginEmail').value.trim();
+  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
+  if (!inputUsuario) { showToast('Digite seu usuário primeiro.'); return; }
   try {
     await sendPasswordResetEmail(auth, email);
     showToast('✅ E-mail de recuperação enviado!');
@@ -675,7 +677,7 @@ async function carregarPerfil(user) {
       isAdmin = false;
     }
   }
-  document.getElementById('sidebarEmail').textContent = user.email;
+  document.getElementById('sidebarEmail').textContent = user.email.replace('@painelvsc.com.br','');
   const badge = document.getElementById('sidebarBadge');
   badge.textContent = isAdmin ? 'Admin' : 'Revendedor';
   badge.className = 'badge-role ' + (isAdmin ? 'badge-admin' : 'badge-rev');
@@ -1039,9 +1041,10 @@ window.editarRevendedor = function(id) {
 window.salvarRevendedor = async function() {
   const id = document.getElementById('rId').value;
   const nome = document.getElementById('rNome').value.trim();
-  const email = document.getElementById('rEmail').value.trim();
+  const emailInput = document.getElementById('rEmail').value.trim();
+  const email = emailInput.includes('@') ? emailInput : emailInput + '@painelvsc.com.br';
   const senha = document.getElementById('rSenha').value;
-  if (!nome || !email) { showToast('❌ Nome e e-mail obrigatórios'); return; }
+  if (!nome || !emailInput) { showToast('❌ Nome e usuário obrigatórios'); return; }
   if (!id && !senha) { showToast('❌ Senha obrigatória para novo revendedor'); return; }
   if (!id && senha.length < 6) { showToast('❌ Senha mínima: 6 caracteres'); return; }
   try {
