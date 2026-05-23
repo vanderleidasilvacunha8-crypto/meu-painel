@@ -113,10 +113,10 @@ tr:last-child td{border-bottom:none}
 .modal-body{padding:1rem 1.25rem;flex:1;background:#161b27}
 .modal h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:#f1f5f9}
 .modal-body .form-group{margin-bottom:.9rem}
-.modal .form-group input,.modal .form-group select,.modal .form-group textarea{width:100%;padding:.7rem .9rem;border:1.5px solid rgba(255,255,255,.15);border-radius:10px;font-size:.95rem;background:rgba(255,255,255,.07);color:#f1f5f9;transition:border .2s, box-shadow .2s, background .2s}
-.modal .form-group input::placeholder{color:#475569}
+.modal .form-group input,.modal .form-group select,.modal .form-group textarea{width:100%;padding:.7rem .9rem;border:1.5px solid rgba(255,255,255,.2);border-radius:10px;font-size:.95rem;background:#1e293b;color:#f1f5f9;transition:border .2s, box-shadow .2s, background .2s}
+.modal .form-group input::placeholder{color:#64748b}
 .modal .form-group select option{background:#1e2433;color:#f1f5f9}
-.modal .form-group input:focus,.modal .form-group select:focus{outline:none;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.2);background:#fff}
+.modal .form-group input:focus,.modal .form-group select:focus{outline:none;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.2);background:#1e293b;color:#f1f5f9}
 .modal .form-group label{color:#94a3b8;font-size:.82rem;font-weight:600;display:block;margin-bottom:.35rem;letter-spacing:.3px}
 .modal-footer{display:flex;gap:.75rem;margin-top:1rem}
 .btn-cancel{flex:1;padding:.7rem;background:#f3f4f6;border:none;border-radius:8px;font-weight:600;cursor:pointer}
@@ -151,8 +151,32 @@ tr:last-child td{border-bottom:none}
 .alert-amanha ul{list-style:none;font-size:.82rem;color:#fca5a5}
 .alert-amanha ul li{padding:.15rem 0;display:flex;align-items:center;gap:.4rem}
 
-/* MOBILE */
-.hamburger{display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;border:none;border-radius:8px;padding:.5rem;cursor:pointer;color:#fff;font-size:1.3rem}
+/* ========== ALERTA "VENCE HOJE" ========== */
+.alert-hoje{
+  background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(139,92,246,.08));
+  border:1.5px solid rgba(139,92,246,.55);
+  border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;
+  animation:pulseViolet 2s infinite;
+}
+@keyframes pulseViolet{
+  0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0)}
+  50%{box-shadow:0 0 0 6px rgba(139,92,246,.15)}
+}
+.alert-hoje h4{color:#a78bfa;font-size:.9rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.alert-hoje ul{list-style:none;font-size:.82rem;color:#c4b5fd}
+.alert-hoje ul li{padding:.15rem 0;display:flex;align-items:center;gap:.4rem}
+
+/* ========== MODAL AVISO DIÁRIO ========== */
+#modalAvisoDiario .aviso-cliente-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,.05);border-radius:10px;padding:.6rem .9rem;margin-bottom:.4rem;
+}
+#modalAvisoDiario .aviso-nome{font-weight:600;font-size:.875rem;color:#f1f5f9}
+#modalAvisoDiario .aviso-info{font-size:.75rem;color:#64748b;margin-top:.1rem}
+#modalAvisoDiario .aviso-btn{background:#25D366;border:none;color:#fff;border-radius:8px;padding:.35rem .75rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+#modalAvisoDiario .aviso-btn:disabled{background:#374151;color:#6b7280;cursor:not-allowed}
+#modalAvisoDiario .secao-titulo{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:.5rem 0 .35rem;margin-top:.5rem}
+display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;border:none;border-radius:8px;padding:.5rem;cursor:pointer;color:#fff;font-size:1.3rem}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}
 
 @media(max-width:768px){
@@ -261,6 +285,14 @@ tr:last-child td{border-bottom:none}
         <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value green" id="stAtivos">0</div></div>
         <div class="stat-card"><div class="stat-label">Vencidos</div><div class="stat-value red" id="stVencidos">0</div></div>
         <div class="stat-card"><div class="stat-label">Receita</div><div class="stat-value amber" id="stReceita">R$ 0</div></div>
+      </div>
+
+      <!-- ===== NOVO: ALERTA VENCE HOJE ===== -->
+      <div id="alertHoje"></div>
+      <div id="btnAvisarHojeWrap" style="display:none;margin-bottom:.75rem">
+        <button onclick="avisarVencendoHoje()" style="width:100%;padding:.8rem;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;box-shadow:0 4px 15px rgba(124,58,237,.35)">
+          🔔 Avisar clientes que vencem HOJE via WhatsApp
+        </button>
       </div>
 
       <!-- ===== NOVO: ALERTA VENCE AMANHÃ ===== -->
@@ -503,6 +535,40 @@ tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- Modal: Aviso Diário (Vence Hoje + Amanhã) -->
+<div class="modal-overlay" id="modalAvisoDiario" style="background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:1rem">
+  <div class="modal" style="max-width:500px;min-height:unset;max-height:85vh;border-radius:16px;padding:0;background:#1e2433;overflow:hidden;display:flex;flex-direction:column">
+    <div style="background:#1a3a2a;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <h3 style="color:#fff;font-size:1rem;margin:0">📋 Avisos do dia</h3>
+        <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-top:.15rem" id="avisoDiarioData"></p>
+      </div>
+      <button onclick="fecharModal('modalAvisoDiario')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:.35rem .75rem;cursor:pointer;font-size:.85rem">✕ Fechar</button>
+    </div>
+    <div style="padding:1rem 1.25rem;overflow-y:auto;flex:1">
+      <!-- Vence Hoje -->
+      <div id="avisoHojeSection" style="display:none">
+        <div class="secao-titulo" style="color:#a78bfa">🔔 Vencendo HOJE</div>
+        <div id="avisoHojeLista"></div>
+        <button onclick="avisarTodosSecao('hoje')" id="btnAvisarTodosHoje" style="width:100%;padding:.65rem;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;margin-bottom:.75rem">
+          📱 Avisar todos que vencem hoje
+        </button>
+      </div>
+      <!-- Vence Amanhã -->
+      <div id="avisoAmanhaSection" style="display:none">
+        <div class="secao-titulo" style="color:#f87171">🚨 Vencendo AMANHÃ</div>
+        <div id="avisoAmanhaLista"></div>
+        <button onclick="avisarTodosSecao('amanha')" id="btnAvisarTodosAmanha" style="width:100%;padding:.65rem;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;border:none;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;margin-bottom:.5rem">
+          📱 Avisar todos que vencem amanhã
+        </button>
+      </div>
+      <div id="avisoVazio" style="display:none;text-align:center;padding:2rem 1rem;color:#64748b;font-size:.875rem">
+        ✅ Nenhum cliente vencendo hoje ou amanhã!
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Restaurar Backup -->
 <div class="modal-overlay" id="modalRestaurar" style="background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:1rem">
   <div class="modal" style="max-width:480px;min-height:unset;border-radius:16px;padding:0;background:#1e2433;overflow:hidden">
@@ -714,8 +780,8 @@ function mostrarApp() {
   document.getElementById('appLayout').classList.remove('hidden');
   iniciarListeners();
   showPage('dashboard');
-  // ===== NOVO: verificação automática com delay para carregar clientes =====
-  setTimeout(verificacaoAutomaticaAmanha, 3000);
+  // ===== NOVO: popup diário ao entrar =====
+  setTimeout(abrirAvisoDiario, 3000);
 }
 
 // ===== LISTENERS =====
@@ -787,6 +853,25 @@ function renderDashboard() {
   document.getElementById('stVencidos').textContent = vencidos;
   document.getElementById('stReceita').textContent = 'R$ ' + receita.toFixed(2).replace('.', ',');
 
+  // ===== NOVO: clientes vencendo HOJE =====
+  const proxHoje = clientes.filter(c => {
+    if (!c.vencimento) return false;
+    const v = new Date(c.vencimento + 'T00:00:00');
+    return v.toDateString() === hoje_.toDateString();
+  });
+  const alertHojeEl = document.getElementById('alertHoje');
+  const btnHojeWrap = document.getElementById('btnAvisarHojeWrap');
+  if (proxHoje.length > 0) {
+    alertHojeEl.innerHTML = `<div class="alert-hoje">
+      <h4>🔔 ${proxHoje.length} cliente(s) vencem HOJE (${formatDate(hoje_.toISOString().split('T')[0])})</h4>
+      <ul>${proxHoje.map(c => `<li>📌 ${c.nome} ${c.whatsapp ? '— 📱 ' + c.whatsapp : '<span style="color:#f87171;font-size:.7rem">(sem WhatsApp)</span>'}</li>`).join('')}</ul>
+    </div>`;
+    if (btnHojeWrap) btnHojeWrap.style.display = 'block';
+  } else {
+    alertHojeEl.innerHTML = '';
+    if (btnHojeWrap) btnHojeWrap.style.display = 'none';
+  }
+
   // ===== NOVO: clientes vencendo AMANHÃ =====
   const proxAmanha = clientes.filter(c => {
     if (!c.vencimento) return false;
@@ -833,69 +918,144 @@ function renderDashboard() {
   if (btnWrap) btnWrap.style.display = temVenc ? 'block' : 'none';
 }
 
-// ===== NOVO: VERIFICAÇÃO AUTOMÁTICA AO ENTRAR NO PAINEL =====
-window.verificacaoAutomaticaAmanha = function() {
+// ===== POPUP DIÁRIO: VENCE HOJE + AMANHÃ =====
+window.abrirAvisoDiario = function() {
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
   const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-  const chaveHoje = 'aviso_amanha_' + hoje_.toISOString().split('T')[0];
 
-  // Verifica se já avisou hoje
-  if (localStorage.getItem(chaveHoje) === '1') return;
-
+  const proxHoje = clientes.filter(c => {
+    if (!c.vencimento) return false;
+    return new Date(c.vencimento + 'T00:00:00').toDateString() === hoje_.toDateString();
+  });
   const proxAmanha = clientes.filter(c => {
-    if (!c.vencimento || !c.whatsapp) return false;
-    const v = new Date(c.vencimento + 'T00:00:00');
-    return v.toDateString() === amanha.toDateString();
+    if (!c.vencimento) return false;
+    return new Date(c.vencimento + 'T00:00:00').toDateString() === amanha.toDateString();
   });
 
-  if (proxAmanha.length === 0) return;
+  const total = proxHoje.length + proxAmanha.length;
+  if (total === 0) return;
 
-  const nomes = proxAmanha.map(c => c.nome).join(', ');
-  const confirmou = confirm(
-    '🚨 AVISO AUTOMÁTICO — Vencimento Amanhã!\n\n' +
-    proxAmanha.length + ' cliente(s) vencem amanhã:\n' +
-    nomes + '\n\n' +
-    'Deseja abrir o WhatsApp para avisar todos agora?'
-  );
+  // Monta seção de hoje
+  const secHoje = document.getElementById('avisoHojeSection');
+  const secAmanha = document.getElementById('avisoAmanhaSection');
+  const vazio = document.getElementById('avisoVazio');
 
-  if (confirmou) {
-    localStorage.setItem(chaveHoje, '1');
-    avisarVencendoAmanha();
-  } else {
-    // Marca como "já perguntou hoje" mesmo que recusou
-    localStorage.setItem(chaveHoje, '1');
-  }
+  if (proxHoje.length > 0) {
+    secHoje.style.display = 'block';
+    document.getElementById('avisoHojeLista').innerHTML = proxHoje.map(c => `
+      <div class="aviso-cliente-row">
+        <div>
+          <div class="aviso-nome">${c.nome}</div>
+          <div class="aviso-info">${c.whatsapp ? '📱 ' + c.whatsapp : '⚠️ Sem WhatsApp'} · ${c.plano || '—'}</div>
+        </div>
+        <button class="aviso-btn" id="btnAvHoje_${c.id}" onclick="whatsClienteAviso('${c.id}','btnAvHoje_${c.id}')" ${!c.whatsapp ? 'disabled' : ''}>
+          ${c.whatsapp ? '📱 Enviar' : 'Sem nº'}
+        </button>
+      </div>`).join('');
+  } else { secHoje.style.display = 'none'; }
+
+  if (proxAmanha.length > 0) {
+    secAmanha.style.display = 'block';
+    document.getElementById('avisoAmanhaLista').innerHTML = proxAmanha.map(c => `
+      <div class="aviso-cliente-row">
+        <div>
+          <div class="aviso-nome">${c.nome}</div>
+          <div class="aviso-info">${c.whatsapp ? '📱 ' + c.whatsapp : '⚠️ Sem WhatsApp'} · ${c.plano || '—'}</div>
+        </div>
+        <button class="aviso-btn" id="btnAvAmanha_${c.id}" onclick="whatsClienteAviso('${c.id}','btnAvAmanha_${c.id}')" ${!c.whatsapp ? 'disabled' : ''}>
+          ${c.whatsapp ? '📱 Enviar' : 'Sem nº'}
+        </button>
+      </div>`).join('');
+  } else { secAmanha.style.display = 'none'; }
+
+  if (total === 0) { vazio.style.display = 'block'; } else { vazio.style.display = 'none'; }
+
+  const hoje_str = hoje_.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long'});
+  document.getElementById('avisoDiarioData').textContent = hoje_str.charAt(0).toUpperCase() + hoje_str.slice(1);
+  document.getElementById('modalAvisoDiario').classList.add('open');
 };
 
-// ===== NOVO: AVISAR CLIENTES QUE VENCEM AMANHÃ =====
+// Enviar WhatsApp individual pelo popup e marcar botão como enviado
+window.whatsClienteAviso = function(id, btnId) {
+  whatsCliente(id);
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '✅ Enviado'; btn.disabled = true; btn.style.background = '#16a34a'; }
+};
+
+// Enviar para todos de uma seção
+window.avisarTodosSecao = function(secao) {
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
+  const lista = clientes.filter(c => {
+    if (!c.vencimento || !c.whatsapp) return false;
+    const v = new Date(c.vencimento + 'T00:00:00');
+    return secao === 'hoje' ? v.toDateString() === hoje_.toDateString() : v.toDateString() === amanha.toDateString();
+  });
+  if (!lista.length) { showToast('Nenhum cliente com WhatsApp nesta lista'); return; }
+  let delay = 0;
+  lista.forEach(c => {
+    setTimeout(() => {
+      whatsCliente(c.id);
+      const prefixo = secao === 'hoje' ? 'btnAvHoje_' : 'btnAvAmanha_';
+      const btn = document.getElementById(prefixo + c.id);
+      if (btn) { btn.textContent = '✅ Enviado'; btn.disabled = true; btn.style.background = '#16a34a'; }
+    }, delay);
+    delay += 1500;
+  });
+  showToast(`📱 Enviando para ${lista.length} cliente(s)...`);
+};
+
+// ===== AVISAR VENCENDO HOJE (botão dashboard) =====
+window.avisarVencendoHoje = function() {
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const lista = clientes.filter(c => {
+    if (!c.vencimento) return false;
+    return new Date(c.vencimento + 'T00:00:00').toDateString() === hoje_.toDateString();
+  });
+  if (!lista.length) { showToast('Nenhum cliente vencendo hoje'); return; }
+  let semWhats = 0, delay = 0;
+  lista.forEach(c => {
+    const whats = (c.whatsapp || '').replace(/\D/g,'');
+    if (!whats) { semWhats++; return; }
+    setTimeout(() => {
+      const msg = `Olá ${c.nome}! 🔔📺\n\nSeu plano IPTV vence *HOJE*! Renove agora para não perder o acesso. Entre em contato comigo! 🙏`;
+      window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
+    }, delay);
+    delay += 1500;
+  });
+  let msg = `📱 Enviando para ${lista.length - semWhats} cliente(s) que vencem hoje...`;
+  if (semWhats > 0) msg += ` (${semWhats} sem WhatsApp)`;
+  showToast(msg);
+};
+
+// ===== AVISAR VENCENDO AMANHÃ (botão dashboard) =====
 window.avisarVencendoAmanha = function() {
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
   const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-
   const proxAmanha = clientes.filter(c => {
     if (!c.vencimento) return false;
-    const v = new Date(c.vencimento + 'T00:00:00');
-    return v.toDateString() === amanha.toDateString();
+    return new Date(c.vencimento + 'T00:00:00').toDateString() === amanha.toDateString();
   });
-
   if (!proxAmanha.length) { showToast('Nenhum cliente vencendo amanhã'); return; }
-
-  let semWhats = 0;
-  let delay = 0;
+  let semWhats = 0, delay = 0;
   proxAmanha.forEach(c => {
     const whats = (c.whatsapp || '').replace(/\D/g,'');
     if (!whats) { semWhats++; return; }
     setTimeout(() => {
       const msg = `Olá ${c.nome}! 😊📺\n\nPassando para lembrar que seu plano IPTV vence *AMANHÃ* (${formatDate(c.vencimento)}).\n\nPara não perder o acesso, renove hoje mesmo! Entre em contato comigo. 🙏`;
-      window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), '_blank');
+      window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
     }, delay);
     delay += 1500;
   });
-
   let msg = `📱 Abrindo WhatsApp para ${proxAmanha.length - semWhats} cliente(s) que vencem amanhã...`;
-  if (semWhats > 0) msg += ` (${semWhats} sem WhatsApp cadastrado)`;
+  if (semWhats > 0) msg += ` (${semWhats} sem WhatsApp)`;
   showToast(msg);
 };
+
+// (mantido para compatibilidade — não usado mais diretamente)
+window.verificacaoAutomaticaAmanha = function() {};
+
+
 
 // ===== CLIENTES =====
 window.renderClientes = function() {
@@ -933,10 +1093,11 @@ window.renderClientes = function() {
       <td>${formatDate(c.vencimento)}<br>${diasBadge}</td>
       <td>R$ ${parseFloat(c.valor || 0).toFixed(2).replace('.', ',')}</td>
       <td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td>
-      <td><div class="actions-grid">
+      <td><div class="actions-grid" style="grid-template-columns:repeat(4,32px)">
         <button class="btn-icon bi-edit" title="Editar dados" onclick="editarCliente('${c.id}')">✏️</button>
         <button class="btn-icon bi-venc" title="Alterar vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
         <button class="btn-icon bi-renN" title="Renovar vários meses" onclick="abrirModalRenovar('${c.id}')">🔄</button>
+        <button class="btn-icon bi-whats" title="WhatsApp" onclick="whatsCliente('${c.id}')">📱</button>
         <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
       </div></td>
     </tr>`;
@@ -1452,7 +1613,7 @@ window.enviarCredenciais = function(id) {
     'Qualquer dúvida é só chamar! 😊';
   const whats = (r.whatsapp || '').replace(/\D/g,'');
   if (!whats) { showToast('❌ Revendedor sem WhatsApp cadastrado'); return; }
-  window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
 };
 
 // ===== BACKUP =====
@@ -1512,7 +1673,7 @@ window.whatsCliente = function(id) {
   } else if (dias < 0) {
     msg = `Olá ${c.nome}! Seu plano IPTV venceu há ${Math.abs(dias)} dia(s). Renove agora para continuar assistindo! Entre em contato comigo. 📺`;
   } else if (dias === 0) {
-    msg = `Olá ${c.nome}! Seu plano IPTV vence HOJE! Renove agora para não perder o acesso. 📺`;
+    msg = `Olá ${c.nome}! 🔔📺\n\nSeu plano IPTV vence *HOJE*! Renove agora para não perder o acesso. Entre em contato comigo! 🙏`;
   } else if (dias === 1) {
     msg = `Olá ${c.nome}! 🚨 Seu plano IPTV vence *AMANHÃ* (${formatDate(c.vencimento)}). Renove hoje para não perder o acesso! 😊📺`;
   } else if (dias <= 7) {
@@ -1526,7 +1687,7 @@ window.whatsCliente = function(id) {
     return;
   }
   const url = `https://wa.me/55${whats}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
+  window.open(url, 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
 };
 
 // ===== WHATSAPP EM MASSA (7 dias) =====
