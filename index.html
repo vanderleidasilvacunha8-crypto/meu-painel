@@ -306,8 +306,8 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
 
       <div id="alertVenc"></div>
       <div id="btnAvisarWrap" style="display:none;margin-bottom:1rem">
-        <button onclick="avisarTodosVencendo()" style="width:100%;padding:.75rem;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">
-          📱 Avisar todos que vencem em 7 dias via WhatsApp
+        <button onclick="avisarVencendoHoje()" style="width:100%;padding:.75rem;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">
+          📱 Avisar todos que vencem HOJE via WhatsApp
         </button>
       </div>
       <div class="card">
@@ -891,17 +891,19 @@ function renderDashboard() {
     if (btnAmanhaWrap) btnAmanhaWrap.style.display = 'none';
   }
 
-  // Alerta 7 dias (original)
-  const prox = clientes.filter(c => {
+  // Alerta HOJE (substituindo o de 2-7 dias)
+  const proxHojeVenc = clientes.filter(c => {
     if (!c.vencimento) return false;
     const v = new Date(c.vencimento + 'T00:00:00');
-    return v > amanha && v <= em7; // exclui amanhã pois já aparece acima
+    return v.toDateString() === hoje_.toDateString();
   });
   let alertHtml = '';
-  if (prox.length > 0) {
-    alertHtml = `<div class="alert-box"><h4>⚠️ ${prox.length} cliente(s) vencem em 2 a 7 dias</h4><ul>${prox.map(c => `<li>• ${c.nome} — ${formatDate(c.vencimento)}</li>`).join('')}</ul></div>`;
+  if (proxHojeVenc.length > 0) {
+    alertHtml = `<div class="alert-hoje"><h4>🔔 ${proxHojeVenc.length} cliente(s) vencem HOJE</h4><ul>${proxHojeVenc.map(c => `<li>📌 ${c.nome} — ${formatDate(c.vencimento)}</li>`).join('')}</ul></div>`;
   }
   document.getElementById('alertVenc').innerHTML = alertHtml;
+
+  const temHoje = proxHojeVenc.length > 0;
 
   const recentes = [...clientes].sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')).slice(0, 5);
   document.getElementById('tblDashClientes').innerHTML = recentes.length ? recentes.map(c => {
@@ -912,10 +914,8 @@ function renderDashboard() {
   document.getElementById('dashGreet').textContent = 'Bem-vindo, ' + (currentUser?.email || '');
   renderGraficoReceita();
 
-  // Botão avisar 7 dias
-  const temVenc = prox.length > 0;
   const btnWrap = document.getElementById('btnAvisarWrap');
-  if (btnWrap) btnWrap.style.display = temVenc ? 'block' : 'none';
+  if (btnWrap) btnWrap.style.display = temHoje ? 'block' : 'none';
 }
 
 // ===== POPUP DIÁRIO: VENCE HOJE + AMANHÃ =====
