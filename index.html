@@ -626,6 +626,22 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
   </div>
 </div>
 
+<!-- Modal: Fila de Envio WhatsApp -->
+<div class="modal-overlay" id="modalFilaEnvio" style="background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem">
+  <div class="modal" style="max-width:420px;min-height:unset;border-radius:18px;padding:0;background:#1e2433;overflow:hidden">
+    <div style="background:#1a3a2a;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h3 style="color:#fff;font-size:1rem;margin:0">📱 Fila de Envio WhatsApp</h3>
+        <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-top:.1rem" id="filaProgresso"></p>
+      </div>
+      <button onclick="fecharModal('modalFilaEnvio')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:.35rem .75rem;cursor:pointer;font-size:.85rem">✕</button>
+    </div>
+    <div style="padding:1.5rem;text-align:center" id="filaConteudo">
+      <!-- preenchido via JS -->
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- FIREBASE -->
@@ -982,30 +998,102 @@ window.whatsClienteAviso = function(id, btnId) {
   if (btn) { btn.textContent = '✅ Enviado'; btn.disabled = true; btn.style.background = '#16a34a'; }
 };
 
-// Enviar para todos de uma seção
+
+// ===== FILA DE ENVIO WHATSAPP =====
+let filaEnvio = [];
+let filaIndex = 0;
+
+window.abrirFilaEnvio = function(lista) {
+  filaEnvio = lista.filter(c => (c.whatsapp || '').replace(/\D/g,'').length >= 8);
+  if (!filaEnvio.length) { showToast('❌ Nenhum cliente com WhatsApp nesta lista'); return; }
+  filaIndex = 0;
+  renderFilaAtual();
+  document.getElementById('modalFilaEnvio').classList.add('open');
+};
+
+function renderFilaAtual() {
+  const total = filaEnvio.length;
+  document.getElementById('filaProgresso').textContent = `${filaIndex + 1} de ${total} clientes`;
+
+  if (filaIndex >= total) {
+    document.getElementById('filaProgresso').textContent = 'Concluído!';
+    document.getElementById('filaConteudo').innerHTML = `
+      <div style="padding:1rem 0">
+        <div style="font-size:3.5rem;margin-bottom:.75rem">✅</div>
+        <p style="color:#4ade80;font-weight:700;font-size:1.1rem">Todos avisados!</p>
+        <p style="color:#64748b;font-size:.85rem;margin-top:.4rem">${total} mensagens enviadas.</p>
+        <button onclick="fecharModal('modalFilaEnvio')" style="margin-top:1.25rem;padding:.7rem 2rem;background:#2d7a4f;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem">Fechar</button>
+      </div>`;
+    return;
+  }
+
+  const c = filaEnvio[filaIndex];
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
+  const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
+  let statusTxt = '';
+  if (dias === 0) statusTxt = '<span style="color:#a78bfa;font-weight:700">🔔 Vence HOJE</span>';
+  else if (dias === 1) statusTxt = '<span style="color:#f87171;font-weight:700">🚨 Vence AMANHÃ</span>';
+  else if (dias !== null && dias < 0) statusTxt = `<span style="color:#ef4444;font-weight:700">Vencido há ${Math.abs(dias)}d</span>`;
+  else if (dias !== null) statusTxt = `<span style="color:#4ade80">Vence em ${dias}d</span>`;
+
+  const pct = Math.round((filaIndex / total) * 100);
+
+  document.getElementById('filaConteudo').innerHTML = `
+    <div style="background:rgba(255,255,255,.04);border-radius:50px;height:6px;margin-bottom:1.25rem;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#4ade80,#25D366);border-radius:50px;transition:width .4s"></div>
+    </div>
+    <div style="background:rgba(255,255,255,.05);border-radius:14px;padding:1rem;margin-bottom:1.25rem">
+      <div style="font-size:1.4rem;margin-bottom:.5rem">👤</div>
+      <div style="font-weight:700;font-size:1.05rem;color:#f1f5f9;margin-bottom:.25rem">${c.nome}</div>
+      <div style="font-size:.82rem;color:#64748b;margin-bottom:.35rem">📱 ${c.whatsapp}</div>
+      <div style="font-size:.82rem">${statusTxt}</div>
+      ${c.plano ? `<div style="font-size:.78rem;color:#475569;margin-top:.25rem">Plano: ${c.plano} · Venc: ${formatDate(c.vencimento)}</div>` : ''}
+    </div>
+    <button onclick="enviarFilaAtual()" style="width:100%;padding:1rem;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;box-shadow:0 4px 15px rgba(37,211,102,.35);margin-bottom:.75rem">
+      📱 Enviar para ${c.nome}
+    </button>
+    <button onclick="pularFila()" style="width:100%;padding:.65rem;background:rgba(255,255,255,.07);color:#94a3b8;border:1px solid rgba(255,255,255,.12);border-radius:10px;font-size:.875rem;cursor:pointer">
+      ⏭️ Pular este cliente
+    </button>`;
+}
+
+window.enviarFilaAtual = function() {
+  const c = filaEnvio[filaIndex];
+  if (!c) return;
+  const whats = (c.whatsapp || '').replace(/\D/g,'');
+  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
+  const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
+  const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
+  let msg = '';
+  if (dias === 0) msg = `Olá ${c.nome}! 🔔📺\n\nSeu plano IPTV vence *HOJE*! Renove agora para não perder o acesso. Entre em contato comigo! 🙏`;
+  else if (dias === 1) msg = `Olá ${c.nome}! 😊📺\n\nPassando para lembrar que seu plano IPTV vence *AMANHÃ* (${formatDate(c.vencimento)}).\n\nRenove hoje para não perder o acesso! Entre em contato comigo. 🙏`;
+  else if (dias !== null && dias < 0) msg = `Olá ${c.nome}! Seu plano IPTV venceu há ${Math.abs(dias)} dia(s). Renove agora para voltar a assistir! Entre em contato comigo. 📺`;
+  else msg = `Olá ${c.nome}! Seu plano IPTV vence em ${formatDate(c.vencimento)}. Qualquer dúvida é só chamar! 😊📺`;
+  window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
+  filaIndex++;
+  renderFilaAtual();
+};
+
+window.pularFila = function() {
+  filaIndex++;
+  renderFilaAtual();
+};
+
+// Enviar para todos de uma seção (popup diário)
 window.avisarTodosSecao = function(secao) {
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
   const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
   const lista = clientes.filter(c => {
-    if (!c.vencimento || !c.whatsapp) return false;
+    if (!c.vencimento) return false;
     const v = new Date(c.vencimento + 'T00:00:00');
     return secao === 'hoje' ? v.toDateString() === hoje_.toDateString() : v.toDateString() === amanha.toDateString();
   });
-  if (!lista.length) { showToast('Nenhum cliente com WhatsApp nesta lista'); return; }
-  let delay = 0;
-  lista.forEach(c => {
-    setTimeout(() => {
-      whatsCliente(c.id);
-      const prefixo = secao === 'hoje' ? 'btnAvHoje_' : 'btnAvAmanha_';
-      const btn = document.getElementById(prefixo + c.id);
-      if (btn) { btn.textContent = '✅ Enviado'; btn.disabled = true; btn.style.background = '#16a34a'; }
-    }, delay);
-    delay += 1500;
-  });
-  showToast(`📱 Enviando para ${lista.length} cliente(s)...`);
+  fecharModal('modalAvisoDiario');
+  abrirFilaEnvio(lista);
 };
 
-// ===== AVISAR VENCENDO HOJE (botão dashboard) =====
+// Avisar vencendo hoje (botão dashboard)
 window.avisarVencendoHoje = function() {
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
   const lista = clientes.filter(c => {
@@ -1013,47 +1101,24 @@ window.avisarVencendoHoje = function() {
     return new Date(c.vencimento + 'T00:00:00').toDateString() === hoje_.toDateString();
   });
   if (!lista.length) { showToast('Nenhum cliente vencendo hoje'); return; }
-  let semWhats = 0, delay = 0;
-  lista.forEach(c => {
-    const whats = (c.whatsapp || '').replace(/\D/g,'');
-    if (!whats) { semWhats++; return; }
-    setTimeout(() => {
-      const msg = `Olá ${c.nome}! 🔔📺\n\nSeu plano IPTV vence *HOJE*! Renove agora para não perder o acesso. Entre em contato comigo! 🙏`;
-      window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
-    }, delay);
-    delay += 1500;
-  });
-  let msg = `📱 Enviando para ${lista.length - semWhats} cliente(s) que vencem hoje...`;
-  if (semWhats > 0) msg += ` (${semWhats} sem WhatsApp)`;
-  showToast(msg);
+  abrirFilaEnvio(lista);
 };
 
-// ===== AVISAR VENCENDO AMANHÃ (botão dashboard) =====
+// Avisar vencendo amanhã (botão dashboard)
 window.avisarVencendoAmanha = function() {
   const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
   const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-  const proxAmanha = clientes.filter(c => {
+  const lista = clientes.filter(c => {
     if (!c.vencimento) return false;
     return new Date(c.vencimento + 'T00:00:00').toDateString() === amanha.toDateString();
   });
-  if (!proxAmanha.length) { showToast('Nenhum cliente vencendo amanhã'); return; }
-  let semWhats = 0, delay = 0;
-  proxAmanha.forEach(c => {
-    const whats = (c.whatsapp || '').replace(/\D/g,'');
-    if (!whats) { semWhats++; return; }
-    setTimeout(() => {
-      const msg = `Olá ${c.nome}! 😊📺\n\nPassando para lembrar que seu plano IPTV vence *AMANHÃ* (${formatDate(c.vencimento)}).\n\nPara não perder o acesso, renove hoje mesmo! Entre em contato comigo. 🙏`;
-      window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
-    }, delay);
-    delay += 1500;
-  });
-  let msg = `📱 Abrindo WhatsApp para ${proxAmanha.length - semWhats} cliente(s) que vencem amanhã...`;
-  if (semWhats > 0) msg += ` (${semWhats} sem WhatsApp)`;
-  showToast(msg);
+  if (!lista.length) { showToast('Nenhum cliente vencendo amanhã'); return; }
+  abrirFilaEnvio(lista);
 };
 
-// (mantido para compatibilidade — não usado mais diretamente)
 window.verificacaoAutomaticaAmanha = function() {};
+
+
 
 
 
