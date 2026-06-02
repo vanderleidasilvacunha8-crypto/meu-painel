@@ -237,8 +237,12 @@ tr:last-child td{border-bottom:none}
     <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
     <div id="loginError" class="error-msg">E-mail ou senha incorretos.</div>
     <div class="login-footer">
-      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha</button><br>
-      <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro." target="_blank">📱 Falar no WhatsApp</a>
+      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha</button>
+      <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid #eee">
+        <p style="font-size:.95rem;color:#1a3a2a;font-weight:700;margin-bottom:.2rem">Quer ser um revendedor? 🤝</p>
+        <p style="font-size:.82rem;color:#666;margin-bottom:.85rem">Chame no WhatsApp e peça um teste grátis!</p>
+        <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro%20e%20fazer%20um%20teste." target="_blank">📱 Chamar e pedir um teste</a>
+      </div>
     </div>
   </div>
 </div>
@@ -684,6 +688,10 @@ let unsubClientes = null;
 let unsubRevs = null;
 let unsubPlanos = null;
 
+// E-mails que SEMPRE entram como administrador (dono do painel).
+// Para adicionar outro admin, coloque o e-mail aqui dentro das aspas, separado por vírgula.
+const SUPER_ADMINS = ['vanderleidasilvacunha8@gmail.com'];
+
 // ===== CRIAR CONTA DE REVENDEDOR SEM DESLOGAR O ADMIN =====
 // Usa um app Firebase secundário só para criar o usuário, assim o login
 // do admin atual não é trocado.
@@ -772,8 +780,10 @@ let currentRevendedorId = null;
 
 async function carregarPerfil(user) {
   const snapAdmin = await get(ref(db, 'iptv/admins/' + user.uid));
-  if (snapAdmin.exists()) {
+  const ehSuperAdmin = SUPER_ADMINS.includes((user.email || '').toLowerCase());
+  if (snapAdmin.exists() || ehSuperAdmin) {
     isAdmin = true;
+    if (!snapAdmin.exists()) { try { await set(ref(db, 'iptv/admins/' + user.uid), { email: user.email, criadoEm: hoje() }); } catch(e) {} }
   } else {
     const snapRevAll = await get(ref(db, 'iptv/revendedores'));
     const snapAdmAll = await get(ref(db, 'iptv/admins'));
