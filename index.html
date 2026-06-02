@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -176,7 +175,7 @@ tr:last-child td{border-bottom:none}
 #modalAvisoDiario .aviso-btn{background:#25D366;border:none;color:#fff;border-radius:8px;padding:.35rem .75rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
 #modalAvisoDiario .aviso-btn:disabled{background:#374151;color:#6b7280;cursor:not-allowed}
 #modalAvisoDiario .secao-titulo{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:.5rem 0 .35rem;margin-top:.5rem}
-display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;border:none;border-radius:8px;padding:.5rem;cursor:pointer;color:#fff;font-size:1.3rem}
+.hamburger{display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;border:none;border-radius:8px;padding:.5rem;cursor:pointer;color:#fff;font-size:1.3rem}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}
 
 @media(max-width:768px){
@@ -253,12 +252,12 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
     </div>
     <div class="sidebar-user">
       <strong id="sidebarEmail"></strong>
-      <span id="sidebarBadge" class="badge-role"></span>
-      <span id="sidebarCreditos" style="display:none;font-size:.75rem;color:#4ade80;margin-top:.3rem;display:block"></span>
+      <span id="sidebarBadge" class="badge-role badge-rev">Revendedor</span>
+      <span id="sidebarCreditos" style="display:none;font-size:.75rem;color:#4ade80;margin-top:.3rem"></span>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section">Menu</div>
-      <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
       <div class="nav-item" onclick="showPage('clientes')"><span class="nav-icon">👥</span> Clientes</div>
       <div class="nav-item admin-only hidden" onclick="showPage('revendedores')"><span class="nav-icon">🤝</span> Revendedores</div>
       <div class="nav-item admin-only hidden" onclick="showPage('planos')"><span class="nav-icon">📋</span> Planos</div>
@@ -278,31 +277,30 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
     <div id="pageDashboard" class="page">
       <div class="page-header">
         <h2>Dashboard</h2>
-        <p id="dashGreet"></p>
+        <p id="dashGreet">Bem-vindo</p>
       </div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Total Clientes</div><div class="stat-value" id="stTotal">0</div></div>
         <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value green" id="stAtivos">0</div></div>
         <div class="stat-card"><div class="stat-label">Vencidos</div><div class="stat-value red" id="stVencidos">0</div></div>
-        <div class="stat-card"><div class="stat-label">Receita</div><div class="stat-value amber" id="stReceita">R$ 0</div></div>
+        <div class="stat-card"><div class="stat-label">Receita</div><div class="stat-value amber" id="stReceita">R$ 0,00</div></div>
       </div>
 
-      <!-- ===== NOVO: ALERTA VENCE HOJE ===== -->
+      <!-- ALERTA VENCE HOJE -->
       <div id="alertHoje"></div>
-      <div id="btnAvisarHojeWrap" style="display:none;margin-bottom:.75rem">
+      <div id="btnAvisarHojeWrap" style="display:none;margin-bottom:0.75rem">
         <button onclick="avisarVencendoHoje()" style="width:100%;padding:.8rem;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;box-shadow:0 4px 15px rgba(124,58,237,.35)">
           🔔 Avisar clientes que vencem HOJE via WhatsApp
         </button>
       </div>
 
-      <!-- ===== NOVO: ALERTA VENCE AMANHÃ ===== -->
+      <!-- ALERTA VENCE AMANHÃ -->
       <div id="alertAmanha"></div>
       <div id="btnAvisarAmanhaWrap" style="display:none;margin-bottom:1rem">
         <button onclick="avisarVencendoAmanha()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;box-shadow:0 4px 15px rgba(220,38,38,.4)">
           🚨 Avisar AGORA clientes que vencem AMANHÃ via WhatsApp
         </button>
       </div>
-      <!-- ===== FIM NOVO ===== -->
 
       <div id="alertVenc"></div>
       <div id="btnAvisarWrap" style="display:none;margin-bottom:1rem">
@@ -312,7 +310,7 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
       </div>
       <div class="card">
         <div class="card-header"><h3>📊 Receita dos Últimos 6 Meses</h3></div>
-        <canvas id="chartReceita" height="120"></canvas>
+        <canvas id="chartReceita" height="258"></canvas>
       </div>
       <div class="card">
         <div class="card-header"><h3>📋 Clientes Recentes</h3></div>
@@ -341,11 +339,9 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
             <option value="vence7">⚠️ Vence em 7 dias</option>
             <option value="vence1">🚨 Vence amanhã</option>
           </select>
-          <select id="filtroServidor" style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer" onchange="renderClientes()">
-            <option value="">🖥️ Todos servidores</option>
-          </select>
+          <select id="filtroServidor" style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer" onchange="renderClientes()"><option value="">🖥️ Todos servidores</option></select>
         </div>
-        <div class="table-wrapper" style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Servidor</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+        <div class="table-wrapper" style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Servidor</th><th>Plano</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody id="tblClientes"></tbody></table></div>
         <div class="cards-mobile" id="cardsMobileClientes"></div>
       </div>
@@ -431,10 +427,10 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
         <div class="form-group"><label>Servidor</label>
-          <select id="cServidor"><option value="">Selecione...</option></select>
+          <select id="cServidor"><option value="">Selecione um servidor...</option></select>
         </div>
         <div class="form-group"><label>Plano</label>
-          <select id="cPlano" style="width:100%;padding:.7rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem">
+          <select id="cPlano">
             <option value="">Selecione...</option>
             <option value="1 mês">1 mês</option><option value="2 meses">2 meses</option>
             <option value="3 meses">3 meses</option><option value="4 meses">4 meses</option>
@@ -646,7 +642,7 @@ display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;bo
 
 <!-- FIREBASE -->
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getDatabase, ref, set, get, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
@@ -673,6 +669,22 @@ let planos = [];
 let unsubClientes = null;
 let unsubRevs = null;
 let unsubPlanos = null;
+
+// ===== CRIAR CONTA DE REVENDEDOR SEM DESLOGAR O ADMIN =====
+// Usa um app Firebase secundário só para criar o usuário, assim o login
+// do admin atual não é trocado.
+async function criarUsuarioSemDeslogar(email, senha) {
+  const appSec = initializeApp(firebaseConfig, 'secundario-' + Date.now());
+  const authSec = getAuth(appSec);
+  try {
+    const cred = await createUserWithEmailAndPassword(authSec, email, senha);
+    const uid = cred.user.uid;
+    await signOut(authSec);
+    return uid;
+  } finally {
+    try { await deleteApp(appSec); } catch(e) {}
+  }
+}
 
 // ===== AUTH =====
 window.toggleSenhaLogin = function() {
@@ -796,7 +808,7 @@ function mostrarApp() {
   document.getElementById('appLayout').classList.remove('hidden');
   iniciarListeners();
   showPage('dashboard');
-  // ===== NOVO: popup diário ao entrar =====
+  // popup diário ao entrar
   setTimeout(abrirAvisoDiario, 3000);
 }
 
@@ -869,7 +881,7 @@ function renderDashboard() {
   document.getElementById('stVencidos').textContent = vencidos;
   document.getElementById('stReceita').textContent = 'R$ ' + receita.toFixed(2).replace('.', ',');
 
-  // ===== NOVO: clientes vencendo HOJE =====
+  // clientes vencendo HOJE
   const proxHoje = clientes.filter(c => {
     if (!c.vencimento) return false;
     const v = new Date(c.vencimento + 'T00:00:00');
@@ -888,7 +900,7 @@ function renderDashboard() {
     if (btnHojeWrap) btnHojeWrap.style.display = 'none';
   }
 
-  // ===== NOVO: clientes vencendo AMANHÃ =====
+  // clientes vencendo AMANHÃ
   const proxAmanha = clientes.filter(c => {
     if (!c.vencimento) return false;
     const v = new Date(c.vencimento + 'T00:00:00');
@@ -907,7 +919,7 @@ function renderDashboard() {
     if (btnAmanhaWrap) btnAmanhaWrap.style.display = 'none';
   }
 
-  // Alerta HOJE (substituindo o de 2-7 dias)
+  // Alerta HOJE (bloco extra)
   const proxHojeVenc = clientes.filter(c => {
     if (!c.vencimento) return false;
     const v = new Date(c.vencimento + 'T00:00:00');
@@ -951,7 +963,6 @@ window.abrirAvisoDiario = function() {
   const total = proxHoje.length + proxAmanha.length;
   if (total === 0) return;
 
-  // Monta seção de hoje
   const secHoje = document.getElementById('avisoHojeSection');
   const secAmanha = document.getElementById('avisoAmanhaSection');
   const vazio = document.getElementById('avisoVazio');
@@ -1118,10 +1129,6 @@ window.avisarVencendoAmanha = function() {
 
 window.verificacaoAutomaticaAmanha = function() {};
 
-
-
-
-
 // ===== CLIENTES =====
 window.renderClientes = function() {
   const busca = (document.getElementById('buscaCliente')?.value || '').toLowerCase();
@@ -1166,7 +1173,7 @@ window.renderClientes = function() {
         <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
       </div></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="9" class="empty-state">Nenhum cliente encontrado</td></tr>';
+  }).join('') : '<tr><td colspan="8" class="empty-state">Nenhum cliente encontrado</td></tr>';
   renderCardsMobile();
 };
 
@@ -1389,8 +1396,8 @@ window.salvarRevendedor = async function() {
   try {
     let uid = id;
     if (!id) {
-      const cred = await createUserWithEmailAndPassword(auth, email, senha);
-      uid = cred.user.uid;
+      // cria a conta sem deslogar o admin atual
+      uid = await criarUsuarioSemDeslogar(email, senha);
     }
     const rev = revendedores.find(x => x.id === id);
     const senhaDigitada = document.getElementById('rSenha').value;
@@ -1857,10 +1864,8 @@ window.lerArquivoBackup = function(input) {
   reader.onload = function(e) {
     try {
       const json = JSON.parse(e.target.result);
-      // Valida estrutura mínima
       if (!json.dados) throw new Error('Arquivo inválido: sem campo "dados"');
       dadosBackupCarregados = json;
-      // Monta preview
       const d = json.dados;
       const totalClientes = d.clientes ? Object.keys(d.clientes).length : 0;
       const totalRevs = d.revendedores ? Object.keys(d.revendedores).length : 0;
@@ -1944,7 +1949,7 @@ window.confirmarRestaurar = async function() {
 let chartInstance = null;
 function renderGraficoReceita() {
   const canvas = document.getElementById('chartReceita');
-  if (!canvas) return;
+  if (!canvas || typeof Chart === 'undefined') return;
   const meses = [];
   const receitas = [];
   const hoje_ = new Date();
@@ -1992,5 +1997,6 @@ function renderGraficoReceita() {
   });
 }
 </script>
-</body>
-</html>
+
+
+</body></html>
