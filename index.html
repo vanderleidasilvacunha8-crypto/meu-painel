@@ -5,6 +5,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1a3a2a">
+<meta name="apple-mobile-web-app-title" content="StreamPanel">
 <title>StreamPanel Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -643,7 +645,7 @@ tr:last-child td{border-bottom:none}
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getDatabase, ref, set, get, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const firebaseConfig = {
@@ -660,6 +662,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
+
+// Mantém o login salvo no aparelho — ao recarregar não pede login de novo
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
+
+// Faz o painel se comportar como app instalado (abrir pela tela inicial = mais estável)
+try {
+  const _manifest = {name:"StreamPanel Pro",short_name:"StreamPanel",start_url:".",scope:".",display:"standalone",orientation:"portrait",background_color:"#0f1117",theme_color:"#1a3a2a"};
+  const _l = document.createElement('link');
+  _l.rel = 'manifest';
+  _l.href = URL.createObjectURL(new Blob([JSON.stringify(_manifest)], {type:'application/manifest+json'}));
+  document.head.appendChild(_l);
+} catch(e) {}
 
 let currentUser = null;
 let isAdmin = false;
@@ -808,8 +822,31 @@ function mostrarApp() {
   document.getElementById('appLayout').classList.remove('hidden');
   iniciarListeners();
   showPage('dashboard');
-  // popup diário ao entrar
-  setTimeout(abrirAvisoDiario, 3000);
+  // popup diário de avisos — só uma vez por dia neste aparelho (evita reaparecer a cada recarregamento)
+  if (localStorage.getItem('avisoVistoEm') !== hoje()) {
+    setTimeout(() => { abrirAvisoDiario(); try { localStorage.setItem('avisoVistoEm', hoje()); } catch(e) {} }, 3000);
+  }
+  // lembrete de backup (somente admin)
+  checarLembreteBackup();
+}
+
+// Lembra o admin de fazer backup se faz tempo que não faz (no máximo uma vez por dia)
+function checarLembreteBackup() {
+  if (!isAdmin) return;
+  try {
+    if (localStorage.getItem('lembreteBackupEm') === hoje()) return;
+    const ultima = localStorage.getItem('ultimoBackup');
+    let dias = null;
+    if (ultima) dias = Math.floor((Date.now() - new Date(ultima).getTime()) / 86400000);
+    if (ultima && dias < 7) return;
+    setTimeout(() => {
+      const msg = ultima
+        ? '⚠️ Faz ' + dias + ' dia(s) desde o seu último backup neste aparelho.\n\nQuer baixar um backup de segurança agora? (recomendado)'
+        : '⚠️ Você ainda não fez nenhum backup neste aparelho.\n\nQuer baixar um backup de segurança agora?';
+      try { localStorage.setItem('lembreteBackupEm', hoje()); } catch(e) {}
+      if (confirm(msg)) fazerBackup();
+    }, 6500);
+  } catch(e) {}
 }
 
 // ===== LISTENERS =====
@@ -1714,6 +1751,7 @@ window.fazerBackup = async function() {
     const dt = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
     a.href = url; a.download = 'backup-streampanel-' + dt + '.json'; a.click();
     URL.revokeObjectURL(url);
+    try { localStorage.setItem('ultimoBackup', new Date().toISOString()); } catch(e) {}
     showToast('✅ Backup gerado! ' + totalC + ' clientes, ' + totalR + ' revendedores.');
   } catch(e) { showToast('❌ Erro ao gerar backup: ' + e.message); }
 };
