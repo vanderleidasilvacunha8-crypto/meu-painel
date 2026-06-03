@@ -1,2050 +1,376 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#1a3a2a">
-<meta name="apple-mobile-web-app-title" content="StreamPanel">
-<title>StreamPanel Pro</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<title>Cobrança Pix — StreamPanel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- ================= FIREBASE (compat - igual seu painel) ================= -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
-.hidden{display:none!important}
-
-/* LOGIN */
-#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1a3a2a 0%,#2d5a3d 100%)}
-.login-box{background:#fff;border-radius:16px;padding:2.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-.login-logo{text-align:center;margin-bottom:2rem}
-.login-logo h1{font-size:1.8rem;color:#1a3a2a;font-weight:700}
-.login-logo p{color:#666;font-size:.9rem;margin-top:.25rem}
-.form-group{margin-bottom:1.2rem}
-.form-group label{display:block;font-size:.85rem;font-weight:600;color:#444;margin-bottom:.4rem}
-.form-group input{width:100%;padding:.75rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;transition:border .2s}
-.form-group input:focus{outline:none;border-color:#2d7a4f}
-.btn-primary{width:100%;padding:.85rem;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s}
-.btn-primary:hover{background:#1a5c38}
-.btn-link{background:none;border:none;color:#2d7a4f;cursor:pointer;font-size:.875rem;text-decoration:underline;padding:.5rem 0}
-.login-footer{text-align:center;margin-top:1.5rem}
-.whatsapp-btn{display:inline-flex;align-items:center;gap:.5rem;background:#25D366;color:#fff;padding:.6rem 1.2rem;border-radius:50px;text-decoration:none;font-size:.85rem;font-weight:600;margin-top:.75rem}
-.error-msg{color:#c0392b;font-size:.85rem;text-align:center;margin-top:.75rem;display:none}
-
-/* LAYOUT PRINCIPAL */
-#appLayout{display:flex;min-height:100vh}
-.sidebar{width:240px;background:#111827;color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;left:0;top:0;z-index:100;overflow-y:auto;border-right:1px solid rgba(255,255,255,.06)}
-.sidebar-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,.1)}
-.sidebar-logo h2{font-size:1.1rem;font-weight:700;letter-spacing:.5px}
-.sidebar-user{padding:.75rem 1.25rem;font-size:.78rem;color:rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.1)}
-.sidebar-user strong{display:block;color:#fff;font-size:.85rem}
-.badge-role{display:inline-block;padding:.15rem .5rem;border-radius:50px;font-size:.7rem;font-weight:700;margin-top:.25rem}
-.badge-admin{background:#f59e0b;color:#1a1a1a}
-.badge-rev{background:#3b82f6;color:#fff}
-.sidebar-nav{flex:1;padding:1rem 0}
-.nav-section{padding:.5rem 1.25rem .25rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4)}
-.nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem 1.25rem;cursor:pointer;color:rgba(255,255,255,.75);font-size:.9rem;transition:all .2s;border-left:3px solid transparent}
-.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-item.active{background:linear-gradient(90deg,rgba(74,222,128,.15),transparent);color:#fff;border-left-color:#4ade80}
-.nav-icon{font-size:1.1rem;width:20px;text-align:center}
-.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.1)}
-.btn-sair{width:100%;display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:8px;color:#f87171;cursor:pointer;font-size:.9rem;font-weight:600;transition:all .2s}
-.btn-sair:hover{background:rgba(239,68,68,.25);color:#fca5a5}
-
-.main-content{margin-left:240px;flex:1;padding:1.5rem;min-height:100vh;background:#0f1117}
-.page-header{margin-bottom:1.5rem}
-.page-header h2{font-size:1.4rem;font-weight:700;color:#f1f5f9}
-.page-header p{color:#64748b;font-size:.875rem;margin-top:.25rem}
-
-/* CARDS */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
-.stat-card{background:#1e2433;border-radius:14px;padding:1.25rem;border:1px solid rgba(255,255,255,.07);box-shadow:0 4px 20px rgba(0,0,0,.2)}
-.stat-label{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:.5rem}
-.stat-value{font-size:1.8rem;font-weight:700;color:#f1f5f9}
-.stat-value.green{color:#16a34a}
-.stat-value.red{color:#dc2626}
-.stat-value.amber{color:#d97706}
-
-/* TABELAS */
-.card{background:#1e2433;border-radius:14px;padding:1.25rem;border:1px solid rgba(255,255,255,.07);margin-bottom:1.25rem;box-shadow:0 4px 20px rgba(0,0,0,.2)}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-.card-header h3{font-size:1rem;font-weight:700;color:#f1f5f9}
-.btn-add{background:#2d7a4f;color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-size:.875rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:background .2s}
-.btn-add:hover{background:#1a5c38}
-table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:.6rem .75rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;border-bottom:1px solid rgba(255,255,255,.07)}
-td{padding:.75rem;font-size:.875rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;color:#cbd5e1}
-tr:last-child td{border-bottom:none}
-.badge{display:inline-block;padding:.2rem .6rem;border-radius:50px;font-size:.72rem;font-weight:700}
-.badge-green{background:#dcfce7;color:#16a34a}
-.badge-red{background:#fee2e2;color:#dc2626}
-.badge-amber{background:#fef3c7;color:#d97706}
-.btn-sm{padding:.3rem .7rem;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
-.btn-edit{background:#eff6ff;color:#2563eb}
-.btn-edit:hover{background:#dbeafe}
-.btn-del{background:#fef2f2;color:#dc2626}
-.btn-del:hover{background:#fee2e2}
-.btn-block{background:#fef3c7;color:#d97706}
-.btn-block:hover{background:#fde68a}
-.btn-unblock{background:#dcfce7;color:#16a34a}
-.btn-unblock:hover{background:#bbf7d0}
-.actions-cell{display:flex;gap:.3rem;flex-wrap:nowrap;align-items:center}
-
-/* BOTÕES ÍCONE NA LINHA */
-.btn-icon{width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;flex-shrink:0}
-.btn-icon:hover{opacity:.85;transform:scale(1.08)}
-.bi-edit{background:#2563eb;color:#fff}
-.bi-venc{background:#8b5cf6;color:#fff}
-.bi-ren1{background:#16a34a;color:#fff;font-size:.75rem;font-weight:700}
-.bi-renN{background:#0891b2;color:#fff}
-.bi-block{background:#d97706;color:#fff}
-.bi-unblock{background:#16a34a;color:#fff}
-.bi-del{background:#dc2626;color:#fff}
-.bi-whats{background:#25D366;color:#fff}
-.actions-grid{display:grid;grid-template-columns:repeat(3,32px);gap:3px}
-
-/* ===================== MODAL TELA CHEIA ===================== */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:#f0f2f5;overflow-y:auto;flex-direction:column}
-.modal-overlay.open{display:flex}
-.modal{background:#fff;width:100%;min-height:100vh;padding:0;display:flex;flex-direction:column}
-.modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:#1a3a2a;color:#fff;position:sticky;top:0;z-index:10}
-.modal-topbar h3{font-size:1rem;font-weight:700;color:#fff;margin:0}
-.modal-topbar .btn-topbar-cancel{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:.4rem .85rem;font-size:.85rem;font-weight:600;cursor:pointer}
-.modal-topbar .btn-topbar-save{background:#4ade80;border:none;color:#1a3a2a;border-radius:8px;padding:.4rem .85rem;font-size:.85rem;font-weight:700;cursor:pointer}
-.modal-body{padding:1rem 1.25rem;flex:1;background:#161b27}
-.modal h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:#f1f5f9}
-.modal-body .form-group{margin-bottom:.9rem}
-.modal .form-group input,.modal .form-group select,.modal .form-group textarea{width:100%;padding:.7rem .9rem;border:1.5px solid rgba(255,255,255,.2);border-radius:10px;font-size:.95rem;background:#1e293b;color:#f1f5f9;transition:border .2s, box-shadow .2s, background .2s}
-.modal .form-group input::placeholder{color:#64748b}
-.modal .form-group select option{background:#1e2433;color:#f1f5f9}
-.modal .form-group input:focus,.modal .form-group select:focus{outline:none;border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.2);background:#1e293b;color:#f1f5f9}
-.modal .form-group label{color:#94a3b8;font-size:.82rem;font-weight:600;display:block;margin-bottom:.35rem;letter-spacing:.3px}
-.modal-footer{display:flex;gap:.75rem;margin-top:1rem}
-.btn-cancel{flex:1;padding:.7rem;background:#f3f4f6;border:none;border-radius:8px;font-weight:600;cursor:pointer}
-.btn-save{flex:2;padding:.7rem;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer}
-.modal-section{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#aaa;margin:1rem 0 .5rem;border-top:1px solid #f3f4f6;padding-top:.75rem}
-
-/* TOAST */
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1a3a2a;color:#fff;padding:.75rem 1.25rem;border-radius:10px;font-size:.875rem;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
-.toast.show{opacity:1}
-
-/* ========== ALERTAS DASHBOARD ========== */
-.alert-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:1rem;margin-bottom:1rem}
-.alert-box h4{color:#92400e;font-size:.85rem;font-weight:700;margin-bottom:.5rem}
-.alert-box ul{list-style:none;font-size:.82rem;color:#78350f}
-.alert-box ul li{padding:.2rem 0}
-.empty-state{text-align:center;padding:2rem;color:#9ca3af;font-size:.875rem}
-
-/* ========== NOVO: ALERTA "VENCE AMANHÃ" ========== */
-.alert-amanha{
-  background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(239,68,68,.08));
-  border:1.5px solid rgba(239,68,68,.5);
-  border-radius:12px;
-  padding:1rem 1.25rem;
-  margin-bottom:1rem;
-  animation:pulseRed 2s infinite;
-}
-@keyframes pulseRed{
-  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}
-  50%{box-shadow:0 0 0 6px rgba(239,68,68,.15)}
-}
-.alert-amanha h4{color:#ef4444;font-size:.9rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
-.alert-amanha ul{list-style:none;font-size:.82rem;color:#fca5a5}
-.alert-amanha ul li{padding:.15rem 0;display:flex;align-items:center;gap:.4rem}
-
-/* ========== ALERTA "VENCE HOJE" ========== */
-.alert-hoje{
-  background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(139,92,246,.08));
-  border:1.5px solid rgba(139,92,246,.55);
-  border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;
-  animation:pulseViolet 2s infinite;
-}
-@keyframes pulseViolet{
-  0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0)}
-  50%{box-shadow:0 0 0 6px rgba(139,92,246,.15)}
-}
-.alert-hoje h4{color:#a78bfa;font-size:.9rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
-.alert-hoje ul{list-style:none;font-size:.82rem;color:#c4b5fd}
-.alert-hoje ul li{padding:.15rem 0;display:flex;align-items:center;gap:.4rem}
-
-/* ========== MODAL AVISO DIÁRIO ========== */
-#modalAvisoDiario .aviso-cliente-row{
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,.05);border-radius:10px;padding:.6rem .9rem;margin-bottom:.4rem;
-}
-#modalAvisoDiario .aviso-nome{font-weight:600;font-size:.875rem;color:#f1f5f9}
-#modalAvisoDiario .aviso-info{font-size:.75rem;color:#64748b;margin-top:.1rem}
-#modalAvisoDiario .aviso-btn{background:#25D366;border:none;color:#fff;border-radius:8px;padding:.35rem .75rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
-#modalAvisoDiario .aviso-btn:disabled{background:#374151;color:#6b7280;cursor:not-allowed}
-#modalAvisoDiario .secao-titulo{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:.5rem 0 .35rem;margin-top:.5rem}
-.hamburger{display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:#1a3a2a;border:none;border-radius:8px;padding:.5rem;cursor:pointer;color:#fff;font-size:1.3rem}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}
-
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:transform .3s}
-  .sidebar.open{transform:translateX(0)}
-  .main-content{margin-left:0;padding:.75rem;padding-top:4rem}
-  .hamburger{display:flex}
-  .sidebar-overlay.show{display:block}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .modal-overlay{padding:.75rem;align-items:center}
-  .modal{border-radius:14px;max-height:85vh;padding:1.25rem 1rem;margin:auto;background:#1e2433}
-  table{font-size:.78rem}
-  th,td{padding:.5rem .4rem}
-  .actions-grid{grid-template-columns:repeat(3,30px);gap:2px}
-  .btn-icon{width:30px;height:30px;font-size:.82rem}
-  .card{padding:1rem}
-  .card-header{flex-wrap:wrap;gap:.5rem}
-  .page-header h2{font-size:1.2rem}
-  .table-wrapper{display:none}
-  .cards-mobile{display:flex;flex-direction:column;gap:.65rem}
-  .client-card{background:#1e2433;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem;box-shadow:0 2px 10px rgba(0,0,0,.2)}
-  .client-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem}
-  .client-card-name{font-weight:700;font-size:.95rem;color:#f1f5f9}
-  .client-card-obs{font-size:.72rem;color:#64748b;margin-top:.1rem}
-  .client-card-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
-  .client-chip{background:rgba(255,255,255,.06);border-radius:6px;padding:.2rem .5rem;font-size:.72rem;color:#94a3b8}
-  .client-chip strong{color:#e2e8f0}
-  .client-card-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem;margin-top:.6rem;border-top:1px solid rgba(255,255,255,.06);padding-top:.6rem}
-  .client-card-actions .btn-icon{width:100%;border-radius:8px}
-}
-@media(min-width:769px){
-  .cards-mobile{display:none}
-  .table-wrapper{display:block}
-}
+  :root{
+    --bg:#0c1116; --panel:#141b22; --panel-2:#1b242d; --line:#243039;
+    --txt:#e6edf3; --txt-dim:#8a97a3; --pix:#32bcad; --pix-dark:#249a8d;
+    --wa:#25d366; --red:#ff6b6b; --orange:#ffa94d; --green:#51cf66; --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(900px 500px at 100% -10%, rgba(50,188,173,.10), transparent 60%), var(--bg);
+    color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;padding:22px 16px 70px;line-height:1.5}
+  .wrap{max-width:760px;margin:0 auto}
+  .head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .badge{width:42px;height:42px;border-radius:12px;flex:none;background:linear-gradient(135deg,var(--pix),var(--pix-dark));
+    display:grid;place-items:center;font-family:'Sora';font-weight:700;color:#06231f;font-size:20px;box-shadow:0 6px 20px rgba(50,188,173,.25)}
+  h1{font-family:'Sora';font-size:22px;font-weight:700;letter-spacing:-.3px}
+  .head p{color:var(--txt-dim);font-size:13px}
+  .tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:18px}
+  .tab{flex:1;text-align:center;padding:11px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;color:var(--txt-dim);transition:.15s}
+  .tab.active{background:linear-gradient(135deg,var(--pix),var(--pix-dark));color:#06231f}
+  .page{display:none}.page.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:16px}
+  .card h2{font-family:'Sora';font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--pix);margin-bottom:18px;font-weight:600}
+  label{display:block;font-size:13px;color:var(--txt-dim);margin:0 0 6px 2px;font-weight:500}
+  .field{margin-bottom:16px}
+  input,select,textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:12px 13px;font-size:15px;font-family:inherit;transition:border-color .15s, box-shadow .15s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pix);box-shadow:0 0 0 3px rgba(50,188,173,.15)}
+  textarea{resize:vertical;min-height:120px;line-height:1.55}
+  .row{display:flex;gap:14px}.row > *{flex:1}
+  .hint{font-size:12px;color:var(--txt-dim);margin-top:6px;margin-left:2px}
+  .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+  .tag{background:var(--panel-2);border:1px solid var(--line);color:var(--txt-dim);font-family:'JetBrains Mono';font-size:11.5px;padding:4px 9px;border-radius:7px;cursor:pointer;transition:.15s}
+  .tag:hover{border-color:var(--pix);color:var(--pix)}
+  .btn{border:none;border-radius:11px;padding:13px 18px;font-size:15px;font-weight:600;font-family:'Plus Jakarta Sans';cursor:pointer;transition:.15s;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%}
+  .btn-primary{background:linear-gradient(135deg,var(--pix),var(--pix-dark));color:#06231f}
+  .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn-ghost{background:var(--panel-2);color:var(--txt);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--pix);color:var(--pix)}
+  .saved{display:none;align-items:center;gap:7px;background:rgba(50,188,173,.12);border:1px solid rgba(50,188,173,.4);color:var(--pix);border-radius:10px;padding:10px 13px;font-size:13.5px;margin-top:14px;font-weight:500}
+  .warn{background:rgba(255,169,77,.1);border:1px solid rgba(255,169,77,.35);color:var(--orange);border-radius:10px;padding:11px 13px;font-size:13px;margin-bottom:16px;line-height:1.5}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .toolbar select{width:auto;flex:1;min-width:160px}
+  .counter{font-size:13px;color:var(--txt-dim);font-weight:500;white-space:nowrap}
+  .counter b{color:var(--pix)}
+  .client{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:11px;transition:.15s}
+  .client.done{opacity:.5}
+  .client-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:11px}
+  .client-name{font-family:'Sora';font-weight:600;font-size:16px}
+  .client-meta{font-size:12.5px;color:var(--txt-dim);margin-top:2px}
+  .pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red)}
+  .pill.orange{background:rgba(255,169,77,.15);color:var(--orange)}
+  .pill.green{background:rgba(81,207,102,.15);color:var(--green)}
+  .client-actions{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+  .mini{padding:9px 12px;font-size:13px;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);color:var(--txt);cursor:pointer;font-weight:600;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
+  .mini.wa{background:var(--wa);color:#06231f;border-color:transparent}.mini.wa:hover{filter:brightness(1.06)}
+  .mini.pix{background:transparent;color:var(--pix);border-color:var(--pix)}
+  .mini.check{width:44px;background:transparent;color:var(--txt-dim)}
+  .mini.check.on{background:rgba(81,207,102,.15);color:var(--green);border-color:transparent}
+  .empty{text-align:center;color:var(--txt-dim);padding:30px;font-size:14px}
+  .divider{height:1px;background:var(--line);margin:18px 0}
+  .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:18px}
+  .modal.open{display:flex}
+  .modal-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:380px;width:100%;text-align:center}
+  .modal-box h3{font-family:'Sora';margin-bottom:4px}
+  .modal-box p{font-size:13px;color:var(--txt-dim);margin-bottom:16px}
+  #qr{display:flex;justify-content:center;margin-bottom:16px}
+  #qr img,#qr canvas{border-radius:10px;border:6px solid #fff}
+  .code-box{background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:12px;font-family:'JetBrains Mono';font-size:11px;color:var(--pix);word-break:break-all;line-height:1.5;max-height:90px;overflow:auto;margin-bottom:12px;text-align:left}
+  @media(max-width:520px){.row{flex-direction:column}.client-actions{grid-template-columns:1fr 1fr}.mini.check{grid-column:span 2;width:auto}}
 </style>
 </head>
 <body>
+<div class="wrap">
+  <div class="head">
+    <div class="badge">Pix</div>
+    <div><h1>Cobrança Pix</h1><p>Configure o Pix uma vez e cobre todos os clientes automaticamente.</p></div>
+  </div>
 
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">
-      <h1>📺 StreamPanel Pro</h1>
-      <p>Painel de Gestão IPTV</p>
-    </div>
-    <div class="form-group">
-      <label>Usuário</label>
-      <input type="text" id="loginEmail" placeholder="Digite seu usuário">
-    </div>
-    <div class="form-group">
-      <label>Senha</label>
-      <div style="position:relative">
-        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()" style="width:100%;padding:.75rem 2.75rem .75rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.95rem;transition:border .2s">
-        <button type="button" onclick="toggleSenhaLogin()" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.1rem;color:#888;padding:0;line-height:1" id="btnOlhoLogin">👁️</button>
+  <div class="tabs">
+    <div class="tab active" data-page="pgConfig">⚙️ Configuração</div>
+    <div class="tab" data-page="pgCobranca">📨 Cobrança em massa</div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="page active" id="pgConfig">
+    <div class="card">
+      <h2>Dados do recebedor</h2>
+      <div class="row">
+        <div class="field"><label>Tipo de chave</label>
+          <select id="tipoChave"><option value="cpf">CPF</option><option value="cnpj">CNPJ</option><option value="celular">Celular</option><option value="email">E-mail</option><option value="aleatoria">Chave aleatória</option></select></div>
+        <div class="field"><label>Chave Pix</label><input id="chavePix" placeholder="ex: +5531989892315"></div>
       </div>
-    </div>
-    <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
-    <div id="loginError" class="error-msg">E-mail ou senha incorretos.</div>
-    <div class="login-footer">
-      <button class="btn-link" onclick="recuperarSenha()">Esqueci minha senha</button>
-      <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid #eee">
-        <p style="font-size:.95rem;color:#1a3a2a;font-weight:700;margin-bottom:.2rem">Quer ser um revendedor? 🤝</p>
-        <p style="font-size:.82rem;color:#666;margin-bottom:.85rem">Chame no WhatsApp e peça um teste grátis!</p>
-        <a class="whatsapp-btn" href="https://wa.me/5531989892315?text=Ol%C3%A1!%20Quero%20ser%20revendedor%20do%20StreamPanel%20Pro%20e%20fazer%20um%20teste." target="_blank">📱 Chamar e pedir um teste</a>
+      <div class="row">
+        <div class="field"><label>Nome do recebedor</label><input id="nomeRecebedor" maxlength="25" placeholder="Até 25 letras"></div>
+        <div class="field"><label>Cidade</label><input id="cidade" maxlength="15" placeholder="ex: Ribeirao Neves"></div>
       </div>
+      <div class="field"><label>Valor padrão da renovação (opcional)</label>
+        <input id="valor" type="number" step="0.01" placeholder="ex: 30.00">
+        <p class="hint">Usado quando o cliente não tiver um valor próprio.</p></div>
+    </div>
+    <div class="card">
+      <h2>Mensagem de cobrança</h2>
+      <div class="field"><label>Texto enviado ao cliente</label>
+        <textarea id="mensagem">Olá, {nome}! 👋
+
+Passando pra lembrar que seu plano de canais, filmes e séries vence *{vencimento}*. Valor: *{valor}*.
+
+Pra renovar é só pagar pelo Pix. 🙏</textarea>
+        <div class="tags">
+          <span class="tag" data-var="{nome}">{nome}</span><span class="tag" data-var="{vencimento}">{vencimento}</span>
+          <span class="tag" data-var="{plano}">{plano}</span><span class="tag" data-var="{valor}">{valor}</span>
+        </div></div>
+      <button class="btn btn-primary" id="btnSalvar">💾 Salvar configuração</button>
+      <div class="saved" id="aviso">✓ Configuração salva no Firebase!</div>
     </div>
   </div>
-</div>
 
-<!-- APP -->
-<div id="appLayout" class="hidden">
-  <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <h2>📺 StreamPanel</h2>
-    </div>
-    <div class="sidebar-user">
-      <strong id="sidebarEmail"></strong>
-      <span id="sidebarBadge" class="badge-role badge-rev">Revendedor</span>
-      <span id="sidebarCreditos" style="display:none;font-size:.75rem;color:#4ade80;margin-top:.3rem"></span>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section">Menu</div>
-      <div class="nav-item" onclick="showPage('dashboard')"><span class="nav-icon">📊</span> Dashboard</div>
-      <div class="nav-item" onclick="showPage('clientes')"><span class="nav-icon">👥</span> Clientes</div>
-      <div class="nav-item admin-only hidden" onclick="showPage('revendedores')"><span class="nav-icon">🤝</span> Revendedores</div>
-      <div class="nav-item admin-only hidden" onclick="showPage('planos')"><span class="nav-icon">📋</span> Planos</div>
-      <div class="nav-item" id="menuServidores" onclick="showPage('servidores')"><span class="nav-icon">🖥️</span> Servidores</div>
-      <div class="nav-section">Conta</div>
-      <div class="nav-item" onclick="showPage('relatorios')"><span class="nav-icon">📈</span> Relatórios</div>
-      <div class="nav-item admin-only hidden" onclick="fazerBackup()"><span class="nav-icon">💾</span> Backup dados</div>
-      <div class="nav-item admin-only hidden" onclick="abrirRestaurarBackup()"><span class="nav-icon">📂</span> Restaurar Backup</div>
-    </nav>
-    <div class="sidebar-footer">
-      <button class="btn-sair" id="btnSair"><span>🚪</span> Sair</button>
-    </div>
-  </aside>
-
-  <main class="main-content">
-    <!-- DASHBOARD -->
-    <div id="pageDashboard" class="page">
-      <div class="page-header">
-        <h2>Dashboard</h2>
-        <p id="dashGreet">Bem-vindo</p>
-      </div>
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Total Clientes</div><div class="stat-value" id="stTotal">0</div></div>
-        <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value green" id="stAtivos">0</div></div>
-        <div class="stat-card"><div class="stat-label">Vencidos</div><div class="stat-value red" id="stVencidos">0</div></div>
-        <div class="stat-card"><div class="stat-label">Receita</div><div class="stat-value amber" id="stReceita">R$ 0,00</div></div>
-      </div>
-
-      <!-- ALERTA VENCE HOJE -->
-      <div id="alertHoje"></div>
-      <div id="btnAvisarHojeWrap" style="display:none;margin-bottom:0.75rem">
-        <button onclick="avisarVencendoHoje()" style="width:100%;padding:.8rem;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;box-shadow:0 4px 15px rgba(124,58,237,.35)">
-          🔔 Avisar clientes que vencem HOJE via WhatsApp
-        </button>
-      </div>
-
-      <!-- ALERTA VENCE AMANHÃ -->
-      <div id="alertAmanha"></div>
-      <div id="btnAvisarAmanhaWrap" style="display:none;margin-bottom:1rem">
-        <button onclick="avisarVencendoAmanha()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;box-shadow:0 4px 15px rgba(220,38,38,.4)">
-          🚨 Avisar AGORA clientes que vencem AMANHÃ via WhatsApp
-        </button>
-      </div>
-
-      <div id="alertVenc"></div>
-      <div id="btnAvisarWrap" style="display:none;margin-bottom:1rem">
-        <button onclick="avisarVencendoHoje()" style="width:100%;padding:.75rem;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">
-          📱 Avisar todos que vencem HOJE via WhatsApp
-        </button>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>📊 Receita dos Últimos 6 Meses</h3></div>
-        <canvas id="chartReceita" height="258"></canvas>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>📋 Clientes Recentes</h3></div>
-        <table><thead><tr><th>Nome</th><th>Plano</th><th>Vencimento</th><th>Status</th></tr></thead>
-        <tbody id="tblDashClientes"></tbody></table>
-      </div>
-    </div>
-
-    <!-- CLIENTES -->
-    <div id="pageClientes" class="page hidden">
-      <div class="page-header"><h2>Clientes</h2></div>
-      <div class="card">
-        <div class="card-header">
-          <h3>👥 Lista de Clientes</h3>
-          <button class="btn-add" onclick="abrirModalCliente()">+ Novo Cliente</button>
-        </div>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem">
-          <div style="display:flex;flex:1;min-width:160px;border:1.5px solid #ddd;border-radius:8px;overflow:hidden;background:#fff">
-            <input type="text" id="buscaCliente" placeholder="Buscar por nome..." style="flex:1;padding:.6rem 1rem;border:none;font-size:.9rem;outline:none" oninput="renderClientes()">
-            <button onclick="renderClientes()" style="padding:.6rem .9rem;background:#2d7a4f;border:none;cursor:pointer;color:#fff;font-size:1rem">🔍</button>
-          </div>
-          <select id="filtroStatus" style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer" onchange="renderClientes()">
-            <option value="">Todos</option>
-            <option value="ativo">✅ Ativo</option>
-            <option value="vencido">❌ Vencido</option>
-            <option value="vence7">⚠️ Vence em 7 dias</option>
-            <option value="vence1">🚨 Vence amanhã</option>
-          </select>
-          <select id="filtroServidor" style="padding:.6rem 1rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;background:#fff;cursor:pointer" onchange="renderClientes()"><option value="">🖥️ Todos servidores</option></select>
-        </div>
-        <div class="table-wrapper" style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Servidor</th><th>Plano</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
-        <tbody id="tblClientes"></tbody></table></div>
-        <div class="cards-mobile" id="cardsMobileClientes"></div>
-      </div>
-    </div>
-
-    <!-- REVENDEDORES -->
-    <div id="pageRevendedores" class="page hidden">
-      <div class="page-header"><h2>Revendedores</h2></div>
-      <div class="card">
-        <div class="card-header">
-          <h3>🤝 Lista de Revendedores</h3>
-          <button class="btn-add" onclick="abrirModalRevendedor()">+ Novo Revendedor</button>
-        </div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário</th><th>Senha</th><th>Créditos</th><th>Clientes</th><th>Status</th><th>Ações</th></tr></thead>
-        <tbody id="tblRevendedores"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- PLANOS -->
-    <div id="pagePlanos" class="page hidden">
-      <div class="page-header"><h2>Planos</h2></div>
-      <div class="card">
-        <div class="card-header">
-          <h3>📋 Planos Disponíveis</h3>
-          <button class="btn-add" onclick="abrirModalPlano()">+ Novo Plano</button>
-        </div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Telas</th><th>Valor (R$)</th><th>Validade (dias)</th><th>Ações</th></tr></thead>
-        <tbody id="tblPlanos"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- SERVIDORES -->
-    <div id="pageServidores" class="page hidden">
-      <div class="page-header"><h2>Servidores</h2><p>Gerencie seus servidores e veja clientes por servidor</p></div>
-      <div class="card">
-        <div class="card-header">
-          <h3>🖥️ Meus Servidores</h3>
-          <button class="btn-add" onclick="abrirModalServidor()">+ Novo Servidor</button>
-        </div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome do Servidor</th><th>Clientes</th><th>Ações</th></tr></thead>
-        <tbody id="tblServidores"></tbody></table></div>
-      </div>
-      <div class="card" id="cardClientesServidor" style="display:none">
-        <div class="card-header"><h3 id="tituloClientesServidor">Clientes do Servidor</h3></div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Usuário IPTV</th><th>Plano</th><th>Vencimento</th><th>Dias</th><th>Status</th></tr></thead>
-        <tbody id="tblClientesServidor"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- RELATÓRIOS -->
-    <div id="pageRelatorios" class="page hidden">
-      <div class="page-header"><h2>Relatórios</h2></div>
-      <div class="card"><div class="card-header"><h3>⚠️ Vencimentos Próximos (7 dias)</h3></div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Plano</th><th>Vencimento</th><th>Valor</th></tr></thead><tbody id="tblVenc7"></tbody></table></div>
-      </div>
-      <div class="card"><div class="card-header"><h3>❌ Vencidos</h3></div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Plano</th><th>Vencimento</th><th>Valor</th></tr></thead><tbody id="tblVencidos"></tbody></table></div>
-      </div>
-      <div class="card"><div class="card-header"><h3>💰 Receita por Plano</h3></div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Plano</th><th>Clientes</th><th>Receita</th></tr></thead><tbody id="tblReceitaPlano"></tbody></table></div>
-      </div>
-    </div>
-  </main>
-</div>
-
-<!-- MODAIS -->
-<div class="modal-overlay" id="modalCliente">
-  <div class="modal">
-    <div class="modal-topbar">
-      <button class="btn-topbar-cancel" onclick="fecharModal('modalCliente')">✕ Cancelar</button>
-      <h3 id="modalClienteTitulo">Novo Cliente</h3>
-      <button class="btn-topbar-save" onclick="salvarCliente()">✓ Salvar</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="cId">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-        <div class="form-group"><label>Nome *</label><input type="text" id="cNome" placeholder="Nome do cliente"></div>
-        <div class="form-group"><label>Valor (R$)</label><input type="number" id="cValor" step="0.01" placeholder="0,00"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-        <div class="form-group"><label>Usuário IPTV</label><input type="text" id="cUser" placeholder="login"></div>
-        <div class="form-group"><label>Senha IPTV</label><input type="text" id="cPass" placeholder="senha"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-        <div class="form-group"><label>Servidor</label>
-          <select id="cServidor"><option value="">Selecione um servidor...</option></select>
-        </div>
-        <div class="form-group"><label>Plano</label>
-          <select id="cPlano">
-            <option value="">Selecione...</option>
-            <option value="1 mês">1 mês</option><option value="2 meses">2 meses</option>
-            <option value="3 meses">3 meses</option><option value="4 meses">4 meses</option>
-            <option value="5 meses">5 meses</option><option value="6 meses">6 meses</option>
-            <option value="7 meses">7 meses</option><option value="8 meses">8 meses</option>
-            <option value="9 meses">9 meses</option><option value="10 meses">10 meses</option>
-            <option value="11 meses">11 meses</option><option value="12 meses">12 meses</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group"><label>Vencimento</label><input type="date" id="cVenc"></div>
-      <div class="form-group"><label>📱 WhatsApp do cliente</label><input type="tel" id="cWhats" placeholder="Ex: 31999998888 (só números)"></div>
-      <div class="form-group"><label>Observações / Informações</label><input type="text" id="cObs" placeholder="Anotações sobre o cliente"></div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalVencimento" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:340px;min-height:unset;border-radius:16px;padding:1.5rem">
-    <h3>📅 Alterar Vencimento</h3>
-    <input type="hidden" id="vencId">
-    <p id="vencNomeCliente" style="font-size:.85rem;color:#555;font-weight:600;margin-bottom:.25rem"></p>
-    <p id="vencAtual" style="font-size:.8rem;color:#888;margin-bottom:1rem"></p>
-    <div class="form-group"><label>Nova data de vencimento</label><input type="date" id="vencNovaData"></div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal('modalVencimento')">Cancelar</button>
-      <button class="btn-save" onclick="salvarVencimento()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalRenovar" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:340px;min-height:unset;border-radius:16px;padding:1.5rem">
-    <h3>🔄 Renovar Plano</h3>
-    <input type="hidden" id="renId">
-    <p id="renNomeCliente" style="font-size:.85rem;color:#555;font-weight:600;margin-bottom:.25rem"></p>
-    <p id="renVencAtual" style="font-size:.8rem;color:#888;margin-bottom:1rem"></p>
-    <div class="form-group"><label>Quantos meses renovar?</label>
-      <select id="renMeses" style="width:100%;padding:.65rem .9rem;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem">
-        <option value="1">1 mês</option><option value="2">2 meses</option>
-        <option value="3">3 meses</option><option value="4">4 meses</option>
-        <option value="5">5 meses</option><option value="6">6 meses</option>
-        <option value="7">7 meses</option><option value="8">8 meses</option>
-        <option value="9">9 meses</option><option value="10">10 meses</option>
-        <option value="11">11 meses</option><option value="12">12 meses</option>
+  <!-- COBRANÇA -->
+  <div class="page" id="pgCobranca">
+    <div class="warn" id="avisoTopo" style="display:none"></div>
+    <div class="toolbar">
+      <select id="filtro">
+        <option value="todos">Todos os clientes</option>
+        <option value="vencidos">Vencidos</option>
+        <option value="hoje">Vence hoje / amanhã</option>
+        <option value="semana">Vence em até 7 dias</option>
       </select>
+      <span class="counter"><b id="cEnviados">0</b> de <b id="cTotal">0</b> enviados</span>
     </div>
-    <p style="font-size:.78rem;color:#2d7a4f;margin-bottom:.5rem">⚡ Soma ao vencimento atual (ou usa hoje se vencido)</p>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal('modalRenovar')">Cancelar</button>
-      <button class="btn-save" onclick="confirmarRenovar()">Renovar</button>
-    </div>
+    <div id="lista"></div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalRevendedor" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:460px;min-height:unset;border-radius:16px;padding:1.5rem">
-    <h3 id="modalRevTitulo">Novo Revendedor</h3>
-    <input type="hidden" id="rId">
-    <div class="form-group"><label>Nome *</label><input type="text" id="rNome"></div>
-    <div class="form-group"><label>Usuário *</label><input type="text" id="rEmail" placeholder="Ex: joao (sem @)"></div>
-    <div class="form-group"><label>Senha (para login) *</label><input type="text" id="rSenha" placeholder="Mínimo 6 caracteres" style="font-family:monospace"><span style="font-size:.72rem;color:#4ade80;margin-top:.25rem;display:block">✅ Senha visível — anote para enviar ao revendedor</span></div>
-    <div class="form-group"><label>Créditos</label><input type="number" id="rCreditos" value="0"></div>
-    <div class="form-group"><label>WhatsApp</label><input type="text" id="rWhats" placeholder="(31) 99999-9999"></div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal('modalRevendedor')">Cancelar</button>
-      <button class="btn-save" onclick="salvarRevendedor()">Salvar</button>
-    </div>
+<!-- modal pix -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="mTitulo">Código Pix</h3>
+    <p>O cliente escaneia o QR ou cola o código no banco.</p>
+    <div id="qr"></div>
+    <div class="code-box" id="mCodigo"></div>
+    <button class="btn btn-primary" id="mEnviar" style="margin-bottom:9px">💬 Enviar código no WhatsApp</button>
+    <button class="btn btn-ghost" id="mCopiar" style="margin-bottom:9px">📋 Copiar código</button>
+    <button class="btn btn-ghost" id="mFechar">Fechar</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalPlano" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:460px;min-height:unset;border-radius:16px;padding:1.5rem">
-    <h3 id="modalPlanoTitulo">Novo Plano</h3>
-    <input type="hidden" id="pId">
-    <div class="form-group"><label>Nome *</label><input type="text" id="pNome"></div>
-    <div class="form-group"><label>Número de Telas</label><input type="number" id="pTelas" value="1" min="1" max="10"></div>
-    <div class="form-group"><label>Valor (R$)</label><input type="number" id="pValor" step="0.01"></div>
-    <div class="form-group"><label>Validade (dias)</label><input type="number" id="pDias" value="30"></div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal('modalPlano')">Cancelar</button>
-      <button class="btn-save" onclick="salvarPlano()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalServidor" style="background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:460px;min-height:unset;border-radius:16px;padding:1.5rem">
-    <h3 id="modalServidorTitulo">Novo Servidor</h3>
-    <input type="hidden" id="srvId">
-    <div class="form-group"><label>Nome do Servidor *</label><input type="text" id="srvNome" placeholder="Ex: Servidor Alpha"></div>
-    <div class="form-group"><label>URL / Host (opcional)</label><input type="text" id="srvUrl" placeholder="Ex: http://servidor.com:8080"></div>
-    <div class="form-group"><label>Observações</label><input type="text" id="srvObs"></div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal('modalServidor')">Cancelar</button>
-      <button class="btn-save" onclick="salvarServidor()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Aviso Diário (Vence Hoje + Amanhã) -->
-<div class="modal-overlay" id="modalAvisoDiario" style="background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:500px;min-height:unset;max-height:85vh;border-radius:16px;padding:0;background:#1e2433;overflow:hidden;display:flex;flex-direction:column">
-    <div style="background:#1a3a2a;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-      <div>
-        <h3 style="color:#fff;font-size:1rem;margin:0">📋 Avisos do dia</h3>
-        <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-top:.15rem" id="avisoDiarioData"></p>
-      </div>
-      <button onclick="fecharModal('modalAvisoDiario')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:.35rem .75rem;cursor:pointer;font-size:.85rem">✕ Fechar</button>
-    </div>
-    <div style="padding:1rem 1.25rem;overflow-y:auto;flex:1">
-      <!-- Vence Hoje -->
-      <div id="avisoHojeSection" style="display:none">
-        <div class="secao-titulo" style="color:#a78bfa">🔔 Vencendo HOJE</div>
-        <div id="avisoHojeLista"></div>
-        <button onclick="avisarTodosSecao('hoje')" id="btnAvisarTodosHoje" style="width:100%;padding:.65rem;background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;border:none;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;margin-bottom:.75rem">
-          📱 Avisar todos que vencem hoje
-        </button>
-      </div>
-      <!-- Vence Amanhã -->
-      <div id="avisoAmanhaSection" style="display:none">
-        <div class="secao-titulo" style="color:#f87171">🚨 Vencendo AMANHÃ</div>
-        <div id="avisoAmanhaLista"></div>
-        <button onclick="avisarTodosSecao('amanha')" id="btnAvisarTodosAmanha" style="width:100%;padding:.65rem;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;border:none;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;margin-bottom:.5rem">
-          📱 Avisar todos que vencem amanhã
-        </button>
-      </div>
-      <div id="avisoVazio" style="display:none;text-align:center;padding:2rem 1rem;color:#64748b;font-size:.875rem">
-        ✅ Nenhum cliente vencendo hoje ou amanhã!
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Restaurar Backup -->
-<div class="modal-overlay" id="modalRestaurar" style="background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:480px;min-height:unset;border-radius:16px;padding:0;background:#1e2433;overflow:hidden">
-    <div style="background:#1a3a2a;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between">
-      <h3 style="color:#fff;font-size:1rem;margin:0">📂 Restaurar Backup</h3>
-      <button onclick="fecharModal('modalRestaurar')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:.3rem .75rem;cursor:pointer;font-size:.85rem">✕</button>
-    </div>
-    <div style="padding:1.25rem">
-      <!-- Passo 1: Selecionar arquivo -->
-      <div id="restoreStep1">
-        <p style="color:#94a3b8;font-size:.875rem;margin-bottom:1rem">Selecione o arquivo <strong style="color:#4ade80">.json</strong> gerado pelo botão <em>Backup dados</em>.</p>
-        <div style="border:2px dashed rgba(74,222,128,.3);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s" onclick="document.getElementById('inputBackupFile').click()" id="dropZone">
-          <div style="font-size:2.5rem;margin-bottom:.5rem">📁</div>
-          <p style="color:#64748b;font-size:.875rem">Clique para selecionar o arquivo de backup</p>
-          <p style="color:#475569;font-size:.75rem;margin-top:.25rem">Formato: backup-streampanel-DD-MM-AAAA.json</p>
-        </div>
-        <input type="file" id="inputBackupFile" accept=".json" style="display:none" onchange="lerArquivoBackup(this)">
-        <div style="margin-top:1rem">
-          <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:.75rem;font-size:.8rem;color:#fbbf24">
-            ⚠️ <strong>Atenção:</strong> A restauração vai <u>sobrescrever</u> todos os dados atuais. Faça um backup antes se quiser guardar os dados atuais.
-          </div>
-        </div>
-      </div>
-      <!-- Passo 2: Preview e confirmação -->
-      <div id="restoreStep2" style="display:none">
-        <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:10px;padding:1rem;margin-bottom:1rem">
-          <p style="color:#4ade80;font-weight:700;font-size:.875rem;margin-bottom:.5rem">✅ Arquivo válido! Resumo do backup:</p>
-          <div id="restorePreview" style="font-size:.82rem;color:#94a3b8;display:grid;grid-template-columns:1fr 1fr;gap:.4rem"></div>
-          <p id="restoreData" style="font-size:.75rem;color:#64748b;margin-top:.5rem"></p>
-        </div>
-        <div style="background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);border-radius:8px;padding:.75rem;font-size:.8rem;color:#fca5a5;margin-bottom:1rem">
-          🚨 <strong>Confirmação necessária:</strong> Isso vai apagar os dados atuais e restaurar os do backup. Não pode ser desfeito!
-        </div>
-        <div style="display:flex;gap:.75rem">
-          <button onclick="voltarRestaurar()" style="flex:1;padding:.7rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#94a3b8;cursor:pointer;font-size:.875rem">← Voltar</button>
-          <button onclick="confirmarRestaurar()" style="flex:2;padding:.7rem;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.875rem">🔄 Restaurar agora</button>
-        </div>
-      </div>
-      <!-- Passo 3: Progresso -->
-      <div id="restoreStep3" style="display:none;text-align:center;padding:1rem 0">
-        <div style="font-size:2rem;margin-bottom:.75rem">⏳</div>
-        <p style="color:#94a3b8;font-size:.875rem" id="restoreProgressMsg">Restaurando dados...</p>
-        <div style="background:rgba(255,255,255,.08);border-radius:50px;height:8px;margin-top:1rem;overflow:hidden">
-          <div id="restoreProgressBar" style="height:100%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:50px;width:0%;transition:width .4s"></div>
-        </div>
-      </div>
-      <!-- Passo 4: Sucesso -->
-      <div id="restoreStep4" style="display:none;text-align:center;padding:1rem 0">
-        <div style="font-size:3rem;margin-bottom:.75rem">✅</div>
-        <p style="color:#4ade80;font-weight:700;font-size:1rem">Backup restaurado com sucesso!</p>
-        <p style="color:#64748b;font-size:.82rem;margin-top:.5rem" id="restoreSucessoMsg"></p>
-        <button onclick="fecharModal('modalRestaurar');location.reload()" style="margin-top:1.25rem;padding:.7rem 1.5rem;background:#2d7a4f;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">Recarregar painel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Fila de Envio WhatsApp -->
-<div class="modal-overlay" id="modalFilaEnvio" style="background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:1rem">
-  <div class="modal" style="max-width:420px;min-height:unset;border-radius:18px;padding:0;background:#1e2433;overflow:hidden">
-    <div style="background:#1a3a2a;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <h3 style="color:#fff;font-size:1rem;margin:0">📱 Fila de Envio WhatsApp</h3>
-        <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-top:.1rem" id="filaProgresso"></p>
-      </div>
-      <button onclick="fecharModal('modalFilaEnvio')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:.35rem .75rem;cursor:pointer;font-size:.85rem">✕</button>
-    </div>
-    <div style="padding:1.5rem;text-align:center" id="filaConteudo">
-      <!-- preenchido via JS -->
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getDatabase, ref, set, get, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
+<script>
+/* ============================================================
+   1) CONFIG DO FIREBASE
+   ------------------------------------------------------------
+   Cole aqui o firebaseConfig do projeto gestor-vinanceiro2020.
+   Pegue em: Console do Firebase > Configurações do projeto (⚙️)
+   > Seus apps > app Web > "Configuração do SDK".
+   (Se este código rodar DENTRO do painel que já inicializa o
+    Firebase, pode apagar este bloco — o "if" abaixo evita
+    inicializar duas vezes.)
+   ============================================================ */
 const firebaseConfig = {
-  apiKey: "AIzaSyAQDKTKhoPHiqPJqqW-To2UNUf-rYWjYfQ",
+  apiKey: "COLE_AQUI",
   authDomain: "gestor-vinanceiro2020.firebaseapp.com",
   databaseURL: "https://gestor-vinanceiro2020-default-rtdb.firebaseio.com",
   projectId: "gestor-vinanceiro2020",
-  storageBucket: "gestor-vinanceiro2020.firebasestorage.app",
-  messagingSenderId: "931469622359",
-  appId: "1:931469622359:web:180a63c847ff2bfa3f3712",
-  measurementId: "G-2L0T7KG8VV"
+  storageBucket: "gestor-vinanceiro2020.appspot.com",
+  messagingSenderId: "COLE_AQUI",
+  appId: "COLE_AQUI"
 };
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let UID = null;
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+/* ============================================================
+   2) CAMINHOS NO BANCO  ——  AJUSTE SE OS SEUS FOREM DIFERENTES
+   ============================================================ */
+const PATH_CONFIG   = uid => 'vendedores/'+uid+'/configPix';
+const PATH_CLIENTES = uid => 'clientes/'+uid;     // <-- onde ficam SEUS clientes
+// Se seus clientes ficam num nó único (sem separar por vendedor),
+// troque por:  const PATH_CLIENTES = uid => 'clientes';
+// e filtre pelo dono dentro do mapearCliente (ex: raw.ownerUid === uid).
 
-// Mantém o login salvo no aparelho — ao recarregar não pede login de novo
-setPersistence(auth, browserLocalPersistence).catch(()=>{});
+/* ============================================================
+   3) TRADUTOR DE CLIENTE  ——  encaixa os SEUS nomes de campo
+   Aceita vários nomes comuns. Se algum não bater, ajuste aqui.
+   ============================================================ */
+function mapearCliente(raw, id){
+  return {
+    id: id,
+    nome:  raw.nome || raw.name || raw.cliente || raw.usuario || 'Cliente',
+    fone:  raw.fone || raw.telefone || raw.whatsapp || raw.celular || raw.phone || '',
+    venc:  normalizarData(raw.vencimento || raw.venc || raw.validade || raw.expira || raw.dataVencimento || ''),
+    valor: raw.valor || raw.preco || raw.mensalidade || raw.value || ''
+  };
+}
+function normalizarData(v){
+  if(v===''||v==null) return '';
+  if(typeof v==='number'){ return fmtData(new Date(v)); }            // timestamp
+  if(/^\d{4}-\d{2}-\d{2}/.test(v)){ const [a,m,d]=v.substring(0,10).split('-'); return d+'/'+m+'/'+a; } // ISO
+  return v; // já está dd/mm/aaaa
+}
+function fmtData(d){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
 
-// Faz o painel se comportar como app instalado (abrir pela tela inicial = mais estável)
-try {
-  const _manifest = {name:"StreamPanel Pro",short_name:"StreamPanel",start_url:".",scope:".",display:"standalone",orientation:"portrait",background_color:"#0f1117",theme_color:"#1a3a2a"};
-  const _l = document.createElement('link');
-  _l.rel = 'manifest';
-  _l.href = URL.createObjectURL(new Blob([JSON.stringify(_manifest)], {type:'application/manifest+json'}));
-  document.head.appendChild(_l);
-} catch(e) {}
-
-let currentUser = null;
-let isAdmin = false;
-let clientes = [];
-let revendedores = [];
-let planos = [];
-let unsubClientes = null;
-let unsubRevs = null;
-let unsubPlanos = null;
-
-// E-mails que SEMPRE entram como administrador (dono do painel).
-// Para adicionar outro admin, coloque o e-mail aqui dentro das aspas, separado por vírgula.
-const SUPER_ADMINS = ['vanderleidasilvacunha8@gmail.com'];
-
-// ===== CRIAR CONTA DE REVENDEDOR SEM DESLOGAR O ADMIN =====
-// Usa um app Firebase secundário só para criar o usuário, assim o login
-// do admin atual não é trocado.
-async function criarUsuarioSemDeslogar(email, senha) {
-  const appSec = initializeApp(firebaseConfig, 'secundario-' + Date.now());
-  const authSec = getAuth(appSec);
-  try {
-    const cred = await createUserWithEmailAndPassword(authSec, email, senha);
-    const uid = cred.user.uid;
-    await signOut(authSec);
-    return uid;
-  } finally {
-    try { await deleteApp(appSec); } catch(e) {}
-  }
+/* ============================================================
+   GERADOR PIX COPIA E COLA (BR Code / EMV - Bacen)
+   ============================================================ */
+function tlv(id,v){return id+String(v.length).padStart(2,'0')+v;}
+function semAcento(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 .,-]/g,'').toUpperCase().trim();}
+function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){crc=(crc&0x8000)?((crc<<1)^0x1021):(crc<<1);crc&=0xFFFF;}}return crc.toString(16).toUpperCase().padStart(4,'0');}
+function gerarPix({chave,nome,cidade,valor}){
+  let mai=tlv('00','br.gov.bcb.pix')+tlv('01',chave);
+  let p=tlv('00','01')+tlv('26',mai)+tlv('52','0000')+tlv('53','986');
+  if(valor&&Number(valor)>0) p+=tlv('54',Number(valor).toFixed(2));
+  p+=tlv('58','BR')+tlv('59',(semAcento(nome)||'RECEBEDOR').substring(0,25))+tlv('60',(semAcento(cidade)||'CIDADE').substring(0,15))+tlv('62',tlv('05','***'))+'6304';
+  return p+crc16(p);
 }
 
-// ===== AUTH =====
-window.toggleSenhaLogin = function() {
-  const inp = document.getElementById('loginPass');
-  const btn = document.getElementById('btnOlhoLogin');
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-  else { inp.type = 'password'; btn.textContent = '👁️'; }
-};
+/* ============================================================
+   ESTADO + ELEMENTOS
+   ============================================================ */
+const $=id=>document.getElementById(id);
+const CAMPOS=['tipoChave','chavePix','nomeRecebedor','cidade','valor','mensagem'];
+let config={}, clientes=[], enviados={};
 
-window.fazerLogin = async function() {
-  const inputUsuario = document.getElementById('loginEmail').value.trim();
-  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
-  const pass = document.getElementById('loginPass').value;
-  const errEl = document.getElementById('loginError');
-  errEl.style.display = 'none';
-  if (!inputUsuario || !pass) { errEl.textContent = 'Usuário ou senha incorretos.'; errEl.style.display = 'block'; return; }
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-    const snapAdmin = await get(ref(db, 'iptv/admins/' + cred.user.uid));
-    if (!snapAdmin.exists()) {
-      const snapRevs = await get(ref(db, 'iptv/revendedores'));
-      if (snapRevs.exists()) {
-        const revs = snapRevs.val();
-        const entry = Object.entries(revs).find(([k,r]) => r.email === email);
-        if (entry) {
-          const [revId, rev] = entry;
-          if (rev.bloqueado) {
-            await signOut(auth);
-            errEl.textContent = '🚫 Conta bloqueada. Contate o administrador.';
-            errEl.style.display = 'block';
-            return;
-          }
-        }
-      }
-    }
-  } catch(e) {
-    errEl.textContent = 'E-mail ou senha incorretos.';
-    errEl.style.display = 'block';
-  }
-};
+/* ---- CONFIG: ler e salvar no Firebase ---- */
+function carregarConfig(){
+  db.ref(PATH_CONFIG(UID)).once('value').then(s=>{
+    const c=s.val();
+    if(c){ config=c; CAMPOS.forEach(k=>{ if(config[k]!==undefined) $(k).value=config[k]; }); }
+    checarConfig();
+  }).catch(e=>console.error('Erro ao ler config:',e));
+}
+function salvarConfig(){
+  config={}; CAMPOS.forEach(k=>config[k]=$(k).value);
+  db.ref(PATH_CONFIG(UID)).set(config).then(()=>{
+    const a=$('aviso'); a.style.display='flex'; setTimeout(()=>a.style.display='none',2500);
+    checarConfig();
+  }).catch(e=>{ alert('Erro ao salvar: '+e.message); });
+}
 
-window.recuperarSenha = async function() {
-  const inputUsuario = document.getElementById('loginEmail').value.trim();
-  const email = inputUsuario.includes('@') ? inputUsuario : inputUsuario + '@painelvsc.com.br';
-  if (!inputUsuario) { showToast('Digite seu usuário primeiro.'); return; }
-  try {
-    await sendPasswordResetEmail(auth, email);
-    showToast('✅ E-mail de recuperação enviado!');
-  } catch(e) { showToast('❌ Erro ao enviar e-mail.'); }
-};
+/* ---- CLIENTES: escuta em tempo real ---- */
+function carregarClientes(){
+  db.ref(PATH_CLIENTES(UID)).on('value', s=>{
+    const val=s.val()||{};
+    clientes=Object.entries(val).map(([id,raw])=>mapearCliente(raw,id));
+    render();
+  }, e=>console.error('Erro ao ler clientes:',e));
+}
 
-document.getElementById('btnSair').addEventListener('click', async function() {
-  try { await signOut(auth); } catch(e) { currentUser = null; mostrarLogin(); }
-});
+/* ---- "Enviados" salvos por vendedor (no Firebase) ---- */
+function carregarEnviados(){
+  db.ref('vendedores/'+UID+'/cobrancasEnviadas').on('value', s=>{ enviados=s.val()||{}; render(); });
+}
+function marcarEnviado(cli){
+  const k=chaveEnvio(cli);
+  if(enviados[k]) db.ref('vendedores/'+UID+'/cobrancasEnviadas/'+k).remove();
+  else db.ref('vendedores/'+UID+'/cobrancasEnviadas/'+k).set(Date.now());
+}
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    const podeEntrar = await carregarPerfil(user);
-    if (podeEntrar) mostrarApp();
-  } else {
-    currentUser = null; isAdmin = false; clientes = []; revendedores = []; planos = [];
-    if (unsubClientes) unsubClientes();
-    if (unsubRevs) unsubRevs();
-    if (unsubPlanos) unsubPlanos();
-    mostrarLogin();
-  }
-});
-
-let currentRevendedorId = null;
-
-async function carregarPerfil(user) {
-  const snapAdmin = await get(ref(db, 'iptv/admins/' + user.uid));
-  const ehSuperAdmin = SUPER_ADMINS.includes((user.email || '').toLowerCase());
-  if (snapAdmin.exists() || ehSuperAdmin) {
-    isAdmin = true;
-    if (!snapAdmin.exists()) { try { await set(ref(db, 'iptv/admins/' + user.uid), { email: user.email, criadoEm: hoje() }); } catch(e) {} }
-  } else {
-    const snapRevAll = await get(ref(db, 'iptv/revendedores'));
-    const snapAdmAll = await get(ref(db, 'iptv/admins'));
-    if (!snapRevAll.exists() && !snapAdmAll.exists()) {
-      isAdmin = true;
-      await set(ref(db, 'iptv/admins/' + user.uid), { email: user.email, criadoEm: hoje() });
-    } else {
-      if (snapRevAll.exists()) {
-        const revs = snapRevAll.val();
-        const entry = Object.entries(revs).find(([k,r]) => r.email === user.email);
-        if (entry) {
-          const [revId, rev] = entry;
-          currentRevendedorId = revId;
-          if (rev.bloqueado) {
-            await signOut(auth);
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('appLayout').classList.add('hidden');
-            const errEl = document.getElementById('loginError');
-            errEl.textContent = '🚫 Conta bloqueada. Contate o administrador.';
-            errEl.style.display = 'block';
-            return false;
-          }
-        }
-      }
-      isAdmin = false;
-    }
-  }
-  document.getElementById('sidebarEmail').textContent = user.email.replace('@painelvsc.com.br','');
-  const badge = document.getElementById('sidebarBadge');
-  badge.textContent = isAdmin ? 'Admin' : 'Revendedor';
-  badge.className = 'badge-role ' + (isAdmin ? 'badge-admin' : 'badge-rev');
-  document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
+/* ============================================================
+   LÓGICA DE EXIBIÇÃO
+   ============================================================ */
+function diasAteVenc(venc){
+  if(!venc) return 999;
+  const [d,m,a]=venc.split('/').map(Number);
+  const alvo=new Date(a,m-1,d), hoje=new Date();
+  hoje.setHours(0,0,0,0); alvo.setHours(0,0,0,0);
+  return Math.round((alvo-hoje)/86400000);
+}
+function statusVenc(dias){
+  if(dias===999) return {cls:'',txt:'sem data'};
+  if(dias<0) return {cls:'red',txt:'Vencido há '+Math.abs(dias)+'d'};
+  if(dias===0) return {cls:'orange',txt:'Vence hoje'};
+  if(dias===1) return {cls:'orange',txt:'Vence amanhã'};
+  return {cls:'green',txt:'Vence em '+dias+'d'};
+}
+function passaFiltro(dias,f){
+  if(f==='vencidos') return dias<0;
+  if(f==='hoje') return dias===0||dias===1;
+  if(f==='semana') return dias>=0&&dias<=7;
   return true;
 }
-
-function mostrarLogin() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('appLayout').classList.add('hidden');
-  document.getElementById('loginEmail').value = '';
-  document.getElementById('loginPass').value = '';
-  document.getElementById('loginError').style.display = 'none';
+function montarMensagem(cli){
+  let m=(config.mensagem||'');
+  const v=cli.valor||config.valor;
+  const valorTxt=v?('R$ '+Number(v).toFixed(2).replace('.',',')):'a combinar';
+  return m.replaceAll('{nome}',(cli.nome||'cliente').split(' ')[0])
+    .replaceAll('{vencimento}',cli.venc||'em breve')
+    .replaceAll('{plano}','canais, filmes e séries')
+    .replaceAll('{valor}',valorTxt);
 }
-
-function mostrarApp() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appLayout').classList.remove('hidden');
-  iniciarListeners();
-  showPage('dashboard');
-  // popup diário de avisos — só uma vez por dia neste aparelho (evita reaparecer a cada recarregamento)
-  if (localStorage.getItem('avisoVistoEm') !== hoje()) {
-    setTimeout(() => { abrirAvisoDiario(); try { localStorage.setItem('avisoVistoEm', hoje()); } catch(e) {} }, 3000);
-  }
-  // lembrete de backup (somente admin)
-  checarLembreteBackup();
+function pixDoCliente(cli){
+  return gerarPix({chave:(config.chavePix||'').trim(),nome:config.nomeRecebedor,cidade:config.cidade,valor:cli.valor||config.valor});
 }
+function waLink(fone,texto){let f=(fone||'').replace(/\D/g,'');if(!f.startsWith('55'))f='55'+f;return 'https://wa.me/'+f+'?text='+encodeURIComponent(texto);}
+function chaveEnvio(cli){return (cli.id||cli.fone)+'_'+(cli.venc||'');}
 
-// Lembra o admin de fazer backup se faz tempo que não faz (no máximo uma vez por dia)
-function checarLembreteBackup() {
-  if (!isAdmin) return;
-  try {
-    if (localStorage.getItem('lembreteBackupEm') === hoje()) return;
-    const ultima = localStorage.getItem('ultimoBackup');
-    let dias = null;
-    if (ultima) dias = Math.floor((Date.now() - new Date(ultima).getTime()) / 86400000);
-    if (ultima && dias < 7) return;
-    setTimeout(() => {
-      const msg = ultima
-        ? '⚠️ Faz ' + dias + ' dia(s) desde o seu último backup neste aparelho.\n\nQuer baixar um backup de segurança agora? (recomendado)'
-        : '⚠️ Você ainda não fez nenhum backup neste aparelho.\n\nQuer baixar um backup de segurança agora?';
-      try { localStorage.setItem('lembreteBackupEm', hoje()); } catch(e) {}
-      if (confirm(msg)) fazerBackup();
-    }, 6500);
-  } catch(e) {}
-}
-
-// ===== LISTENERS =====
-function iniciarListeners() {
-  iniciarListenerServidores();
-  unsubClientes = onValue(ref(db, 'iptv/clientes'), snap => {
-    clientes = [];
-    if (snap.exists()) {
-      const data = snap.val();
-      Object.keys(data).forEach(k => clientes.push({ id: k, ...data[k] }));
-      if (!isAdmin) clientes = clientes.filter(c => c.revendedor === currentUser.email);
-    }
-    renderClientes(); renderDashboard(); renderRelatorios(); renderServidores();
+function render(){
+  const f=$('filtro').value, cont=$('lista'); cont.innerHTML='';
+  const lista=clientes.map(c=>({...c,dias:diasAteVenc(c.venc)})).filter(c=>passaFiltro(c.dias,f)).sort((a,b)=>a.dias-b.dias);
+  if(!lista.length){cont.innerHTML='<div class="empty">Nenhum cliente nesse filtro.</div>';}
+  let totEnv=0;
+  lista.forEach(cli=>{
+    const st=statusVenc(cli.dias), enviado=!!enviados[chaveEnvio(cli)]; if(enviado)totEnv++;
+    const div=document.createElement('div');
+    div.className='client'+(enviado?' done':'');
+    div.innerHTML=`<div class="client-top"><div><div class="client-name">${cli.nome}</div><div class="client-meta">${cli.fone||'sem telefone'} · ${cli.venc||'—'}</div></div><span class="pill ${st.cls}">${st.txt}</span></div>
+      <div class="client-actions"><button class="mini wa" data-act="msg">💬 Lembrete</button><button class="mini pix" data-act="pix">🔑 Código Pix</button><button class="mini check ${enviado?'on':''}" data-act="check" title="Marcar enviado">✓</button></div>`;
+    div._cli=cli; cont.appendChild(div);
   });
-  unsubRevs = onValue(ref(db, 'iptv/revendedores'), snap => {
-    revendedores = [];
-    if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => revendedores.push({ id: k, ...d[k] })); }
-    if (!isAdmin && currentRevendedorId) {
-      const meuDado = revendedores.find(r => r.id === currentRevendedorId);
-      if (meuDado) {
-        if (meuDado.bloqueado) { signOut(auth); return; }
-        const credEl = document.getElementById('sidebarCreditos');
-        if (credEl) { credEl.textContent = '💳 Créditos: ' + (meuDado.creditos || 0); credEl.style.display = 'block'; }
-      }
-    }
-    renderRevendedores(); popularSelectRevendedor();
-  });
-  unsubPlanos = onValue(ref(db, 'iptv/planos'), snap => {
-    planos = [];
-    if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => planos.push({ id: k, ...d[k] })); }
-    renderPlanos(); popularSelectPlano();
+  $('cTotal').textContent=lista.length; $('cEnviados').textContent=totEnv;
+  cont.querySelectorAll('.mini').forEach(b=>{
+    b.onclick=()=>{const cli=b.closest('.client')._cli;const act=b.dataset.act;
+      if(act==='msg'){ if(!cli.fone){alert('Esse cliente não tem telefone cadastrado.');return;}
+        window.open(waLink(cli.fone,montarMensagem(cli)+'\n\nVou te mandar o código Pix na próxima mensagem 👇'),'_blank'); }
+      else if(act==='pix'){ abrirModalPix(cli); }
+      else if(act==='check'){ marcarEnviado(cli); }};
   });
 }
 
-// ===== NAVEGAÇÃO =====
-window.showPage = function(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1)).classList.remove('hidden');
-  event && event.currentTarget && event.currentTarget.classList.add('active');
-  closeSidebar();
-  if (page === 'dashboard') renderDashboard();
-};
-
-window.toggleSidebar = function() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('show');
-};
-window.closeSidebar = function() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
-};
-
-// ===== DASHBOARD =====
-function renderDashboard() {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
-  // amanhã = exatamente 1 dia
-  const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-
-  let ativos = 0, vencidos = 0, receita = 0;
-  clientes.forEach(c => {
-    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    if (v && v >= hoje_) { ativos++; } else if (v) { vencidos++; }
-    receita += parseFloat(c.valor || 0);
-  });
-  document.getElementById('stTotal').textContent = clientes.length;
-  document.getElementById('stAtivos').textContent = ativos;
-  document.getElementById('stVencidos').textContent = vencidos;
-  document.getElementById('stReceita').textContent = 'R$ ' + receita.toFixed(2).replace('.', ',');
-
-  // clientes vencendo HOJE
-  const proxHoje = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    const v = new Date(c.vencimento + 'T00:00:00');
-    return v.toDateString() === hoje_.toDateString();
-  });
-  const alertHojeEl = document.getElementById('alertHoje');
-  const btnHojeWrap = document.getElementById('btnAvisarHojeWrap');
-  if (proxHoje.length > 0) {
-    alertHojeEl.innerHTML = `<div class="alert-hoje">
-      <h4>🔔 ${proxHoje.length} cliente(s) vencem HOJE (${formatDate(hoje_.toISOString().split('T')[0])})</h4>
-      <ul>${proxHoje.map(c => `<li>📌 ${c.nome} ${c.whatsapp ? '— 📱 ' + c.whatsapp : '<span style="color:#f87171;font-size:.7rem">(sem WhatsApp)</span>'}</li>`).join('')}</ul>
-    </div>`;
-    if (btnHojeWrap) btnHojeWrap.style.display = 'block';
-  } else {
-    alertHojeEl.innerHTML = '';
-    if (btnHojeWrap) btnHojeWrap.style.display = 'none';
-  }
-
-  // clientes vencendo AMANHÃ
-  const proxAmanha = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    const v = new Date(c.vencimento + 'T00:00:00');
-    return v.toDateString() === amanha.toDateString();
-  });
-  const alertAmanhaEl = document.getElementById('alertAmanha');
-  const btnAmanhaWrap = document.getElementById('btnAvisarAmanhaWrap');
-  if (proxAmanha.length > 0) {
-    alertAmanhaEl.innerHTML = `<div class="alert-amanha">
-      <h4>🚨 ATENÇÃO! ${proxAmanha.length} cliente(s) vencem AMANHÃ (${formatDate(amanha.toISOString().split('T')[0])})</h4>
-      <ul>${proxAmanha.map(c => `<li>📌 ${c.nome} ${c.whatsapp ? '— 📱 ' + c.whatsapp : '<span style="color:#f87171;font-size:.7rem">(sem WhatsApp cadastrado)</span>'}</li>`).join('')}</ul>
-    </div>`;
-    if (btnAmanhaWrap) btnAmanhaWrap.style.display = 'block';
-  } else {
-    alertAmanhaEl.innerHTML = '';
-    if (btnAmanhaWrap) btnAmanhaWrap.style.display = 'none';
-  }
-
-  // Alerta HOJE (bloco extra)
-  const proxHojeVenc = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    const v = new Date(c.vencimento + 'T00:00:00');
-    return v.toDateString() === hoje_.toDateString();
-  });
-  let alertHtml = '';
-  if (proxHojeVenc.length > 0) {
-    alertHtml = `<div class="alert-hoje"><h4>🔔 ${proxHojeVenc.length} cliente(s) vencem HOJE</h4><ul>${proxHojeVenc.map(c => `<li>📌 ${c.nome} — ${formatDate(c.vencimento)}</li>`).join('')}</ul></div>`;
-  }
-  document.getElementById('alertVenc').innerHTML = alertHtml;
-
-  const temHoje = proxHojeVenc.length > 0;
-
-  const recentes = [...clientes].sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || '')).slice(0, 5);
-  document.getElementById('tblDashClientes').innerHTML = recentes.length ? recentes.map(c => {
-    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    const ativo = v && v >= hoje_;
-    return `<tr><td>${c.nome}</td><td>${c.plano || '—'}</td><td>${formatDate(c.vencimento)}</td><td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td></tr>`;
-  }).join('') : '<tr><td colspan="4" class="empty-state">Nenhum cliente ainda</td></tr>';
-  document.getElementById('dashGreet').textContent = 'Bem-vindo, ' + (currentUser?.email || '');
-  renderGraficoReceita();
-
-  const btnWrap = document.getElementById('btnAvisarWrap');
-  if (btnWrap) btnWrap.style.display = temHoje ? 'block' : 'none';
+/* modal */
+let codigoModal='', clienteModal=null;
+function abrirModalPix(cli){
+  if(!config.chavePix){alert('Configure a chave Pix na aba Configuração.');return;}
+  clienteModal=cli; codigoModal=pixDoCliente(cli);
+  $('mTitulo').textContent='Pix de '+(cli.nome||'').split(' ')[0];
+  $('mCodigo').textContent=codigoModal;
+  $('qr').innerHTML=''; new QRCode($('qr'),{text:codigoModal,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});
+  $('modal').classList.add('open');
 }
+$('mCopiar').onclick=()=>navigator.clipboard.writeText(codigoModal).then(()=>{$('mCopiar').textContent='✓ Copiado!';setTimeout(()=>$('mCopiar').textContent='📋 Copiar código',1600);});
+$('mEnviar').onclick=()=>{ if(!clienteModal.fone){alert('Cliente sem telefone.');return;} window.open(waLink(clienteModal.fone,codigoModal),'_blank'); };
+$('mFechar').onclick=()=>$('modal').classList.remove('open');
+$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('open');};
 
-// ===== POPUP DIÁRIO: VENCE HOJE + AMANHÃ =====
-window.abrirAvisoDiario = function() {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
+/* ============================================================
+   INTERFACE GERAL
+   ============================================================ */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');$(t.dataset.page).classList.add('active');if(t.dataset.page==='pgCobranca')checarConfig();};
+});
+document.querySelectorAll('.tag').forEach(t=>{t.onclick=()=>{const ta=$('mensagem'),v=t.dataset.var,s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.focus();ta.selectionStart=ta.selectionEnd=s+v.length;};});
+$('btnSalvar').onclick=salvarConfig;
+$('filtro').onchange=render;
+function checarConfig(){const w=$('avisoTopo');if(!config.chavePix){w.style.display='block';w.innerHTML='⚠️ Configure sua chave Pix na aba <b>Configuração</b> antes de cobrar.';}else{w.style.display='none';}}
 
-  const proxHoje = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    return new Date(c.vencimento + 'T00:00:00').toDateString() === hoje_.toDateString();
-  });
-  const proxAmanha = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    return new Date(c.vencimento + 'T00:00:00').toDateString() === amanha.toDateString();
-  });
-
-  const total = proxHoje.length + proxAmanha.length;
-  if (total === 0) return;
-
-  const secHoje = document.getElementById('avisoHojeSection');
-  const secAmanha = document.getElementById('avisoAmanhaSection');
-  const vazio = document.getElementById('avisoVazio');
-
-  if (proxHoje.length > 0) {
-    secHoje.style.display = 'block';
-    document.getElementById('avisoHojeLista').innerHTML = proxHoje.map(c => `
-      <div class="aviso-cliente-row">
-        <div>
-          <div class="aviso-nome">${c.nome}</div>
-          <div class="aviso-info">${c.whatsapp ? '📱 ' + c.whatsapp : '⚠️ Sem WhatsApp'} · ${c.plano || '—'}</div>
-        </div>
-        <button class="aviso-btn" id="btnAvHoje_${c.id}" onclick="whatsClienteAviso('${c.id}','btnAvHoje_${c.id}')" ${!c.whatsapp ? 'disabled' : ''}>
-          ${c.whatsapp ? '📱 Enviar' : 'Sem nº'}
-        </button>
-      </div>`).join('');
-  } else { secHoje.style.display = 'none'; }
-
-  if (proxAmanha.length > 0) {
-    secAmanha.style.display = 'block';
-    document.getElementById('avisoAmanhaLista').innerHTML = proxAmanha.map(c => `
-      <div class="aviso-cliente-row">
-        <div>
-          <div class="aviso-nome">${c.nome}</div>
-          <div class="aviso-info">${c.whatsapp ? '📱 ' + c.whatsapp : '⚠️ Sem WhatsApp'} · ${c.plano || '—'}</div>
-        </div>
-        <button class="aviso-btn" id="btnAvAmanha_${c.id}" onclick="whatsClienteAviso('${c.id}','btnAvAmanha_${c.id}')" ${!c.whatsapp ? 'disabled' : ''}>
-          ${c.whatsapp ? '📱 Enviar' : 'Sem nº'}
-        </button>
-      </div>`).join('');
-  } else { secAmanha.style.display = 'none'; }
-
-  if (total === 0) { vazio.style.display = 'block'; } else { vazio.style.display = 'none'; }
-
-  const hoje_str = hoje_.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long'});
-  document.getElementById('avisoDiarioData').textContent = hoje_str.charAt(0).toUpperCase() + hoje_str.slice(1);
-  document.getElementById('modalAvisoDiario').classList.add('open');
-};
-
-// Enviar WhatsApp individual pelo popup e marcar botão como enviado
-window.whatsClienteAviso = function(id, btnId) {
-  whatsCliente(id);
-  const btn = document.getElementById(btnId);
-  if (btn) { btn.textContent = '✅ Enviado'; btn.disabled = true; btn.style.background = '#16a34a'; }
-};
-
-
-// ===== FILA DE ENVIO WHATSAPP =====
-let filaEnvio = [];
-let filaIndex = 0;
-
-window.abrirFilaEnvio = function(lista) {
-  filaEnvio = lista.filter(c => (c.whatsapp || '').replace(/\D/g,'').length >= 8);
-  if (!filaEnvio.length) { showToast('❌ Nenhum cliente com WhatsApp nesta lista'); return; }
-  filaIndex = 0;
-  renderFilaAtual();
-  document.getElementById('modalFilaEnvio').classList.add('open');
-};
-
-function renderFilaAtual() {
-  const total = filaEnvio.length;
-  document.getElementById('filaProgresso').textContent = `${filaIndex + 1} de ${total} clientes`;
-
-  if (filaIndex >= total) {
-    document.getElementById('filaProgresso').textContent = 'Concluído!';
-    document.getElementById('filaConteudo').innerHTML = `
-      <div style="padding:1rem 0">
-        <div style="font-size:3.5rem;margin-bottom:.75rem">✅</div>
-        <p style="color:#4ade80;font-weight:700;font-size:1.1rem">Todos avisados!</p>
-        <p style="color:#64748b;font-size:.85rem;margin-top:.4rem">${total} mensagens enviadas.</p>
-        <button onclick="fecharModal('modalFilaEnvio')" style="margin-top:1.25rem;padding:.7rem 2rem;background:#2d7a4f;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem">Fechar</button>
-      </div>`;
+/* ============================================================
+   INICIALIZAÇÃO — espera o vendedor estar logado
+   ============================================================ */
+firebase.auth().onAuthStateChanged(user=>{
+  if(!user){
+    $('avisoTopo').style.display='block';
+    $('avisoTopo').innerHTML='⚠️ Faça login no painel para carregar seus dados.';
     return;
   }
-
-  const c = filaEnvio[filaIndex];
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-  const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-  let statusTxt = '';
-  if (dias === 0) statusTxt = '<span style="color:#a78bfa;font-weight:700">🔔 Vence HOJE</span>';
-  else if (dias === 1) statusTxt = '<span style="color:#f87171;font-weight:700">🚨 Vence AMANHÃ</span>';
-  else if (dias !== null && dias < 0) statusTxt = `<span style="color:#ef4444;font-weight:700">Vencido há ${Math.abs(dias)}d</span>`;
-  else if (dias !== null) statusTxt = `<span style="color:#4ade80">Vence em ${dias}d</span>`;
-
-  const pct = Math.round((filaIndex / total) * 100);
-
-  document.getElementById('filaConteudo').innerHTML = `
-    <div style="background:rgba(255,255,255,.04);border-radius:50px;height:6px;margin-bottom:1.25rem;overflow:hidden">
-      <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#4ade80,#25D366);border-radius:50px;transition:width .4s"></div>
-    </div>
-    <div style="background:rgba(255,255,255,.05);border-radius:14px;padding:1rem;margin-bottom:1.25rem">
-      <div style="font-size:1.4rem;margin-bottom:.5rem">👤</div>
-      <div style="font-weight:700;font-size:1.05rem;color:#f1f5f9;margin-bottom:.25rem">${c.nome}</div>
-      <div style="font-size:.82rem;color:#64748b;margin-bottom:.35rem">📱 ${c.whatsapp}</div>
-      <div style="font-size:.82rem">${statusTxt}</div>
-      ${c.plano ? `<div style="font-size:.78rem;color:#475569;margin-top:.25rem">Plano: ${c.plano} · Venc: ${formatDate(c.vencimento)}</div>` : ''}
-    </div>
-    <button onclick="enviarFilaAtual()" style="width:100%;padding:1rem;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;box-shadow:0 4px 15px rgba(37,211,102,.35);margin-bottom:.75rem">
-      📱 Enviar para ${c.nome}
-    </button>
-    <button onclick="pularFila()" style="width:100%;padding:.65rem;background:rgba(255,255,255,.07);color:#94a3b8;border:1px solid rgba(255,255,255,.12);border-radius:10px;font-size:.875rem;cursor:pointer">
-      ⏭️ Pular este cliente
-    </button>`;
-}
-
-window.enviarFilaAtual = function() {
-  const c = filaEnvio[filaIndex];
-  if (!c) return;
-  const whats = (c.whatsapp || '').replace(/\D/g,'');
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-  const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-  let msg = '';
-  if (dias === 0) msg = `Olá ${c.nome}! 🔔📺\n\nSeu plano IPTV vence *HOJE*! Renove agora para não perder o acesso. Entre em contato comigo! 🙏`;
-  else if (dias === 1) msg = `Olá ${c.nome}! 😊📺\n\nPassando para lembrar que seu plano IPTV vence *AMANHÃ* (${formatDate(c.vencimento)}).\n\nRenove hoje para não perder o acesso! Entre em contato comigo. 🙏`;
-  else if (dias !== null && dias < 0) msg = `Olá ${c.nome}! Seu plano IPTV venceu há ${Math.abs(dias)} dia(s). Renove agora para voltar a assistir! Entre em contato comigo. 📺`;
-  else msg = `Olá ${c.nome}! Seu plano IPTV vence em ${formatDate(c.vencimento)}. Qualquer dúvida é só chamar! 😊📺`;
-  window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
-  filaIndex++;
-  renderFilaAtual();
-};
-
-window.pularFila = function() {
-  filaIndex++;
-  renderFilaAtual();
-};
-
-// Enviar para todos de uma seção (popup diário)
-window.avisarTodosSecao = function(secao) {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-  const lista = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    const v = new Date(c.vencimento + 'T00:00:00');
-    return secao === 'hoje' ? v.toDateString() === hoje_.toDateString() : v.toDateString() === amanha.toDateString();
-  });
-  fecharModal('modalAvisoDiario');
-  abrirFilaEnvio(lista);
-};
-
-// Avisar vencendo hoje (botão dashboard)
-window.avisarVencendoHoje = function() {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const lista = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    return new Date(c.vencimento + 'T00:00:00').toDateString() === hoje_.toDateString();
-  });
-  if (!lista.length) { showToast('Nenhum cliente vencendo hoje'); return; }
-  abrirFilaEnvio(lista);
-};
-
-// Avisar vencendo amanhã (botão dashboard)
-window.avisarVencendoAmanha = function() {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-  const lista = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    return new Date(c.vencimento + 'T00:00:00').toDateString() === amanha.toDateString();
-  });
-  if (!lista.length) { showToast('Nenhum cliente vencendo amanhã'); return; }
-  abrirFilaEnvio(lista);
-};
-
-window.verificacaoAutomaticaAmanha = function() {};
-
-// ===== CLIENTES =====
-window.renderClientes = function() {
-  const busca = (document.getElementById('buscaCliente')?.value || '').toLowerCase();
-  const filtro = document.getElementById('filtroStatus')?.value || '';
-  const filtroSrv = document.getElementById('filtroServidor')?.value || '';
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
-  const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-
-  let lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
-  if (filtro === 'ativo') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_; });
-  else if (filtro === 'vencido') lista = lista.filter(c => { if (!c.vencimento) return true; const v = new Date(c.vencimento + 'T00:00:00'); return v < hoje_; });
-  else if (filtro === 'vence7') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_ && v <= em7; });
-  else if (filtro === 'vence1') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v.toDateString() === amanha.toDateString(); });
-  if (filtroSrv) lista = lista.filter(c => (c.servidor || '').toLowerCase() === filtroSrv.toLowerCase());
-
-  document.getElementById('tblClientes').innerHTML = lista.length ? lista.map(c => {
-    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    const ativo = v && v >= hoje_;
-    const diasRestantes = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-    let diasBadge = '<span style="color:#dc2626;font-weight:700">Sem data</span>';
-    if (diasRestantes !== null) {
-      if (diasRestantes < 0) diasBadge = `<span style="color:#dc2626;font-weight:700">${Math.abs(diasRestantes)}d vencido</span>`;
-      else if (diasRestantes === 0) diasBadge = `<span style="color:#d97706;font-weight:700">Vence hoje</span>`;
-      else if (diasRestantes === 1) diasBadge = `<span style="color:#ef4444;font-weight:700;animation:pulseRed 1.5s infinite">🚨 Amanhã!</span>`;
-      else if (diasRestantes <= 7) diasBadge = `<span style="color:#d97706;font-weight:700">${diasRestantes}d</span>`;
-      else diasBadge = `<span style="color:#16a34a;font-weight:600">${diasRestantes}d</span>`;
-    }
-    return `<tr>
-      <td><strong>${c.nome}</strong>${c.obs ? '<br><span style="font-size:.72rem;color:#888">' + c.obs + '</span>' : ''}</td>
-      <td><span style="font-family:monospace;font-size:.82rem">${c.usuario || '—'}</span><br><span style="font-size:.72rem;color:#aaa">${c.senha || ''}</span></td>
-      <td>${c.servidor || '—'}</td>
-      <td>${c.plano || '—'}</td>
-      <td>${formatDate(c.vencimento)}<br>${diasBadge}</td>
-      <td>R$ ${parseFloat(c.valor || 0).toFixed(2).replace('.', ',')}</td>
-      <td><span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span></td>
-      <td><div class="actions-grid" style="grid-template-columns:repeat(4,32px)">
-        <button class="btn-icon bi-edit" title="Editar dados" onclick="editarCliente('${c.id}')">✏️</button>
-        <button class="btn-icon bi-venc" title="Alterar vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
-        <button class="btn-icon bi-renN" title="Renovar vários meses" onclick="abrirModalRenovar('${c.id}')">🔄</button>
-        <button class="btn-icon bi-whats" title="WhatsApp" onclick="whatsCliente('${c.id}')">📱</button>
-        <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
-      </div></td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="8" class="empty-state">Nenhum cliente encontrado</td></tr>';
-  renderCardsMobile();
-};
-
-window.abrirModalCliente = function() {
-  document.getElementById('cId').value = '';
-  document.getElementById('cNome').value = '';
-  document.getElementById('cUser').value = '';
-  document.getElementById('cPass').value = '';
-  popularSelectServidor();
-  document.getElementById('cServidor').value = '';
-  document.getElementById('cPlano').value = '';
-  document.getElementById('cValor').value = '';
-  document.getElementById('cVenc').value = '';
-  document.getElementById('cWhats').value = '';
-  document.getElementById('cObs').value = '';
-  document.getElementById('modalClienteTitulo').textContent = 'Novo Cliente';
-  document.getElementById('modalCliente').classList.add('open');
-};
-
-window.editarCliente = function(id) {
-  const c = clientes.find(x => x.id === id);
-  if (!c) return;
-  document.getElementById('cId').value = id;
-  document.getElementById('cNome').value = c.nome || '';
-  document.getElementById('cUser').value = c.usuario || '';
-  document.getElementById('cPass').value = c.senha || '';
-  popularSelectServidor();
-  document.getElementById('cServidor').value = c.servidor || '';
-  document.getElementById('cPlano').value = c.plano || '';
-  document.getElementById('cValor').value = c.valor || '';
-  document.getElementById('cVenc').value = c.vencimento || '';
-  document.getElementById('cWhats').value = c.whatsapp || '';
-  document.getElementById('cObs').value = c.obs || '';
-  document.getElementById('modalClienteTitulo').textContent = '✏️ Editar: ' + c.nome;
-  document.getElementById('modalCliente').classList.add('open');
-};
-
-window.renovarCliente = function() {
-  const plano = document.getElementById('cPlano').value;
-  if (!plano) { showToast('❌ Selecione um plano primeiro'); return; }
-  const meses = parseInt(plano.split(' ')[0]);
-  if (isNaN(meses)) return;
-  const base = new Date();
-  base.setMonth(base.getMonth() + meses);
-  const yyyy = base.getFullYear();
-  const mm = String(base.getMonth() + 1).padStart(2, '0');
-  const dd = String(base.getDate()).padStart(2, '0');
-  document.getElementById('cVenc').value = `${yyyy}-${mm}-${dd}`;
-  showToast('📅 Vencimento renovado para ' + dd + '/' + mm + '/' + yyyy);
-};
-
-window.salvarCliente = async function() {
-  const id = document.getElementById('cId').value;
-  const nome = document.getElementById('cNome').value.trim();
-  if (!nome) { showToast('❌ Nome obrigatório'); return; }
-  const clienteExistente = id ? clientes.find(x => x.id === id) : null;
-  const data = {
-    nome,
-    usuario: document.getElementById('cUser').value.trim(),
-    senha: document.getElementById('cPass').value.trim(),
-    servidor: document.getElementById('cServidor').value.trim(),
-    plano: document.getElementById('cPlano').value,
-    valor: parseFloat(document.getElementById('cValor').value) || 0,
-    vencimento: document.getElementById('cVenc').value || '',
-    whatsapp: document.getElementById('cWhats').value.replace(/\D/g,''),
-    obs: document.getElementById('cObs').value.trim(),
-    revendedor: currentUser.email,
-    criadoEm: (clienteExistente && clienteExistente.criadoEm) ? clienteExistente.criadoEm : hoje()
-  };
-  try {
-    if (id) {
-      await set(ref(db, 'iptv/clientes/' + id), data);
-    } else {
-      if (!isAdmin && currentRevendedorId) {
-        const snapRev = await get(ref(db, 'iptv/revendedores/' + currentRevendedorId));
-        if (snapRev.exists()) {
-          const creditos = snapRev.val().creditos || 0;
-          if (creditos <= 0) { showToast('❌ Sem créditos! Solicite mais créditos ao administrador.'); return; }
-          await set(ref(db, 'iptv/revendedores/' + currentRevendedorId + '/creditos'), creditos - 1);
-        }
-      }
-      const newRef = push(ref(db, 'iptv/clientes'));
-      await set(newRef, data);
-    }
-    fecharModal('modalCliente');
-    showToast('✅ Cliente salvo!');
-  } catch(e) { showToast('❌ Erro ao salvar: ' + e.message); }
-};
-
-window.deletarCliente = async function(id) {
-  if (!confirm('Excluir este cliente?')) return;
-  try { await remove(ref(db, 'iptv/clientes/' + id)); showToast('🗑️ Cliente removido.'); }
-  catch(e) { showToast('❌ Erro ao excluir.'); }
-};
-
-window.toggleBloqueioCliente = async function(id, estaBloqueado) {
-  const acao = estaBloqueado ? 'desbloquear' : 'bloquear';
-  if (!confirm('Deseja ' + acao + ' este cliente?')) return;
-  try {
-    await set(ref(db, 'iptv/clientes/' + id + '/bloqueado'), !estaBloqueado);
-    showToast(estaBloqueado ? '✅ Cliente desbloqueado.' : '🚫 Cliente bloqueado.');
-  } catch(e) { showToast('❌ Erro.'); }
-};
-
-window.abrirModalVencimento = function(id) {
-  const c = clientes.find(x => x.id === id);
-  if (!c) return;
-  document.getElementById('vencId').value = id;
-  document.getElementById('vencNomeCliente').textContent = '👤 ' + c.nome;
-  document.getElementById('vencAtual').textContent = 'Vencimento atual: ' + formatDate(c.vencimento);
-  document.getElementById('vencNovaData').value = c.vencimento || '';
-  document.getElementById('modalVencimento').classList.add('open');
-};
-
-window.salvarVencimento = async function() {
-  const id = document.getElementById('vencId').value;
-  const novaData = document.getElementById('vencNovaData').value;
-  if (!novaData) { showToast('❌ Selecione uma data'); return; }
-  try {
-    await set(ref(db, 'iptv/clientes/' + id + '/vencimento'), novaData);
-    fecharModal('modalVencimento');
-    showToast('✅ Vencimento atualizado para ' + formatDate(novaData));
-  } catch(e) { showToast('❌ Erro ao salvar.'); }
-};
-
-window.renovar1Mes = async function(id) {
-  const c = clientes.find(x => x.id === id);
-  if (!c) return;
-  const base = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : new Date();
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  if (base < hoje_) base.setTime(hoje_.getTime());
-  base.setMonth(base.getMonth() + 1);
-  const novaData = base.toISOString().split('T')[0];
-  try {
-    await set(ref(db, 'iptv/clientes/' + id + '/vencimento'), novaData);
-    showToast('✅ ' + c.nome + ' renovado até ' + formatDate(novaData));
-  } catch(e) { showToast('❌ Erro ao renovar.'); }
-};
-
-window.abrirModalRenovar = function(id) {
-  const c = clientes.find(x => x.id === id);
-  if (!c) return;
-  document.getElementById('renId').value = id;
-  document.getElementById('renNomeCliente').textContent = '👤 ' + c.nome;
-  document.getElementById('renVencAtual').textContent = 'Vencimento atual: ' + formatDate(c.vencimento);
-  document.getElementById('renMeses').value = '1';
-  document.getElementById('modalRenovar').classList.add('open');
-};
-
-window.confirmarRenovar = async function() {
-  const id = document.getElementById('renId').value;
-  const meses = parseInt(document.getElementById('renMeses').value);
-  const c = clientes.find(x => x.id === id);
-  if (!c) return;
-  const base = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : new Date();
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  if (base < hoje_) base.setTime(hoje_.getTime());
-  base.setMonth(base.getMonth() + meses);
-  const novaData = base.toISOString().split('T')[0];
-  try {
-    await set(ref(db, 'iptv/clientes/' + id + '/vencimento'), novaData);
-    fecharModal('modalRenovar');
-    showToast('✅ ' + c.nome + ' renovado por ' + meses + ' mes(es) ate ' + formatDate(novaData));
-  } catch(e) { showToast('❌ Erro ao renovar.'); }
-};
-
-// ===== REVENDEDORES =====
-function renderRevendedores() {
-  const tbody = document.getElementById('tblRevendedores');
-  if (!tbody) return;
-  tbody.innerHTML = revendedores.length ? revendedores.map(r => {
-    const nClientes = clientes.filter(c => c.revendedor === r.email).length;
-    const bloqueado = r.bloqueado;
-    return `<tr>
-      <td>${r.nome}</td><td>${r.email.replace('@painelvsc.com.br','')}</td><td>${r.senha ? '<span style="font-family:monospace;font-size:.8rem;background:rgba(74,222,128,.1);padding:.1rem .4rem;border-radius:4px;color:#4ade80">'+r.senha+'</span>' : '—'}</td><td>${r.creditos || 0}</td><td>${nClientes}</td>
-      <td><span class="badge ${bloqueado ? 'badge-red' : 'badge-green'}">${bloqueado ? 'Bloqueado' : 'Ativo'}</span></td>
-      <td><div class="actions-cell">
-        <button class="btn-sm btn-edit" onclick="editarRevendedor('${r.id}')">Editar</button>
-        <button class="btn-sm" style="background:#dcfce7;color:#16a34a" onclick="enviarCredenciais('${r.id}')">📱 Enviar</button>
-        <button class="btn-sm ${bloqueado ? 'btn-unblock' : 'btn-block'}" onclick="toggleBloquear('${r.id}',${bloqueado})">${bloqueado ? 'Liberar' : 'Bloquear'}</button>
-        <button class="btn-sm btn-del" onclick="deletarRevendedor('${r.id}')">Excluir</button>
-      </div></td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="7" class="empty-state">Nenhum revendedor cadastrado</td></tr>';
-}
-
-window.abrirModalRevendedor = function() {
-  document.getElementById('rId').value = '';
-  document.getElementById('rNome').value = '';
-  document.getElementById('rEmail').value = '';
-  document.getElementById('rSenha').value = '';
-  document.getElementById('rCreditos').value = '0';
-  document.getElementById('rWhats').value = '';
-  document.getElementById('modalRevTitulo').textContent = 'Novo Revendedor';
-  document.getElementById('modalRevendedor').classList.add('open');
-};
-
-window.editarRevendedor = function(id) {
-  const r = revendedores.find(x => x.id === id);
-  if (!r) return;
-  document.getElementById('rId').value = id;
-  document.getElementById('rNome').value = r.nome || '';
-  document.getElementById('rEmail').value = r.email || '';
-  document.getElementById('rSenha').value = '';
-  document.getElementById('rCreditos').value = r.creditos || 0;
-  document.getElementById('rWhats').value = r.whatsapp || '';
-  document.getElementById('modalRevTitulo').textContent = 'Editar Revendedor';
-  document.getElementById('modalRevendedor').classList.add('open');
-};
-
-window.salvarRevendedor = async function() {
-  const id = document.getElementById('rId').value;
-  const nome = document.getElementById('rNome').value.trim();
-  const emailInput = document.getElementById('rEmail').value.trim();
-  const email = emailInput.includes('@') ? emailInput : emailInput + '@painelvsc.com.br';
-  const senha = document.getElementById('rSenha').value;
-  if (!nome || !emailInput) { showToast('❌ Nome e usuário obrigatórios'); return; }
-  if (!id && !senha) { showToast('❌ Senha obrigatória para novo revendedor'); return; }
-  if (!id && senha.length < 6) { showToast('❌ Senha mínima: 6 caracteres'); return; }
-  try {
-    let uid = id;
-    if (!id) {
-      // cria a conta sem deslogar o admin atual
-      uid = await criarUsuarioSemDeslogar(email, senha);
-    }
-    const rev = revendedores.find(x => x.id === id);
-    const senhaDigitada = document.getElementById('rSenha').value;
-    const revAtual = revendedores.find(x => x.id === id);
-    const data = {
-      nome, email,
-      senha: senhaDigitada || (revAtual ? revAtual.senha || '' : ''),
-      creditos: parseInt(document.getElementById('rCreditos').value) || 0,
-      whatsapp: document.getElementById('rWhats').value.trim(),
-      bloqueado: rev ? (rev.bloqueado || false) : false,
-      criadoEm: (rev && rev.criadoEm) ? rev.criadoEm : hoje()
-    };
-    await set(ref(db, 'iptv/revendedores/' + (uid || id)), data);
-    fecharModal('modalRevendedor');
-    showToast('✅ Revendedor salvo!');
-  } catch(e) {
-    if (e.code === 'auth/email-already-in-use') showToast('❌ E-mail já cadastrado.');
-    else showToast('❌ Erro: ' + e.message);
-  }
-};
-
-window.toggleBloquear = async function(id, atual) {
-  try {
-    const r = revendedores.find(x => x.id === id);
-    if (!r) return;
-    await set(ref(db, 'iptv/revendedores/' + id + '/bloqueado'), !atual);
-    showToast(atual ? '✅ Revendedor liberado.' : '🚫 Revendedor bloqueado.');
-  } catch(e) { showToast('❌ Erro.'); }
-};
-
-window.deletarRevendedor = async function(id) {
-  if (!confirm('Excluir este revendedor?')) return;
-  try { await remove(ref(db, 'iptv/revendedores/' + id)); showToast('🗑️ Revendedor removido.'); }
-  catch(e) { showToast('❌ Erro ao excluir.'); }
-};
-
-// ===== PLANOS =====
-function renderPlanos() {
-  const tbody = document.getElementById('tblPlanos');
-  if (!tbody) return;
-  tbody.innerHTML = planos.length ? planos.map(p => `<tr>
-    <td>${p.nome}</td><td>${p.telas || 1}</td>
-    <td>R$ ${parseFloat(p.valor || 0).toFixed(2).replace('.', ',')}</td>
-    <td>${p.dias || 30} dias</td>
-    <td><div class="actions-cell">
-      <button class="btn-sm btn-edit" onclick="editarPlano('${p.id}')">Editar</button>
-      <button class="btn-sm btn-del" onclick="deletarPlano('${p.id}')">Excluir</button>
-    </div></td>
-  </tr>`).join('') : '<tr><td colspan="5" class="empty-state">Nenhum plano cadastrado</td></tr>';
-}
-
-window.abrirModalPlano = function() {
-  document.getElementById('pId').value = '';
-  document.getElementById('pNome').value = '';
-  document.getElementById('pTelas').value = '1';
-  document.getElementById('pValor').value = '';
-  document.getElementById('pDias').value = '30';
-  document.getElementById('modalPlanoTitulo').textContent = 'Novo Plano';
-  document.getElementById('modalPlano').classList.add('open');
-};
-
-window.editarPlano = function(id) {
-  const p = planos.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('pId').value = id;
-  document.getElementById('pNome').value = p.nome || '';
-  document.getElementById('pTelas').value = p.telas || 1;
-  document.getElementById('pValor').value = p.valor || '';
-  document.getElementById('pDias').value = p.dias || 30;
-  document.getElementById('modalPlanoTitulo').textContent = 'Editar Plano';
-  document.getElementById('modalPlano').classList.add('open');
-};
-
-window.salvarPlano = async function() {
-  const id = document.getElementById('pId').value;
-  const nome = document.getElementById('pNome').value.trim();
-  if (!nome) { showToast('❌ Nome obrigatório'); return; }
-  const data = { nome, telas: parseInt(document.getElementById('pTelas').value) || 1, valor: parseFloat(document.getElementById('pValor').value) || 0, dias: parseInt(document.getElementById('pDias').value) || 30 };
-  try {
-    if (id) await set(ref(db, 'iptv/planos/' + id), data);
-    else { const nr = push(ref(db, 'iptv/planos')); await set(nr, data); }
-    fecharModal('modalPlano');
-    showToast('✅ Plano salvo!');
-  } catch(e) { showToast('❌ Erro ao salvar.'); }
-};
-
-window.deletarPlano = async function(id) {
-  if (!confirm('Excluir este plano?')) return;
-  try { await remove(ref(db, 'iptv/planos/' + id)); showToast('🗑️ Plano removido.'); }
-  catch(e) { showToast('❌ Erro.'); }
-};
-
-// ===== RELATÓRIOS =====
-function renderRelatorios() {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
-  const venc7 = clientes.filter(c => { if (!c.vencimento) return false; const v = new Date(c.vencimento + 'T00:00:00'); return v >= hoje_ && v <= em7; });
-  const vencidos = clientes.filter(c => { if (!c.vencimento) return false; const v = new Date(c.vencimento + 'T00:00:00'); return v < hoje_; });
-  const row = (c) => `<tr><td>${c.nome}</td><td>${c.plano||'—'}</td><td>${formatDate(c.vencimento)}</td><td>R$ ${parseFloat(c.valor||0).toFixed(2).replace('.',',')}</td></tr>`;
-  const tV7 = document.getElementById('tblVenc7');
-  const tVe = document.getElementById('tblVencidos');
-  if (tV7) tV7.innerHTML = venc7.length ? venc7.map(row).join('') : '<tr><td colspan="4" class="empty-state">Nenhum</td></tr>';
-  if (tVe) tVe.innerHTML = vencidos.length ? vencidos.map(row).join('') : '<tr><td colspan="4" class="empty-state">Nenhum</td></tr>';
-  const por = {};
-  clientes.forEach(c => { const p = c.plano || 'Sem plano'; if (!por[p]) por[p] = {n:0,r:0}; por[p].n++; por[p].r += parseFloat(c.valor||0); });
-  const tRP = document.getElementById('tblReceitaPlano');
-  if (tRP) tRP.innerHTML = Object.keys(por).length ? Object.entries(por).map(([n,v]) => `<tr><td>${n}</td><td>${v.n}</td><td>R$ ${v.r.toFixed(2).replace('.',',')}</td></tr>`).join('') : '<tr><td colspan="3" class="empty-state">Nenhum dado</td></tr>';
-}
-
-// ===== HELPERS =====
-function popularSelectPlano() {}
-
-function popularSelectServidor() {
-  const sel = document.getElementById('cServidor');
-  if (!sel) return;
-  const val = sel.value;
-  sel.innerHTML = '<option value="">Selecione um servidor...</option>' +
-    servidores.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
-  if (!servidores.length) sel.innerHTML += '<option value="" disabled>— Nenhum servidor cadastrado —</option>';
-  if (val) sel.value = val;
-}
-
-function popularFiltroServidor() {
-  const sel = document.getElementById('filtroServidor');
-  if (!sel) return;
-  const val = sel.value;
-  sel.innerHTML = '<option value="">🖥️ Todos servidores</option>' +
-    servidores.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
-  if (val) sel.value = val;
-  renderClientes();
-}
-
-function popularSelectRevendedor() {}
-
-window.fecharModal = function(id) { document.getElementById(id).classList.remove('open'); };
-
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', function(e) {
-    if (e.target === this) fecharModal(this.id);
-  });
+  UID=user.uid;
+  carregarConfig();
+  carregarClientes();
+  carregarEnviados();
 });
-
-// ===== SERVIDORES =====
-let servidores = [];
-let unsubServ = null;
-
-function getServidorPath() {
-  return 'iptv/servidores/' + (isAdmin ? 'admin' : currentUser.uid);
-}
-
-function iniciarListenerServidores() {
-  const path = getServidorPath();
-  if (unsubServ) unsubServ();
-  unsubServ = onValue(ref(db, path), snap => {
-    servidores = [];
-    if (snap.exists()) { const d = snap.val(); Object.keys(d).forEach(k => servidores.push({ id: k, ...d[k] })); }
-    renderServidores(); popularSelectServidor(); popularFiltroServidor();
-  });
-}
-
-function renderServidores() {
-  const tbody = document.getElementById('tblServidores');
-  if (!tbody) return;
-  let rows = '';
-  if (servidores.length) {
-    rows = servidores.map(s => {
-      const n = clientes.filter(c => (c.servidor || '').trim().toLowerCase() === s.nome.trim().toLowerCase()).length;
-      return `<tr>
-        <td><strong>${s.nome}</strong>${s.url ? '<br><span style="font-size:.75rem;color:#888">' + s.url + '</span>' : ''}</td>
-        <td><span style="font-size:1.1rem;font-weight:700;color:#1a3a2a">${n}</span> cliente(s)</td>
-        <td><div class="actions-cell">
-          <button class="btn-sm btn-edit" onclick="verClientesServidor('${s.id}','${s.nome}')">Ver Clientes</button>
-          <button class="btn-sm btn-edit" onclick="editarServidor('${s.id}')">Editar</button>
-          <button class="btn-sm btn-del" onclick="deletarServidor('${s.id}')">Excluir</button>
-        </div></td>
-      </tr>`;
-    }).join('');
-    const semSrv = clientes.filter(c => !c.servidor || c.servidor.trim() === '').length;
-    if (semSrv > 0) {
-      rows += `<tr style="background:#fef9ec">
-        <td><strong style="color:#d97706">⚠️ Sem servidor</strong></td>
-        <td><span style="font-size:1.1rem;font-weight:700;color:#d97706">${semSrv}</span> cliente(s)</td>
-        <td><button class="btn-sm btn-block" onclick="verClientesSemServidor()">Ver Clientes</button></td>
-      </tr>`;
-    }
-  } else {
-    rows = '<tr><td colspan="3" class="empty-state">Nenhum servidor cadastrado.</td></tr>';
-  }
-  tbody.innerHTML = rows;
-}
-
-window.verClientesSemServidor = function() {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const lista = clientes.filter(c => !c.servidor || c.servidor.trim() === '');
-  document.getElementById('tituloClientesServidor').textContent = '⚠️ Clientes sem servidor definido';
-  document.getElementById('cardClientesServidor').style.display = 'block';
-  document.getElementById('tblClientesServidor').innerHTML = lista.length ? lista.map(c => {
-    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    const ativo = v && v >= hoje_;
-    const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-    let diasTxt = 'Sem data';
-    if (dias !== null) { if (dias < 0) diasTxt = Math.abs(dias) + 'd vencido'; else if (dias === 0) diasTxt = 'Hoje'; else diasTxt = dias + 'd'; }
-    return `<tr><td>${c.nome}</td><td>${c.usuario||'—'}</td><td>${c.plano||'—'}</td><td>${formatDate(c.vencimento)}</td><td>${diasTxt}</td><td><span class="badge ${ativo?'badge-green':'badge-red'}">${ativo?'Ativo':'Vencido'}</span></td></tr>`;
-  }).join('') : '<tr><td colspan="6" class="empty-state">Nenhum</td></tr>';
-  document.getElementById('cardClientesServidor').scrollIntoView({behavior:'smooth'});
-};
-
-window.verClientesServidor = function(id, nome) {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const lista = clientes.filter(c => (c.servidor || '').toLowerCase() === nome.toLowerCase());
-  document.getElementById('tituloClientesServidor').textContent = '👥 Clientes — ' + nome;
-  document.getElementById('cardClientesServidor').style.display = 'block';
-  document.getElementById('tblClientesServidor').innerHTML = lista.length ? lista.map(c => {
-    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    const ativo = v && v >= hoje_;
-    const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-    let diasTxt = 'Sem data';
-    if (dias !== null) { if (dias < 0) diasTxt = Math.abs(dias) + 'd vencido'; else if (dias === 0) diasTxt = 'Hoje'; else diasTxt = dias + 'd'; }
-    return `<tr><td>${c.nome}</td><td>${c.usuario||'—'}</td><td>${c.plano||'—'}</td><td>${formatDate(c.vencimento)}</td><td>${diasTxt}</td><td><span class="badge ${ativo?'badge-green':'badge-red'}">${ativo?'Ativo':'Vencido'}</span></td></tr>`;
-  }).join('') : '<tr><td colspan="6" class="empty-state">Nenhum cliente neste servidor</td></tr>';
-  document.getElementById('cardClientesServidor').scrollIntoView({behavior:'smooth'});
-};
-
-window.abrirModalServidor = function() {
-  document.getElementById('srvId').value = '';
-  document.getElementById('srvNome').value = '';
-  document.getElementById('srvUrl').value = '';
-  document.getElementById('srvObs').value = '';
-  document.getElementById('modalServidorTitulo').textContent = 'Novo Servidor';
-  document.getElementById('modalServidor').classList.add('open');
-};
-
-window.editarServidor = function(id) {
-  const s = servidores.find(x => x.id === id);
-  if (!s) return;
-  document.getElementById('srvId').value = id;
-  document.getElementById('srvNome').value = s.nome || '';
-  document.getElementById('srvUrl').value = s.url || '';
-  document.getElementById('srvObs').value = s.obs || '';
-  document.getElementById('modalServidorTitulo').textContent = 'Editar Servidor';
-  document.getElementById('modalServidor').classList.add('open');
-};
-
-window.salvarServidor = async function() {
-  const id = document.getElementById('srvId').value;
-  const nome = document.getElementById('srvNome').value.trim();
-  if (!nome) { showToast('❌ Nome obrigatório'); return; }
-  const path = getServidorPath();
-  const data = { nome, url: document.getElementById('srvUrl').value.trim(), obs: document.getElementById('srvObs').value.trim() };
-  try {
-    if (id) await set(ref(db, path + '/' + id), data);
-    else { const nr = push(ref(db, path)); await set(nr, data); }
-    fecharModal('modalServidor');
-    showToast('✅ Servidor salvo!');
-  } catch(e) { showToast('❌ Erro ao salvar: ' + e.message); }
-};
-
-window.deletarServidor = async function(id) {
-  if (!confirm('Excluir este servidor?')) return;
-  const path = getServidorPath();
-  try { await remove(ref(db, path + '/' + id)); showToast('🗑️ Servidor removido.'); }
-  catch(e) { showToast('❌ Erro.'); }
-};
-
-document.getElementById('cPlano').addEventListener('change', function() {
-  const val = this.value;
-  if (!val) return;
-  const meses = parseInt(val.split(' ')[0]);
-  if (isNaN(meses)) return;
-  const base = new Date();
-  base.setMonth(base.getMonth() + meses);
-  document.getElementById('cVenc').value = base.toISOString().split('T')[0];
-});
-
-window.enviarCredenciais = function(id) {
-  const r = revendedores.find(x => x.id === id);
-  if (!r) return;
-  const usuario = r.email.replace('@painelvsc.com.br','');
-  const senha = r.senha || '(senha não salva)';
-  const link = window.location.href.split('?')[0];
-  const msg = 'Olá ' + r.nome + '! Seguem suas credenciais de acesso ao StreamPanel Pro:\n\n' +
-    '🌐 Link: ' + link + '\n' +
-    '👤 Usuário: ' + usuario + '\n' +
-    '🔑 Senha: ' + senha + '\n\n' +
-    'Qualquer dúvida é só chamar! 😊';
-  const whats = (r.whatsapp || '').replace(/\D/g,'');
-  if (!whats) { showToast('❌ Revendedor sem WhatsApp cadastrado'); return; }
-  window.open('https://wa.me/55' + whats + '?text=' + encodeURIComponent(msg), 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
-};
-
-// ===== BACKUP =====
-window.fazerBackup = async function() {
-  try {
-    showToast('⏳ Gerando backup...');
-    const snapClientes = await get(ref(db, 'iptv/clientes'));
-    const snapRevs = await get(ref(db, 'iptv/revendedores'));
-    const snapServ = await get(ref(db, 'iptv/servidores'));
-    const snapPlanos = await get(ref(db, 'iptv/planos'));
-    const backup = {
-      geradoEm: new Date().toISOString(),
-      versao: '1.0',
-      dados: {
-        clientes: snapClientes.exists() ? snapClientes.val() : {},
-        revendedores: snapRevs.exists() ? snapRevs.val() : {},
-        servidores: snapServ.exists() ? snapServ.val() : {},
-        planos: snapPlanos.exists() ? snapPlanos.val() : {}
-      }
-    };
-    const totalC = Object.keys(backup.dados.clientes).length;
-    const totalR = Object.keys(backup.dados.revendedores).length;
-    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const dt = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
-    a.href = url; a.download = 'backup-streampanel-' + dt + '.json'; a.click();
-    URL.revokeObjectURL(url);
-    try { localStorage.setItem('ultimoBackup', new Date().toISOString()); } catch(e) {}
-    showToast('✅ Backup gerado! ' + totalC + ' clientes, ' + totalR + ' revendedores.');
-  } catch(e) { showToast('❌ Erro ao gerar backup: ' + e.message); }
-};
-
-window.showToast = function(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
-};
-
-function hoje() { return new Date().toISOString().split('T')[0]; }
-function formatDate(d) {
-  if (!d) return '—';
-  const [y,m,day] = d.split('-');
-  return `${day}/${m}/${y}`;
-}
-
-// ===== WHATSAPP INDIVIDUAL =====
-window.whatsCliente = function(id) {
-  const c = clientes.find(x => x.id === id);
-  if (!c) return;
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-  const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-  let msg = '';
-  if (dias === null) {
-    msg = `Olá ${c.nome}! Tudo bem? Passando para falar sobre seu plano IPTV. Qualquer dúvida estou à disposição! 😊`;
-  } else if (dias < 0) {
-    msg = `Olá ${c.nome}! Seu plano IPTV venceu há ${Math.abs(dias)} dia(s). Renove agora para continuar assistindo! Entre em contato comigo. 📺`;
-  } else if (dias === 0) {
-    msg = `Olá ${c.nome}! 🔔📺\n\nSeu plano IPTV vence *HOJE*! Renove agora para não perder o acesso. Entre em contato comigo! 🙏`;
-  } else if (dias === 1) {
-    msg = `Olá ${c.nome}! 🚨 Seu plano IPTV vence *AMANHÃ* (${formatDate(c.vencimento)}). Renove hoje para não perder o acesso! 😊📺`;
-  } else if (dias <= 7) {
-    msg = `Olá ${c.nome}! Seu plano IPTV vence em ${dias} dia(s) (${formatDate(c.vencimento)}). Renove com antecedência para não perder o acesso! 😊📺`;
-  } else {
-    msg = `Olá ${c.nome}! Tudo bem? Passando para falar sobre seu plano IPTV que vence em ${formatDate(c.vencimento)}. Qualquer dúvida é só chamar! 😊`;
-  }
-  const whats = (c.whatsapp || '').replace(/\D/g,'');
-  if (!whats) {
-    showToast('❌ ' + c.nome + ' não tem WhatsApp cadastrado');
-    return;
-  }
-  const url = `https://wa.me/55${whats}?text=${encodeURIComponent(msg)}`;
-  window.open(url, 'whatsapp_popup', 'width=900,height=680,resizable=yes,scrollbars=yes');
-};
-
-// ===== WHATSAPP EM MASSA (7 dias) =====
-window.avisarTodosVencendo = function() {
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
-  const vencendo = clientes.filter(c => {
-    if (!c.vencimento) return false;
-    const v = new Date(c.vencimento + 'T00:00:00');
-    return v >= hoje_ && v <= em7;
-  });
-  if (!vencendo.length) { showToast('Nenhum cliente vencendo nos próximos 7 dias'); return; }
-  let delay = 0;
-  vencendo.forEach((c) => {
-    setTimeout(() => { whatsCliente(c.id); }, delay);
-    delay += 1500;
-  });
-  showToast(`📱 Abrindo WhatsApp para ${vencendo.length} cliente(s)...`);
-};
-
-// ===== CARDS MOBILE =====
-function renderCardsMobile() {
-  const busca = (document.getElementById('buscaCliente')?.value || '').toLowerCase();
-  const filtro = document.getElementById('filtroStatus')?.value || '';
-  const filtroSrv = document.getElementById('filtroServidor')?.value || '';
-  const hoje_ = new Date(); hoje_.setHours(0,0,0,0);
-  const em7 = new Date(hoje_); em7.setDate(em7.getDate() + 7);
-  const amanha = new Date(hoje_); amanha.setDate(amanha.getDate() + 1);
-  let lista = clientes.filter(c => !busca || c.nome?.toLowerCase().includes(busca) || c.usuario?.toLowerCase().includes(busca));
-  if (filtro === 'ativo') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_; });
-  else if (filtro === 'vencido') lista = lista.filter(c => { if (!c.vencimento) return true; const v = new Date(c.vencimento + 'T00:00:00'); return v < hoje_; });
-  else if (filtro === 'vence7') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v >= hoje_ && v <= em7; });
-  else if (filtro === 'vence1') lista = lista.filter(c => { const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null; return v && v.toDateString() === amanha.toDateString(); });
-  if (filtroSrv) lista = lista.filter(c => (c.servidor || '').toLowerCase() === filtroSrv.toLowerCase());
-  const container = document.getElementById('cardsMobileClientes');
-  if (!container) return;
-  if (!lista.length) { container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b">Nenhum cliente encontrado</div>'; return; }
-  container.innerHTML = lista.map(c => {
-    const v = c.vencimento ? new Date(c.vencimento + 'T00:00:00') : null;
-    const ativo = v && v >= hoje_;
-    const dias = v ? Math.ceil((v - hoje_) / (1000*60*60*24)) : null;
-    let diasTxt = '<span style="color:#64748b">Sem data</span>';
-    if (dias !== null) {
-      if (dias < 0) diasTxt = `<span style="color:#ef4444;font-weight:700">${Math.abs(dias)}d vencido</span>`;
-      else if (dias === 0) diasTxt = `<span style="color:#f59e0b;font-weight:700">Vence hoje!</span>`;
-      else if (dias === 1) diasTxt = `<span style="color:#ef4444;font-weight:700">🚨 Amanhã!</span>`;
-      else if (dias <= 7) diasTxt = `<span style="color:#f59e0b;font-weight:700">${dias}d</span>`;
-      else diasTxt = `<span style="color:#4ade80;font-weight:600">${dias}d</span>`;
-    }
-    return `<div class="client-card">
-      <div class="client-card-top">
-        <div>
-          <div class="client-card-name">${c.nome}</div>
-          ${c.obs ? `<div class="client-card-obs">${c.obs}</div>` : ''}
-        </div>
-        <span class="badge ${ativo ? 'badge-green' : 'badge-red'}">${ativo ? 'Ativo' : 'Vencido'}</span>
-      </div>
-      <div class="client-card-row">
-        <div class="client-chip">👤 <strong>${c.usuario || '—'}</strong></div>
-        ${c.whatsapp ? `<div class="client-chip">📱 <strong>${c.whatsapp}</strong></div>` : ''}
-        <div class="client-chip">🔑 <strong>${c.senha || '—'}</strong></div>
-        <div class="client-chip">🖥️ <strong>${c.servidor || '—'}</strong></div>
-        <div class="client-chip">📋 <strong>${c.plano || '—'}</strong></div>
-        <div class="client-chip">💰 <strong>R$ ${parseFloat(c.valor||0).toFixed(2).replace('.',',')}</strong></div>
-        <div class="client-chip">📅 <strong>${formatDate(c.vencimento)}</strong> ${diasTxt}</div>
-      </div>
-      <div class="client-card-actions">
-        <button class="btn-icon bi-edit" title="Editar" onclick="editarCliente('${c.id}')">✏️</button>
-        <button class="btn-icon bi-venc" title="Vencimento" onclick="abrirModalVencimento('${c.id}')">📅</button>
-        <button class="btn-icon bi-renN" title="Renovar" onclick="abrirModalRenovar('${c.id}')">🔄</button>
-        <button class="btn-icon bi-whats" title="WhatsApp" onclick="whatsCliente('${c.id}')">📱</button>
-        <button class="btn-icon bi-del" title="Excluir" onclick="deletarCliente('${c.id}')">🗑️</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ===== RESTAURAR BACKUP =====
-let dadosBackupCarregados = null;
-
-window.abrirRestaurarBackup = function() {
-  dadosBackupCarregados = null;
-  document.getElementById('restoreStep1').style.display = 'block';
-  document.getElementById('restoreStep2').style.display = 'none';
-  document.getElementById('restoreStep3').style.display = 'none';
-  document.getElementById('restoreStep4').style.display = 'none';
-  document.getElementById('inputBackupFile').value = '';
-  document.getElementById('modalRestaurar').classList.add('open');
-};
-
-window.voltarRestaurar = function() {
-  dadosBackupCarregados = null;
-  document.getElementById('restoreStep1').style.display = 'block';
-  document.getElementById('restoreStep2').style.display = 'none';
-  document.getElementById('inputBackupFile').value = '';
-};
-
-window.lerArquivoBackup = function(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const json = JSON.parse(e.target.result);
-      if (!json.dados) throw new Error('Arquivo inválido: sem campo "dados"');
-      dadosBackupCarregados = json;
-      const d = json.dados;
-      const totalClientes = d.clientes ? Object.keys(d.clientes).length : 0;
-      const totalRevs = d.revendedores ? Object.keys(d.revendedores).length : 0;
-      const totalServ = d.servidores ? Object.keys(d.servidores).length : 0;
-      const totalPlanos = d.planos ? Object.keys(d.planos).length : 0;
-      document.getElementById('restorePreview').innerHTML = `
-        <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .75rem">👥 <strong style="color:#f1f5f9">${totalClientes}</strong> clientes</div>
-        <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .75rem">🤝 <strong style="color:#f1f5f9">${totalRevs}</strong> revendedores</div>
-        <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .75rem">🖥️ <strong style="color:#f1f5f9">${totalServ > 0 ? Object.values(d.servidores).reduce((acc,v) => acc + Object.keys(v).length, 0) : 0}</strong> servidores</div>
-        <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .75rem">📋 <strong style="color:#f1f5f9">${totalPlanos}</strong> planos</div>
-      `;
-      const geradoEm = json.geradoEm ? new Date(json.geradoEm).toLocaleString('pt-BR') : 'Data desconhecida';
-      document.getElementById('restoreData').textContent = '📅 Backup gerado em: ' + geradoEm;
-      document.getElementById('restoreStep1').style.display = 'none';
-      document.getElementById('restoreStep2').style.display = 'block';
-    } catch(err) {
-      showToast('❌ Arquivo inválido: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-};
-
-window.confirmarRestaurar = async function() {
-  if (!dadosBackupCarregados) return;
-  document.getElementById('restoreStep2').style.display = 'none';
-  document.getElementById('restoreStep3').style.display = 'block';
-
-  const setProgress = (pct, msg) => {
-    document.getElementById('restoreProgressBar').style.width = pct + '%';
-    document.getElementById('restoreProgressMsg').textContent = msg;
-  };
-
-  try {
-    const d = dadosBackupCarregados.dados;
-
-    setProgress(10, 'Apagando clientes antigos...');
-    await set(ref(db, 'iptv/clientes'), null);
-
-    setProgress(25, 'Restaurando clientes...');
-    if (d.clientes && Object.keys(d.clientes).length > 0) {
-      await set(ref(db, 'iptv/clientes'), d.clientes);
-    }
-
-    setProgress(45, 'Restaurando revendedores...');
-    await set(ref(db, 'iptv/revendedores'), null);
-    if (d.revendedores && Object.keys(d.revendedores).length > 0) {
-      await set(ref(db, 'iptv/revendedores'), d.revendedores);
-    }
-
-    setProgress(65, 'Restaurando servidores...');
-    await set(ref(db, 'iptv/servidores'), null);
-    if (d.servidores) {
-      await set(ref(db, 'iptv/servidores'), d.servidores);
-    }
-
-    setProgress(80, 'Restaurando planos...');
-    await set(ref(db, 'iptv/planos'), null);
-    if (d.planos && Object.keys(d.planos).length > 0) {
-      await set(ref(db, 'iptv/planos'), d.planos);
-    }
-
-    setProgress(100, 'Concluído!');
-
-    const totalClientes = d.clientes ? Object.keys(d.clientes).length : 0;
-    const totalRevs = d.revendedores ? Object.keys(d.revendedores).length : 0;
-
-    setTimeout(() => {
-      document.getElementById('restoreStep3').style.display = 'none';
-      document.getElementById('restoreStep4').style.display = 'block';
-      document.getElementById('restoreSucessoMsg').textContent =
-        totalClientes + ' clientes e ' + totalRevs + ' revendedores restaurados.';
-    }, 600);
-
-  } catch(err) {
-    document.getElementById('restoreStep3').style.display = 'none';
-    document.getElementById('restoreStep2').style.display = 'block';
-    showToast('❌ Erro ao restaurar: ' + err.message);
-  }
-};
-
-let chartInstance = null;
-function renderGraficoReceita() {
-  const canvas = document.getElementById('chartReceita');
-  if (!canvas || typeof Chart === 'undefined') return;
-  const meses = [];
-  const receitas = [];
-  const hoje_ = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(hoje_.getFullYear(), hoje_.getMonth() - i, 1);
-    const ano = d.getFullYear();
-    const mes = d.getMonth();
-    const nomeMes = d.toLocaleDateString('pt-BR', {month:'short'}).replace('.','');
-    meses.push(nomeMes + '/' + String(ano).slice(2));
-    const receita = clientes
-      .filter(c => {
-        if (!c.vencimento) return false;
-        const [y,m] = c.vencimento.split('-').map(Number);
-        return y === ano && (m-1) === mes;
-      })
-      .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-    receitas.push(receita);
-  }
-  if (chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: meses,
-      datasets: [{
-        label: 'Receita (R$)',
-        data: receitas,
-        backgroundColor: 'rgba(74,222,128,.25)',
-        borderColor: '#4ade80',
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => 'R$ ' + ctx.parsed.y.toFixed(2).replace('.',',') } }
-      },
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#64748b', font: { size: 11 } } },
-        y: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#64748b', font: { size: 11 }, callback: v => 'R$ ' + v.toFixed(0) } }
-      }
-    }
-  });
-}
 </script>
-
-
-</body></html>
+</body>
+</html>
