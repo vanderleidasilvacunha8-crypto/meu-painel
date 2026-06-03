@@ -8,27 +8,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<!-- ================= FIREBASE (compat - igual seu painel) ================= -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <style>
-  :root{
-    --bg:#0c1116; --panel:#141b22; --panel-2:#1b242d; --line:#243039;
-    --txt:#e6edf3; --txt-dim:#8a97a3; --pix:#32bcad; --pix-dark:#249a8d;
-    --wa:#25d366; --red:#ff6b6b; --orange:#ffa94d; --green:#51cf66; --radius:14px;
-  }
+  :root{--bg:#0c1116;--panel:#141b22;--panel-2:#1b242d;--line:#243039;--txt:#e6edf3;--txt-dim:#8a97a3;--pix:#32bcad;--pix-dark:#249a8d;--wa:#25d366;--red:#ff6b6b;--orange:#ffa94d;--green:#51cf66;--radius:14px}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:radial-gradient(900px 500px at 100% -10%, rgba(50,188,173,.10), transparent 60%), var(--bg);
-    color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;padding:22px 16px 70px;line-height:1.5}
+  body{background:radial-gradient(900px 500px at 100% -10%, rgba(50,188,173,.10), transparent 60%), var(--bg);color:var(--txt);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;padding:22px 16px 70px;line-height:1.5}
   .wrap{max-width:760px;margin:0 auto}
-  .head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-  .badge{width:42px;height:42px;border-radius:12px;flex:none;background:linear-gradient(135deg,var(--pix),var(--pix-dark));
-    display:grid;place-items:center;font-family:'Sora';font-weight:700;color:#06231f;font-size:20px;box-shadow:0 6px 20px rgba(50,188,173,.25)}
+  .head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .badge{width:42px;height:42px;border-radius:12px;flex:none;background:linear-gradient(135deg,var(--pix),var(--pix-dark));display:grid;place-items:center;font-family:'Sora';font-weight:700;color:#06231f;font-size:20px;box-shadow:0 6px 20px rgba(50,188,173,.25)}
   h1{font-family:'Sora';font-size:22px;font-weight:700;letter-spacing:-.3px}
   .head p{color:var(--txt-dim);font-size:13px}
+  .who{font-size:12px;color:var(--txt-dim);margin-bottom:14px}.who b{color:var(--pix)}
   .tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:18px}
   .tab{flex:1;text-align:center;padding:11px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;color:var(--txt-dim);transition:.15s}
   .tab.active{background:linear-gradient(135deg,var(--pix),var(--pix-dark));color:#06231f}
@@ -37,7 +29,7 @@
   .card h2{font-family:'Sora';font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--pix);margin-bottom:18px;font-weight:600}
   label{display:block;font-size:13px;color:var(--txt-dim);margin:0 0 6px 2px;font-weight:500}
   .field{margin-bottom:16px}
-  input,select,textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:12px 13px;font-size:15px;font-family:inherit;transition:border-color .15s, box-shadow .15s}
+  input,select,textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:12px 13px;font-size:15px;font-family:inherit;transition:border-color .15s,box-shadow .15s}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pix);box-shadow:0 0 0 3px rgba(50,188,173,.15)}
   textarea{resize:vertical;min-height:120px;line-height:1.55}
   .row{display:flex;gap:14px}.row > *{flex:1}
@@ -54,8 +46,7 @@
   .warn{background:rgba(255,169,77,.1);border:1px solid rgba(255,169,77,.35);color:var(--orange);border-radius:10px;padding:11px 13px;font-size:13px;margin-bottom:16px;line-height:1.5}
   .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
   .toolbar select{width:auto;flex:1;min-width:160px}
-  .counter{font-size:13px;color:var(--txt-dim);font-weight:500;white-space:nowrap}
-  .counter b{color:var(--pix)}
+  .counter{font-size:13px;color:var(--txt-dim);font-weight:500;white-space:nowrap}.counter b{color:var(--pix)}
   .client{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:11px;transition:.15s}
   .client.done{opacity:.5}
   .client-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:11px}
@@ -65,6 +56,7 @@
   .pill.red{background:rgba(255,107,107,.15);color:var(--red)}
   .pill.orange{background:rgba(255,169,77,.15);color:var(--orange)}
   .pill.green{background:rgba(81,207,102,.15);color:var(--green)}
+  .pill.gray{background:var(--panel-2);color:var(--txt-dim)}
   .client-actions{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
   .mini{padding:9px 12px;font-size:13px;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);color:var(--txt);cursor:pointer;font-weight:600;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
   .mini.wa{background:var(--wa);color:#06231f;border-color:transparent}.mini.wa:hover{filter:brightness(1.06)}
@@ -72,7 +64,6 @@
   .mini.check{width:44px;background:transparent;color:var(--txt-dim)}
   .mini.check.on{background:rgba(81,207,102,.15);color:var(--green);border-color:transparent}
   .empty{text-align:center;color:var(--txt-dim);padding:30px;font-size:14px}
-  .divider{height:1px;background:var(--line);margin:18px 0}
   .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:18px}
   .modal.open{display:flex}
   .modal-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:380px;width:100%;text-align:center}
@@ -86,17 +77,14 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="head">
-    <div class="badge">Pix</div>
-    <div><h1>Cobrança Pix</h1><p>Configure o Pix uma vez e cobre todos os clientes automaticamente.</p></div>
-  </div>
+  <div class="head"><div class="badge">Pix</div><div><h1>Cobrança Pix</h1><p>Configure o Pix uma vez e cobre seus clientes.</p></div></div>
+  <div class="who" id="quemSou"></div>
 
   <div class="tabs">
     <div class="tab active" data-page="pgConfig">⚙️ Configuração</div>
     <div class="tab" data-page="pgCobranca">📨 Cobrança em massa</div>
   </div>
 
-  <!-- CONFIG -->
   <div class="page active" id="pgConfig">
     <div class="card">
       <h2>Dados do recebedor</h2>
@@ -109,9 +97,8 @@
         <div class="field"><label>Nome do recebedor</label><input id="nomeRecebedor" maxlength="25" placeholder="Até 25 letras"></div>
         <div class="field"><label>Cidade</label><input id="cidade" maxlength="15" placeholder="ex: Ribeirao Neves"></div>
       </div>
-      <div class="field"><label>Valor padrão da renovação (opcional)</label>
-        <input id="valor" type="number" step="0.01" placeholder="ex: 30.00">
-        <p class="hint">Usado quando o cliente não tiver um valor próprio.</p></div>
+      <div class="field"><label>Valor padrão (opcional)</label><input id="valor" type="number" step="0.01" placeholder="ex: 25.00">
+        <p class="hint">Usado quando o cliente não tiver valor próprio cadastrado.</p></div>
     </div>
     <div class="card">
       <h2>Mensagem de cobrança</h2>
@@ -121,24 +108,20 @@
 Passando pra lembrar que seu plano de canais, filmes e séries vence *{vencimento}*. Valor: *{valor}*.
 
 Pra renovar é só pagar pelo Pix. 🙏</textarea>
-        <div class="tags">
-          <span class="tag" data-var="{nome}">{nome}</span><span class="tag" data-var="{vencimento}">{vencimento}</span>
-          <span class="tag" data-var="{plano}">{plano}</span><span class="tag" data-var="{valor}">{valor}</span>
-        </div></div>
+        <div class="tags"><span class="tag" data-var="{nome}">{nome}</span><span class="tag" data-var="{vencimento}">{vencimento}</span><span class="tag" data-var="{plano}">{plano}</span><span class="tag" data-var="{valor}">{valor}</span></div></div>
       <button class="btn btn-primary" id="btnSalvar">💾 Salvar configuração</button>
-      <div class="saved" id="aviso">✓ Configuração salva no Firebase!</div>
+      <div class="saved" id="aviso">✓ Configuração salva!</div>
     </div>
   </div>
 
-  <!-- COBRANÇA -->
   <div class="page" id="pgCobranca">
     <div class="warn" id="avisoTopo" style="display:none"></div>
     <div class="toolbar">
       <select id="filtro">
-        <option value="todos">Todos os clientes</option>
-        <option value="vencidos">Vencidos</option>
         <option value="hoje">Vence hoje / amanhã</option>
+        <option value="vencidos">Vencidos</option>
         <option value="semana">Vence em até 7 dias</option>
+        <option value="todos">Todos os clientes</option>
       </select>
       <span class="counter"><b id="cEnviados">0</b> de <b id="cTotal">0</b> enviados</span>
     </div>
@@ -146,230 +129,163 @@ Pra renovar é só pagar pelo Pix. 🙏</textarea>
   </div>
 </div>
 
-<!-- modal pix -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <h3 id="mTitulo">Código Pix</h3>
-    <p>O cliente escaneia o QR ou cola o código no banco.</p>
-    <div id="qr"></div>
-    <div class="code-box" id="mCodigo"></div>
-    <button class="btn btn-primary" id="mEnviar" style="margin-bottom:9px">💬 Enviar código no WhatsApp</button>
-    <button class="btn btn-ghost" id="mCopiar" style="margin-bottom:9px">📋 Copiar código</button>
-    <button class="btn btn-ghost" id="mFechar">Fechar</button>
-  </div>
-</div>
+<div class="modal" id="modal"><div class="modal-box">
+  <h3 id="mTitulo">Código Pix</h3>
+  <p>O cliente escaneia o QR ou cola o código no banco.</p>
+  <div id="qr"></div>
+  <div class="code-box" id="mCodigo"></div>
+  <button class="btn btn-primary" id="mEnviar" style="margin-bottom:9px">💬 Enviar código no WhatsApp</button>
+  <button class="btn btn-ghost" id="mCopiar" style="margin-bottom:9px">📋 Copiar código</button>
+  <button class="btn btn-ghost" id="mFechar">Fechar</button>
+</div></div>
 
 <script>
 /* ============================================================
    1) CONFIG DO FIREBASE
-   ------------------------------------------------------------
-   Cole aqui o firebaseConfig do projeto gestor-vinanceiro2020.
-   Pegue em: Console do Firebase > Configurações do projeto (⚙️)
-   > Seus apps > app Web > "Configuração do SDK".
-   (Se este código rodar DENTRO do painel que já inicializa o
-    Firebase, pode apagar este bloco — o "if" abaixo evita
-    inicializar duas vezes.)
+   >>> COLE AQUI o MESMO firebaseConfig que já está no seu
+       StreamPanel (procure por "apiKey" no código do painel).
+       Tem que ser idêntico, senão o login não é reconhecido.
    ============================================================ */
 const firebaseConfig = {
-  apiKey: "COLE_AQUI",
+  apiKey: "COLE_O_DO_SEU_PAINEL",
   authDomain: "gestor-vinanceiro2020.firebaseapp.com",
   databaseURL: "https://gestor-vinanceiro2020-default-rtdb.firebaseio.com",
   projectId: "gestor-vinanceiro2020",
   storageBucket: "gestor-vinanceiro2020.appspot.com",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
+  messagingSenderId: "COLE_O_DO_SEU_PAINEL",
+  appId: "COLE_O_DO_SEU_PAINEL"
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-let UID = null;
 
 /* ============================================================
-   2) CAMINHOS NO BANCO  ——  AJUSTE SE OS SEUS FOREM DIFERENTES
+   2) AJUSTES DO SEU PAINEL  (já configurados pra sua estrutura)
    ============================================================ */
-const PATH_CONFIG   = uid => 'vendedores/'+uid+'/configPix';
-const PATH_CLIENTES = uid => 'clientes/'+uid;     // <-- onde ficam SEUS clientes
-// Se seus clientes ficam num nó único (sem separar por vendedor),
-// troque por:  const PATH_CLIENTES = uid => 'clientes';
-// e filtre pelo dono dentro do mapearCliente (ex: raw.ownerUid === uid).
+const EMAIL_ADMIN   = "vanderleidasilvacunha8@gmail.com"; // dono: enxerga TODOS os clientes
+const PATH_CLIENTES = "clientes";                          // nó único, filtrado por "revendedor"
+const PATH_CONFIG   = uid => "configPix/" + uid;
+const PATH_ENVIADAS = uid => "cobrancasEnviadas/" + uid;
+// Se no banco os dados estiverem dentro de "dados/" (raro), use "dados/clientes" etc.
 
-/* ============================================================
-   3) TRADUTOR DE CLIENTE  ——  encaixa os SEUS nomes de campo
-   Aceita vários nomes comuns. Se algum não bater, ajuste aqui.
-   ============================================================ */
-function mapearCliente(raw, id){
+let UID=null, MEU_EMAIL="";
+
+/* tradutor — encaixado nos campos reais do seu banco */
+function mapearCliente(raw,id){
   return {
-    id: id,
-    nome:  raw.nome || raw.name || raw.cliente || raw.usuario || 'Cliente',
-    fone:  raw.fone || raw.telefone || raw.whatsapp || raw.celular || raw.phone || '',
-    venc:  normalizarData(raw.vencimento || raw.venc || raw.validade || raw.expira || raw.dataVencimento || ''),
-    valor: raw.valor || raw.preco || raw.mensalidade || raw.value || ''
+    id:id,
+    nome: raw.nome || "Cliente",
+    fone: raw.whatsapp || raw.telefone || raw.fone || "",
+    venc: normalizarData(raw.vencimento || raw.venc || ""),
+    valor: raw.valor || "",
+    revendedor: raw.revendedor || ""
   };
 }
 function normalizarData(v){
-  if(v===''||v==null) return '';
-  if(typeof v==='number'){ return fmtData(new Date(v)); }            // timestamp
-  if(/^\d{4}-\d{2}-\d{2}/.test(v)){ const [a,m,d]=v.substring(0,10).split('-'); return d+'/'+m+'/'+a; } // ISO
-  return v; // já está dd/mm/aaaa
+  if(v===""||v==null) return "";
+  if(typeof v==="number") return fmtData(new Date(v));
+  if(/^\d{4}-\d{2}-\d{2}/.test(v)){const [a,m,d]=v.substring(0,10).split("-");return d+"/"+m+"/"+a;}
+  return v;
 }
-function fmtData(d){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
+function fmtData(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();}
 
 /* ============================================================
    GERADOR PIX COPIA E COLA (BR Code / EMV - Bacen)
    ============================================================ */
-function tlv(id,v){return id+String(v.length).padStart(2,'0')+v;}
-function semAcento(s){return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 .,-]/g,'').toUpperCase().trim();}
-function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){crc=(crc&0x8000)?((crc<<1)^0x1021):(crc<<1);crc&=0xFFFF;}}return crc.toString(16).toUpperCase().padStart(4,'0');}
+function tlv(id,v){return id+String(v.length).padStart(2,"0")+v;}
+function semAcento(s){return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9 .,-]/g,"").toUpperCase().trim();}
+function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){crc=(crc&0x8000)?((crc<<1)^0x1021):(crc<<1);crc&=0xFFFF;}}return crc.toString(16).toUpperCase().padStart(4,"0");}
 function gerarPix({chave,nome,cidade,valor}){
-  let mai=tlv('00','br.gov.bcb.pix')+tlv('01',chave);
-  let p=tlv('00','01')+tlv('26',mai)+tlv('52','0000')+tlv('53','986');
-  if(valor&&Number(valor)>0) p+=tlv('54',Number(valor).toFixed(2));
-  p+=tlv('58','BR')+tlv('59',(semAcento(nome)||'RECEBEDOR').substring(0,25))+tlv('60',(semAcento(cidade)||'CIDADE').substring(0,15))+tlv('62',tlv('05','***'))+'6304';
+  let mai=tlv("00","br.gov.bcb.pix")+tlv("01",chave);
+  let p=tlv("00","01")+tlv("26",mai)+tlv("52","0000")+tlv("53","986");
+  if(valor&&Number(valor)>0) p+=tlv("54",Number(valor).toFixed(2));
+  p+=tlv("58","BR")+tlv("59",(semAcento(nome)||"RECEBEDOR").substring(0,25))+tlv("60",(semAcento(cidade)||"CIDADE").substring(0,15))+tlv("62",tlv("05","***"))+"6304";
   return p+crc16(p);
 }
 
 /* ============================================================
-   ESTADO + ELEMENTOS
+   ESTADO + DADOS
    ============================================================ */
 const $=id=>document.getElementById(id);
-const CAMPOS=['tipoChave','chavePix','nomeRecebedor','cidade','valor','mensagem'];
+const CAMPOS=["tipoChave","chavePix","nomeRecebedor","cidade","valor","mensagem"];
 let config={}, clientes=[], enviados={};
 
-/* ---- CONFIG: ler e salvar no Firebase ---- */
 function carregarConfig(){
-  db.ref(PATH_CONFIG(UID)).once('value').then(s=>{
-    const c=s.val();
-    if(c){ config=c; CAMPOS.forEach(k=>{ if(config[k]!==undefined) $(k).value=config[k]; }); }
+  db.ref(PATH_CONFIG(UID)).once("value").then(s=>{
+    const c=s.val(); if(c){config=c;CAMPOS.forEach(k=>{if(config[k]!==undefined)$(k).value=config[k];});}
     checarConfig();
-  }).catch(e=>console.error('Erro ao ler config:',e));
+  }).catch(e=>console.error("config:",e));
 }
 function salvarConfig(){
-  config={}; CAMPOS.forEach(k=>config[k]=$(k).value);
+  config={};CAMPOS.forEach(k=>config[k]=$(k).value);
   db.ref(PATH_CONFIG(UID)).set(config).then(()=>{
-    const a=$('aviso'); a.style.display='flex'; setTimeout(()=>a.style.display='none',2500);
-    checarConfig();
-  }).catch(e=>{ alert('Erro ao salvar: '+e.message); });
+    const a=$("aviso");a.style.display="flex";setTimeout(()=>a.style.display="none",2500);checarConfig();
+  }).catch(e=>alert("Erro ao salvar: "+e.message));
 }
-
-/* ---- CLIENTES: escuta em tempo real ---- */
 function carregarClientes(){
-  db.ref(PATH_CLIENTES(UID)).on('value', s=>{
+  db.ref(PATH_CLIENTES).on("value",s=>{
     const val=s.val()||{};
-    clientes=Object.entries(val).map(([id,raw])=>mapearCliente(raw,id));
+    const todos=Object.entries(val).map(([id,raw])=>mapearCliente(raw,id));
+    const ehAdmin=(MEU_EMAIL===EMAIL_ADMIN);
+    clientes=todos.filter(c=>ehAdmin || c.revendedor===MEU_EMAIL);
     render();
-  }, e=>console.error('Erro ao ler clientes:',e));
+  },e=>console.error("clientes:",e));
 }
-
-/* ---- "Enviados" salvos por vendedor (no Firebase) ---- */
-function carregarEnviados(){
-  db.ref('vendedores/'+UID+'/cobrancasEnviadas').on('value', s=>{ enviados=s.val()||{}; render(); });
-}
-function marcarEnviado(cli){
-  const k=chaveEnvio(cli);
-  if(enviados[k]) db.ref('vendedores/'+UID+'/cobrancasEnviadas/'+k).remove();
-  else db.ref('vendedores/'+UID+'/cobrancasEnviadas/'+k).set(Date.now());
-}
+function carregarEnviados(){db.ref(PATH_ENVIADAS(UID)).on("value",s=>{enviados=s.val()||{};render();});}
+function marcarEnviado(cli){const k=chaveEnvio(cli);
+  if(enviados[k]) db.ref(PATH_ENVIADAS(UID)+"/"+k).remove();
+  else db.ref(PATH_ENVIADAS(UID)+"/"+k).set(Date.now());}
 
 /* ============================================================
-   LÓGICA DE EXIBIÇÃO
+   EXIBIÇÃO
    ============================================================ */
-function diasAteVenc(venc){
-  if(!venc) return 999;
-  const [d,m,a]=venc.split('/').map(Number);
-  const alvo=new Date(a,m-1,d), hoje=new Date();
-  hoje.setHours(0,0,0,0); alvo.setHours(0,0,0,0);
-  return Math.round((alvo-hoje)/86400000);
-}
-function statusVenc(dias){
-  if(dias===999) return {cls:'',txt:'sem data'};
-  if(dias<0) return {cls:'red',txt:'Vencido há '+Math.abs(dias)+'d'};
-  if(dias===0) return {cls:'orange',txt:'Vence hoje'};
-  if(dias===1) return {cls:'orange',txt:'Vence amanhã'};
-  return {cls:'green',txt:'Vence em '+dias+'d'};
-}
-function passaFiltro(dias,f){
-  if(f==='vencidos') return dias<0;
-  if(f==='hoje') return dias===0||dias===1;
-  if(f==='semana') return dias>=0&&dias<=7;
-  return true;
-}
-function montarMensagem(cli){
-  let m=(config.mensagem||'');
-  const v=cli.valor||config.valor;
-  const valorTxt=v?('R$ '+Number(v).toFixed(2).replace('.',',')):'a combinar';
-  return m.replaceAll('{nome}',(cli.nome||'cliente').split(' ')[0])
-    .replaceAll('{vencimento}',cli.venc||'em breve')
-    .replaceAll('{plano}','canais, filmes e séries')
-    .replaceAll('{valor}',valorTxt);
-}
-function pixDoCliente(cli){
-  return gerarPix({chave:(config.chavePix||'').trim(),nome:config.nomeRecebedor,cidade:config.cidade,valor:cli.valor||config.valor});
-}
-function waLink(fone,texto){let f=(fone||'').replace(/\D/g,'');if(!f.startsWith('55'))f='55'+f;return 'https://wa.me/'+f+'?text='+encodeURIComponent(texto);}
-function chaveEnvio(cli){return (cli.id||cli.fone)+'_'+(cli.venc||'');}
+function diasAteVenc(venc){if(!venc)return 999;const[d,m,a]=venc.split("/").map(Number);const alvo=new Date(a,m-1,d),hoje=new Date();hoje.setHours(0,0,0,0);alvo.setHours(0,0,0,0);return Math.round((alvo-hoje)/86400000);}
+function statusVenc(dias){if(dias===999)return{cls:"gray",txt:"sem data"};if(dias<0)return{cls:"red",txt:"Vencido há "+Math.abs(dias)+"d"};if(dias===0)return{cls:"orange",txt:"Vence hoje"};if(dias===1)return{cls:"orange",txt:"Vence amanhã"};return{cls:"green",txt:"Vence em "+dias+"d"};}
+function passaFiltro(dias,f){if(f==="vencidos")return dias<0;if(f==="hoje")return dias===0||dias===1;if(f==="semana")return dias>=0&&dias<=7;return true;}
+function montarMensagem(cli){let m=(config.mensagem||"");const v=cli.valor||config.valor;const valorTxt=v?("R$ "+Number(v).toFixed(2).replace(".",",")):"a combinar";
+  return m.replaceAll("{nome}",(cli.nome||"cliente").split(" ")[0]).replaceAll("{vencimento}",cli.venc||"em breve").replaceAll("{plano}","canais, filmes e séries").replaceAll("{valor}",valorTxt);}
+function pixDoCliente(cli){return gerarPix({chave:(config.chavePix||"").trim(),nome:config.nomeRecebedor,cidade:config.cidade,valor:cli.valor||config.valor});}
+function waLink(fone,texto){let f=(fone||"").replace(/\D/g,"");if(f.length<=11)f="55"+f;return "https://wa.me/"+f+"?text="+encodeURIComponent(texto);}
+function chaveEnvio(cli){return (cli.id||cli.fone)+"_"+(cli.venc||"");}
 
 function render(){
-  const f=$('filtro').value, cont=$('lista'); cont.innerHTML='';
+  const f=$("filtro").value,cont=$("lista");cont.innerHTML="";
   const lista=clientes.map(c=>({...c,dias:diasAteVenc(c.venc)})).filter(c=>passaFiltro(c.dias,f)).sort((a,b)=>a.dias-b.dias);
-  if(!lista.length){cont.innerHTML='<div class="empty">Nenhum cliente nesse filtro.</div>';}
+  if(!lista.length)cont.innerHTML='<div class="empty">Nenhum cliente nesse filtro.</div>';
   let totEnv=0;
   lista.forEach(cli=>{
-    const st=statusVenc(cli.dias), enviado=!!enviados[chaveEnvio(cli)]; if(enviado)totEnv++;
-    const div=document.createElement('div');
-    div.className='client'+(enviado?' done':'');
-    div.innerHTML=`<div class="client-top"><div><div class="client-name">${cli.nome}</div><div class="client-meta">${cli.fone||'sem telefone'} · ${cli.venc||'—'}</div></div><span class="pill ${st.cls}">${st.txt}</span></div>
-      <div class="client-actions"><button class="mini wa" data-act="msg">💬 Lembrete</button><button class="mini pix" data-act="pix">🔑 Código Pix</button><button class="mini check ${enviado?'on':''}" data-act="check" title="Marcar enviado">✓</button></div>`;
-    div._cli=cli; cont.appendChild(div);
+    const st=statusVenc(cli.dias),enviado=!!enviados[chaveEnvio(cli)];if(enviado)totEnv++;
+    const div=document.createElement("div");div.className="client"+(enviado?" done":"");
+    div.innerHTML=`<div class="client-top"><div><div class="client-name">${cli.nome}</div><div class="client-meta">${cli.fone||"sem WhatsApp"} · ${cli.venc||"—"}</div></div><span class="pill ${st.cls}">${st.txt}</span></div>
+      <div class="client-actions"><button class="mini wa" data-act="msg">💬 Lembrete</button><button class="mini pix" data-act="pix">🔑 Código Pix</button><button class="mini check ${enviado?"on":""}" data-act="check" title="Marcar enviado">✓</button></div>`;
+    div._cli=cli;cont.appendChild(div);
   });
-  $('cTotal').textContent=lista.length; $('cEnviados').textContent=totEnv;
-  cont.querySelectorAll('.mini').forEach(b=>{
-    b.onclick=()=>{const cli=b.closest('.client')._cli;const act=b.dataset.act;
-      if(act==='msg'){ if(!cli.fone){alert('Esse cliente não tem telefone cadastrado.');return;}
-        window.open(waLink(cli.fone,montarMensagem(cli)+'\n\nVou te mandar o código Pix na próxima mensagem 👇'),'_blank'); }
-      else if(act==='pix'){ abrirModalPix(cli); }
-      else if(act==='check'){ marcarEnviado(cli); }};
-  });
+  $("cTotal").textContent=lista.length;$("cEnviados").textContent=totEnv;
+  cont.querySelectorAll(".mini").forEach(b=>{b.onclick=()=>{const cli=b.closest(".client")._cli,act=b.dataset.act;
+    if(act==="msg"){if(!cli.fone){alert("Esse cliente não tem WhatsApp cadastrado.");return;}window.open(waLink(cli.fone,montarMensagem(cli)+"\n\nVou te mandar o código Pix na próxima mensagem 👇"),"_blank");}
+    else if(act==="pix"){abrirModalPix(cli);}
+    else if(act==="check"){marcarEnviado(cli);}};});
 }
 
-/* modal */
-let codigoModal='', clienteModal=null;
-function abrirModalPix(cli){
-  if(!config.chavePix){alert('Configure a chave Pix na aba Configuração.');return;}
-  clienteModal=cli; codigoModal=pixDoCliente(cli);
-  $('mTitulo').textContent='Pix de '+(cli.nome||'').split(' ')[0];
-  $('mCodigo').textContent=codigoModal;
-  $('qr').innerHTML=''; new QRCode($('qr'),{text:codigoModal,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});
-  $('modal').classList.add('open');
-}
-$('mCopiar').onclick=()=>navigator.clipboard.writeText(codigoModal).then(()=>{$('mCopiar').textContent='✓ Copiado!';setTimeout(()=>$('mCopiar').textContent='📋 Copiar código',1600);});
-$('mEnviar').onclick=()=>{ if(!clienteModal.fone){alert('Cliente sem telefone.');return;} window.open(waLink(clienteModal.fone,codigoModal),'_blank'); };
-$('mFechar').onclick=()=>$('modal').classList.remove('open');
-$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('open');};
+let codigoModal="",clienteModal=null;
+function abrirModalPix(cli){if(!config.chavePix){alert("Configure a chave Pix na aba Configuração.");return;}
+  clienteModal=cli;codigoModal=pixDoCliente(cli);$("mTitulo").textContent="Pix de "+(cli.nome||"").split(" ")[0];$("mCodigo").textContent=codigoModal;
+  $("qr").innerHTML="";new QRCode($("qr"),{text:codigoModal,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});$("modal").classList.add("open");}
+$("mCopiar").onclick=()=>navigator.clipboard.writeText(codigoModal).then(()=>{$("mCopiar").textContent="✓ Copiado!";setTimeout(()=>$("mCopiar").textContent="📋 Copiar código",1600);});
+$("mEnviar").onclick=()=>{if(!clienteModal.fone){alert("Cliente sem WhatsApp.");return;}window.open(waLink(clienteModal.fone,codigoModal),"_blank");};
+$("mFechar").onclick=()=>$("modal").classList.remove("open");
+$("modal").onclick=e=>{if(e.target===$("modal"))$("modal").classList.remove("open");};
 
-/* ============================================================
-   INTERFACE GERAL
-   ============================================================ */
-document.querySelectorAll('.tab').forEach(t=>{
-  t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');$(t.dataset.page).classList.add('active');if(t.dataset.page==='pgCobranca')checarConfig();};
-});
-document.querySelectorAll('.tag').forEach(t=>{t.onclick=()=>{const ta=$('mensagem'),v=t.dataset.var,s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.focus();ta.selectionStart=ta.selectionEnd=s+v.length;};});
-$('btnSalvar').onclick=salvarConfig;
-$('filtro').onchange=render;
-function checarConfig(){const w=$('avisoTopo');if(!config.chavePix){w.style.display='block';w.innerHTML='⚠️ Configure sua chave Pix na aba <b>Configuração</b> antes de cobrar.';}else{w.style.display='none';}}
+document.querySelectorAll(".tab").forEach(t=>{t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.page).classList.add("active");if(t.dataset.page==="pgCobranca")checarConfig();};});
+document.querySelectorAll(".tag").forEach(t=>{t.onclick=()=>{const ta=$("mensagem"),v=t.dataset.var,s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);ta.focus();ta.selectionStart=ta.selectionEnd=s+v.length;};});
+$("btnSalvar").onclick=salvarConfig;
+$("filtro").onchange=render;
+function checarConfig(){const w=$("avisoTopo");if(!config.chavePix){w.style.display="block";w.innerHTML="⚠️ Configure sua chave Pix na aba <b>Configuração</b> antes de cobrar.";}else w.style.display="none";}
 
-/* ============================================================
-   INICIALIZAÇÃO — espera o vendedor estar logado
-   ============================================================ */
 firebase.auth().onAuthStateChanged(user=>{
-  if(!user){
-    $('avisoTopo').style.display='block';
-    $('avisoTopo').innerHTML='⚠️ Faça login no painel para carregar seus dados.';
-    return;
-  }
-  UID=user.uid;
-  carregarConfig();
-  carregarClientes();
-  carregarEnviados();
+  if(!user){$("avisoTopo").style.display="block";$("avisoTopo").innerHTML="⚠️ Faça login no painel para carregar seus dados.";$("quemSou").textContent="";return;}
+  UID=user.uid;MEU_EMAIL=user.email||"";
+  $("quemSou").innerHTML="Logado como <b>"+MEU_EMAIL+"</b>"+(MEU_EMAIL===EMAIL_ADMIN?" (dono — vê todos os clientes)":"");
+  carregarConfig();carregarClientes();carregarEnviados();
 });
 </script>
 </body>
